@@ -628,7 +628,7 @@ const FIREBASE_CONFIG = {
 };
 
 const FIREBASE_LISTO = FIREBASE_CONFIG.apiKey !== 'PEGAR_AQUI';
-let fbAuth, fbDb, currentUser=null, isSaving=false, modoLocal=false;
+let fbAuth, fbDb, currentUser=null, isSaving=false, modoLocal=false, syncRef=null;
 
 if(FIREBASE_LISTO){
   try{
@@ -717,7 +717,8 @@ async function loadFromCloud(){
 }
 
 function startSync(){
-  fbDb.ref('users/'+currentUser.uid).on('value',snap=>{
+  syncRef=fbDb.ref('users/'+currentUser.uid);
+  syncRef.on('value',snap=>{
     if(isSaving)return;
     const data=snap.val();
     if(!data)return;
@@ -1164,7 +1165,7 @@ function signInWithGoogle(){
 
 function signOut(){
   if(!confirm('¿Cerrar sesión?'))return;
-  if(fbDb&&currentUser)fbDb.ref('users/'+currentUser.uid).off();
+  if(syncRef){syncRef.off();syncRef=null;}
   if(fbAuth)fbAuth.signOut();
 }
 
@@ -1198,7 +1199,7 @@ if(FIREBASE_LISTO&&fbAuth){
       startSync();
     } else {
       currentUser=null;
-      if(fbDb)fbDb.off();
+      if(syncRef){syncRef.off();syncRef=null;}
       $('appLoading').classList.add('hidden');
       $('loginScreen').classList.remove('hidden');
     }
