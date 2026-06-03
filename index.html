@@ -18,14 +18,14 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 :root{
-  --bg:#FAFAF9;--bg2:#F3F0F8;--card:#FFFFFF;
+  --bg:#FAFAFC;--bg2:#ECEAF6;--card:#FFFFFF;
   --text:#1E1528;--text2:#6B5A80;--text3:#B09EC0;
-  --accent:#7B3FA8;--border:#E8DEFF;
-  --shadow:0 2px 20px rgba(100,60,160,0.10);
-  --shadow-lg:0 8px 40px rgba(100,60,160,0.14);
+  --accent:#9881FF;--border:#DDD7F0;
+  --shadow:0 2px 20px rgba(120,100,180,0.10);
+  --shadow-lg:0 8px 40px rgba(120,100,180,0.14);
   --r-sm:8px;--r-md:12px;--r-lg:20px;
   --r:var(--r-md);--sidebar:260px;
-  --grad:linear-gradient(135deg,#5B21B6,#7C3AED);
+  --grad:linear-gradient(135deg,#A94ACE,#9881FF);
   --green:#2D6A4F;--green-bg:#D8F3DC;--green-border:#95D5B2;
 }
 body.dark{
@@ -1403,16 +1403,19 @@ function renderComparativa(){
   }).join(''):`<div class="empty-state" style="padding:20px"><div class="empty-text">Sin categorías para comparar</div></div>`;
 }
 const THEMES={
-  violet:{name:'Violeta',grad:'linear-gradient(135deg,#5B21B6,#7C3AED)',accent:'#7B3FA8',bg:'#FAFAF9',bg2:'#F3F0F8',border:'#E8DEFF',preview:'#7C3AED'},
-  pink:{name:'Rosa',grad:'linear-gradient(135deg,#BE185D,#EC4899)',accent:'#BE185D',bg:'#FFF7FB',bg2:'#FCE7F3',border:'#FBCFE8',preview:'#EC4899'},
-  blue:{name:'Azul',grad:'linear-gradient(135deg,#1E40AF,#3B82F6)',accent:'#2563EB',bg:'#F5F8FF',bg2:'#DBEAFE',border:'#BFDBFE',preview:'#3B82F6'},
-  teal:{name:'Turquesa',grad:'linear-gradient(135deg,#115E59,#14B8A6)',accent:'#0F766E',bg:'#F0FDFA',bg2:'#CCFBF1',border:'#99F6E4',preview:'#14B8A6'},
-  orange:{name:'Naranja',grad:'linear-gradient(135deg,#9A3412,#EA580C)',accent:'#C2410C',bg:'#FFFAF5',bg2:'#FFEDD5',border:'#FED7AA',preview:'#EA580C'},
+  amethyst:{name:'Amatista',grad:'linear-gradient(135deg,#A94ACE,#9881FF)',accent:'#9881FF',bg:'#FAFAFC',bg2:'#ECEAF6',border:'#DDD7F0',preview:'#A94ACE'},
+  wisteria:{name:'Wisteria',grad:'linear-gradient(135deg,#534BA8,#C490D1)',accent:'#7D6FC4',bg:'#FBFAFE',bg2:'#EBE7F4',border:'#DDD5EC',preview:'#C490D1'},
+  lavender:{name:'Lavanda',grad:'linear-gradient(135deg,#A775C9,#D480BB)',accent:'#A775C9',bg:'#FAF9FB',bg2:'#F0E8F4',border:'#E3D7EA',preview:'#A775C9'},
+  periwinkle:{name:'Periwinkle',grad:'linear-gradient(135deg,#9381FF,#B8B8FF)',accent:'#9381FF',bg:'#FBFAFE',bg2:'#ECEAFC',border:'#DDD9F5',preview:'#9381FF'},
+  mint:{name:'Menta',grad:'linear-gradient(135deg,#41898B,#ADBBA0)',accent:'#41898B',bg:'#F8FBFA',bg2:'#E8EDE5',border:'#D5DCD0',preview:'#41898B'},
   slate:{name:'Grafito',grad:'linear-gradient(135deg,#1E293B,#475569)',accent:'#334155',bg:'#F8FAFC',bg2:'#E2E8F0',border:'#CBD5E1',preview:'#475569'}
 };
 
 function applyTheme(){
-  const t=THEMES[state.theme]||THEMES.violet;
+  // Migración: temas viejos (violet/pink/blue/teal/orange) → nuevos
+  const themeMigrationMap={violet:'amethyst',pink:'lavender',blue:'periwinkle',teal:'mint',orange:'wisteria'};
+  if(state.theme&&themeMigrationMap[state.theme]){state.theme=themeMigrationMap[state.theme];}
+  const t=THEMES[state.theme]||THEMES.amethyst;
   const r=document.documentElement.style;
   r.setProperty('--grad',t.grad);
   r.setProperty('--accent',t.accent);
