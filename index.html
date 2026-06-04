@@ -21,6 +21,7 @@
   --bg:#F8F5FE;--bg2:#E5DCF6;--card:#FFFFFF;
   --text:#1E1528;--text2:#6B5A80;--text3:#B09EC0;
   --accent:#9881FF;--accent-strong:#7A4FCC;--border:#CFC0EC;
+  --color-gastos:#A94ACE;--color-ingresos:#41898B;--color-balance:#9881FF;
   --shadow:0 2px 20px rgba(120,100,180,0.10);
   --shadow-lg:0 8px 40px rgba(120,100,180,0.14);
   --r-sm:8px;--r-md:12px;--r-lg:20px;
@@ -90,7 +91,7 @@ body.dark::before{opacity:0.22;}
 
 /* SHARED */
 .screen{display:none;}.screen.active{display:block;}
-.metric-val.green{color:var(--accent);}.metric-val.red{color:#BE185D;}.metric-val.amber{color:#C2410C;}.metric-val.emerald{color:#41898B;}
+.metric-val.green{color:var(--color-balance);}.metric-val.red{color:#BE185D;}.metric-val.amber{color:var(--color-gastos);}.metric-val.emerald{color:var(--color-ingresos);}
 .alert-box{border-radius:var(--r);padding:14px 18px;font-size:13px;line-height:1.5;border:1px solid;}
 .alert-box strong{font-weight:600;display:block;margin-bottom:2px;}
 .alert-green{background:#EDE3FA;color:#4C1D95;border-color:#C4B5FD;}
@@ -104,7 +105,7 @@ body.dark::before{opacity:0.22;}
 .exp-info{flex:1;min-width:0;}.exp-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .exp-cat{font-size:11px;color:var(--text3);margin-top:1px;}.exp-right{text-align:right;flex-shrink:0;}
 .exp-amt{font-size:14px;font-weight:600;color:var(--text);}
-.exp-amt.paid{color:var(--accent);}.exp-amt.income{color:#41898B;}
+.exp-amt.paid{color:var(--color-balance);}.exp-amt.income{color:var(--color-ingresos);}
 .exp-status{display:inline-block;font-size:10px;font-weight:600;margin-top:3px;padding:2px 8px;border-radius:99px;letter-spacing:0.02em;}
 .exp-status.done{background:#D8F3DC;color:#2D6A4F;}
 .exp-status.pending{background:#FFF3E0;color:#C2410C;}
@@ -428,8 +429,8 @@ body.dark .form-error{color:#F9A8D4;}
     <div class="card" style="padding:16px">
       <canvas id="trendChart" style="width:100%;height:180px;display:block;"></canvas>
       <div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--text3);">
-        <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:8px;background:#A94ACE;border-radius:2px;display:inline-block;"></span>Gastos</span>
-        <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:8px;background:#41898B;border-radius:2px;display:inline-block;"></span>Ingresos</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:8px;background:var(--color-gastos);border-radius:2px;display:inline-block;"></span>Gastos</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:8px;background:var(--color-ingresos);border-radius:2px;display:inline-block;"></span>Ingresos</span>
       </div>
     </div>
     <div class="two-col" style="margin-top:16px">
@@ -531,6 +532,14 @@ body.dark .form-error{color:#F9A8D4;}
           </div>
           <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Paleta de colores</div>
           <div id="themePicker" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+          <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+            <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Color de Gastos</div>
+            <div id="cpGastos" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+            <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Color de Ingresos</div>
+            <div id="cpIngresos" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+            <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Color de Balance / Pagado</div>
+            <div id="cpBalance" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+          </div>
         </div>
       </div>
       <div class="card" style="padding:0">
@@ -1108,16 +1117,18 @@ function renderTrendChart(){
   // Barras agrupadas
   const groupW=chartW/months.length;
   const barW=Math.max(6,(groupW*0.32));
+  const cGastos=cs.getPropertyValue('--color-gastos').trim()||'#A94ACE';
+  const cIngresos=cs.getPropertyValue('--color-ingresos').trim()||'#41898B';
   gastos.forEach((val,i)=>{
     const x=padL+groupW*i+(groupW/2)-barW-1;
     const barH=(val/niceMax)*chartH;
-    ctx.fillStyle='#A94ACE';
+    ctx.fillStyle=cGastos;
     ctx.fillRect(x,padT+chartH-barH,barW,barH);
   });
   ingresos.forEach((val,i)=>{
     const x=padL+groupW*i+(groupW/2)+1;
     const barH=(val/niceMax)*chartH;
-    ctx.fillStyle='#41898B';
+    ctx.fillStyle=cIngresos;
     ctx.fillRect(x,padT+chartH-barH,barW,barH);
   });
   // X labels
@@ -1345,6 +1356,7 @@ function renderConfig(){
   const td=$('toggleDark');if(td)td.classList.toggle('on',!!state.darkMode);
   const ur=$('usdRateInput');if(ur)ur.value=state.usdRate||1000;
   renderThemePicker();
+  renderUserColorPickers();
   $('catManageList').innerHTML=state.categories.length?state.categories.map(c=>`
     <div class="manage-row">
       <div class="manage-icon" style="background:${c.color}22">${c.icon}</div>
@@ -1456,7 +1468,44 @@ function applyTheme(){
   }
   renderThemePicker();
 }
-function setTheme(id){state.theme=id;applyTheme();save();}
+function setTheme(id){state.theme=id;applyTheme();applyUserColors();save();}
+
+const DEFAULT_COLORS={gastos:'#A94ACE',ingresos:'#41898B',balance:''};
+function applyUserColors(){
+  const c=state.userColors||{};
+  const r=document.documentElement.style;
+  r.setProperty('--color-gastos',c.gastos||DEFAULT_COLORS.gastos);
+  r.setProperty('--color-ingresos',c.ingresos||DEFAULT_COLORS.ingresos);
+  // Balance: si no eligió custom, usa el accent del tema activo
+  if(c.balance)r.setProperty('--color-balance',c.balance);
+  else{
+    const accentValue=getComputedStyle(document.body).getPropertyValue('--accent').trim()||'#9881FF';
+    r.setProperty('--color-balance',accentValue);
+  }
+}
+function setUserColor(key,color){
+  if(!state.userColors)state.userColors={};
+  state.userColors[key]=color;
+  applyUserColors();
+  renderUserColorPickers();
+  save();
+  renderAll();
+}
+function renderUserColorPickers(){
+  const c=state.userColors||{};
+  function makePicker(elId,currentColor,key,defaultColor){
+    const el=$(elId);if(!el)return;
+    const effective=(currentColor||defaultColor||'').toUpperCase();
+    el.innerHTML=COLORS.map(color=>{
+      const isSel=effective===color.toUpperCase();
+      return `<button onclick="setUserColor('${key}','${color}')" title="${color}" style="width:26px;height:26px;border-radius:50%;border:${isSel?'2.5px solid var(--text)':'1.5px solid var(--border)'};background:${color};cursor:pointer;padding:0;transition:transform 0.15s;${isSel?'transform:scale(1.15);':''}"></button>`;
+    }).join('');
+  }
+  const accentValue=getComputedStyle(document.body).getPropertyValue('--accent').trim();
+  makePicker('cpGastos',c.gastos,'gastos',DEFAULT_COLORS.gastos);
+  makePicker('cpIngresos',c.ingresos,'ingresos',DEFAULT_COLORS.ingresos);
+  makePicker('cpBalance',c.balance,'balance',accentValue);
+}
 function renderThemePicker(){
   const el=$('themePicker');if(!el)return;
   el.innerHTML=Object.entries(THEMES).map(([id,t])=>`<button onclick="setTheme('${id}')" title="${t.name}" style="width:34px;height:34px;border-radius:50%;border:${state.theme===id?'3px solid var(--text)':'2px solid var(--border)'};background:${t.preview};cursor:pointer;padding:0;transition:transform 0.15s;${state.theme===id?'transform:scale(1.12);':''}"></button>`).join('');
@@ -1807,6 +1856,7 @@ Object.entries(_modalClosers).forEach(([id,fn])=>{
 function mostrarApp(){
   applyDarkMode();
   applyTheme();
+  applyUserColors();
   $('appLoading').classList.add('hidden');
   $('loginScreen').classList.add('hidden');
   if(!state.done){$('onboarding').classList.remove('hidden');}
