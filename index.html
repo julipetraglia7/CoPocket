@@ -797,7 +797,7 @@ let state={
   budgets:{}
 };
 
-const COLORS=['#8B5CF6','#C084FC','#A855F7','#E879F9','#F472B6','#7C3AED','#D946EF','#BE185D','#9CA3AF','#A78BFA','#60A5FA','#34D399','#FBBF24','#F87171','#FB923C'];
+const COLORS=['#A94ACE','#C490D1','#A775C9','#9381FF','#7D8CC4','#534BA8','#B8B8FF','#DA7DBE','#D480BB','#DEAFC2','#B8336A','#F4A4F5','#41898B','#ADBBA0','#FFD8BE'];
 const EMOJIS=['💳','🏠','⛽','🛡️','📺','📚','🖨️','⚡','🏢','📦','🛒','💊','🐾','🍔','✈️','🎮','👗','💄','🏋️','🎵','🎬','🍷','☕','🚗','🚌','💰','🏦','📱','💻','🔧'];
 const MEDIO_EMOJIS=['💳','🏦','💵','🔵','🟣','🟢','⚡','🌐','📲','💸'];
 const INCOME_TYPES=[
@@ -917,8 +917,28 @@ function medioT(){const m={};monthExps().forEach(e=>{if(e.medio)m[e.medio]=(m[e.
 function monthLabel(){const[y,mo]=state.activeMonth.split('-');return['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][parseInt(mo)-1]+' '+y;}
 function prevMonthStr(m){const[y,mo]=m.split('-').map(Number);return mo===1?`${y-1}-12`:`${y}-${String(mo-1).padStart(2,'0')}`;}
 
+// MIGRACIÓN DE COLORES DE CATEGORÍAS (vibrantes → pastel)
+function migrateCategoryColors(){
+  if(state.categoryColorsMigrated)return;
+  const map={
+    '#8B5CF6':'#A775C9','#C084FC':'#C490D1','#A855F7':'#A94ACE','#E879F9':'#F4A4F5',
+    '#F472B6':'#DA7DBE','#7C3AED':'#9381FF','#D946EF':'#A775C9','#BE185D':'#B8336A',
+    '#9CA3AF':'#ADBBA0','#A78BFA':'#B8B8FF','#60A5FA':'#7D8CC4','#34D399':'#41898B',
+    '#FBBF24':'#FFD8BE','#F87171':'#DA7DBE','#FB923C':'#FFD8BE'
+  };
+  let changed=false;
+  (state.categories||[]).forEach(c=>{
+    const up=(c.color||'').toUpperCase();
+    if(map[up]){c.color=map[up];changed=true;}
+  });
+  state.categoryColorsMigrated=true;
+  if(changed)save();
+  else{try{localStorage.setItem(SK,JSON.stringify(state));}catch(e){}}
+}
+
 // LIMPIEZA DE DATOS (proyectados antiguos + cuotas duplicadas)
 function cleanupData(){
+  migrateCategoryColors();
   let changed=false;
   const before=state.expenses.length;
   // Sacar entries proyectadas viejas (de la feature removida)
@@ -1201,9 +1221,9 @@ function expRow(e){
   const cl=e.cuota?` · cuota ${e.cuota.actual}/${e.cuota.total}`:'';
   const rl=e.recurring?' · 🔄':'';
   const ml=med?` · ${med.icon} ${med.label}`:'';
-  return`<div class="exp-row" onclick="openDetail(${e.id})">
-    <div class="exp-icon" style="background:${cat.color}22">${cat.icon}</div>
-    <div class="exp-info"><div class="exp-name">${e.desc}</div><div class="exp-cat">${cat.label}${cl}${rl}${ml}</div></div>
+  return`<div class="exp-row" onclick="openDetail(${e.id})" style="border-left:3px solid ${cat.color}">
+    <div class="exp-icon" style="background:${cat.color}33;border:1.5px solid ${cat.color}55">${cat.icon}</div>
+    <div class="exp-info"><div class="exp-name">${e.desc}</div><div class="exp-cat"><span style="color:${cat.color};font-weight:600">${cat.label}</span>${cl}${rl}${ml}</div></div>
     <div class="exp-right"><div class="exp-amt ${e.paid?'paid':''}">${fmtCur(e.amt,e.currency)}</div><div class="exp-status ${e.paid?'done':'pending'}">${e.paid?'Pagado':'Pendiente'}</div></div>
   </div>`;
 }
@@ -1273,9 +1293,9 @@ function renderIngresos(){
   $('incomeList').innerHTML=entries.length?entries.map(i=>{
     const t=getIncomeType(i.type);
     const rl=i.recurring?' · 🔄':'';
-    return `<div class="inc-row" onclick="openIncomeDetail(${i.id})">
-      <div class="exp-icon" style="background:${t.color}22;font-size:20px">${t.icon}</div>
-      <div class="exp-info"><div class="exp-name">${i.desc}</div><div class="exp-cat">${t.label}${rl} · ${i.date||''}</div></div>
+    return `<div class="inc-row" onclick="openIncomeDetail(${i.id})" style="border-left:3px solid ${t.color}">
+      <div class="exp-icon" style="background:${t.color}33;border:1.5px solid ${t.color}55;font-size:20px">${t.icon}</div>
+      <div class="exp-info"><div class="exp-name">${i.desc}</div><div class="exp-cat"><span style="color:${t.color};font-weight:600">${t.label}</span>${rl} · ${i.date||''}</div></div>
       <div class="exp-right"><div class="exp-amt income">${fmt(i.amt)}</div></div>
     </div>`;
   }).join(''):
