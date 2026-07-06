@@ -727,7 +727,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
         <button class="btn-secondary" onclick="exportExpensesCSV()">⬇ Descargar CSV de gastos</button>
         <button class="btn-secondary" onclick="document.getElementById('csvImportInput').click()" style="margin-top:8px">⬆ Importar CSV de gastos</button>
         <input type="file" id="csvImportInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvImportChange(event)">
-        <div id="csvImportStatus" style="font-size:11px;color:var(--text3);margin-top:8px">El CSV debe tener las columnas: Monto, Descripcion, Medio de Pago, Categoria, Quien Pago, Fecha, Cuotas, Dividido, Moneda, Recurrente, Estado. Las categorías y medios de pago que no existan se crean automáticamente.</div>
+        <div id="csvImportStatus" style="font-size:11px;color:var(--text3);margin-top:8px">El CSV descarga <strong>todos</strong> tus gastos, de todos los meses (no solo el activo) — si sumás la columna Monto entera vas a ver el total histórico, no el de un mes. Para comparar con "Gastos" de Inicio, filtrá por la columna Mes. Al importar, debe tener las columnas: Monto, Descripcion, Medio de Pago, Categoria, Quien Pago, Fecha, Cuotas, Dividido, Moneda, Recurrente, Estado. Las categorías y medios de pago que no existan se crean automáticamente.</div>
       </div>
     </div>
     <div style="margin-top:16px">
@@ -2565,7 +2565,7 @@ function csvEscape(val){
   if(/[",\n\r]/.test(s))return'"'+s.replace(/"/g,'""')+'"';
   return s;
 }
-const CSV_HEADERS=['Monto','Descripcion','Medio de Pago','Categoria','Quien Pago','Fecha','Cuotas','Dividido','Moneda','Recurrente','Estado','Notas','Mes de Cobertura'];
+const CSV_HEADERS=['Monto','Descripcion','Medio de Pago','Categoria','Quien Pago','Fecha','Mes','Cuotas','Dividido','Moneda','Recurrente','Estado','Notas','Mes de Cobertura'];
 function exportExpensesCSV(){
   if(!state.expenses.length){alert('No tenés gastos cargados para exportar.');return;}
   const rows=state.expenses.map(e=>{
@@ -2577,6 +2577,7 @@ function exportExpensesCSV(){
       cat?cat.label:'',
       ownerOf(e)==='partner'?partnerLabel():myLabel(),
       e.date||'',
+      expMonth(e),
       e.cuota?`${e.cuota.actual}/${e.cuota.total}`:'',
       isShared(e)?'Sí':'No',
       e.currency||'ARS',
