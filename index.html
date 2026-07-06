@@ -722,6 +722,15 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       </div>
     </div>
     <div style="margin-top:16px">
+      <div class="card">
+        <div class="card-title">Exportar / Importar gastos</div>
+        <button class="btn-secondary" onclick="exportExpensesCSV()">⬇ Descargar CSV de gastos</button>
+        <button class="btn-secondary" onclick="document.getElementById('csvImportInput').click()" style="margin-top:8px">⬆ Importar CSV de gastos</button>
+        <input type="file" id="csvImportInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvImportChange(event)">
+        <div id="csvImportStatus" style="font-size:11px;color:var(--text3);margin-top:8px">El CSV debe tener las columnas: Monto, Descripcion, Medio de Pago, Categoria, Quien Pago, Fecha, Cuotas, Dividido, Moneda, Recurrente, Estado. Las categorías y medios de pago que no existan se crean automáticamente.</div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
       <div class="card" id="accountCard">
         <div class="card-title">Mi cuenta</div>
         <div id="accountInfo" style="font-size:13px;color:var(--text2);margin-bottom:14px">—</div>
@@ -2548,6 +2557,143 @@ async function fetchUsdRate(){
       renderAll();
     }
   }catch(e){console.log('No se pudo obtener cotización automática, usando valor manual');}
+}
+
+// EXPORTAR / IMPORTAR CSV DE GASTOS
+function csvEscape(val){
+  const s=val===null||val===undefined?'':String(val);
+  if(/[",\n\r]/.test(s))return'"'+s.replace(/"/g,'""')+'"';
+  return s;
+}
+const CSV_HEADERS=['Monto','Descripcion','Medio de Pago','Categoria','Quien Pago','Fecha','Cuotas','Dividido','Moneda','Recurrente','Estado','Notas','Mes de Cobertura'];
+function exportExpensesCSV(){
+  if(!state.expenses.length){alert('No tenés gastos cargados para exportar.');return;}
+  const rows=state.expenses.map(e=>{
+    const cat=getCat(e.cat),med=getMedio(e.medio);
+    return[
+      e.amt,
+      e.desc||'',
+      med?med.label:'',
+      cat?cat.label:'',
+      ownerOf(e)==='partner'?partnerLabel():myLabel(),
+      e.date||'',
+      e.cuota?`${e.cuota.actual}/${e.cuota.total}`:'',
+      isShared(e)?'Sí':'No',
+      e.currency||'ARS',
+      e.recurring?'Sí':'No',
+      e.paid?'Pagado':'Pendiente',
+      e.notes||'',
+      e.coverMonth||''
+    ];
+  });
+  const csv='﻿'+[CSV_HEADERS.join(','),...rows.map(r=>r.map(csvEscape).join(','))].join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`copocket_gastos_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function parseCSV(text){
+  if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
+  const rows=[];let row=[],field='',inQuotes=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQuotes){
+      if(c==='"'){if(text[i+1]==='"'){field+='"';i++;}else inQuotes=false;}
+      else field+=c;
+    } else {
+      if(c==='"')inQuotes=true;
+      else if(c===','){row.push(field);field='';}
+      else if(c==='\r'){/* ignorar */}
+      else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}
+      else field+=c;
+    }
+  }
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  return rows.filter(r=>!(r.length===1&&r[0].trim()===''));
+}
+function normalizeDateStr(raw){
+  if(!raw)return null;
+  raw=raw.trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;
+  const m=raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if(m){const[,d,mo,y]=m;return`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+  const d=new Date(raw);
+  if(!isNaN(d.getTime()))return d.toISOString().split('T')[0];
+  return null;
+}
+function handleCsvImportChange(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>importExpensesCSV(ev.target.result);
+  reader.onerror=()=>alert('No se pudo leer el archivo.');
+  reader.readAsText(file,'utf-8');
+  event.target.value='';
+}
+function importExpensesCSV(text){
+  const rows=parseCSV(text);
+  if(!rows.length){alert('El archivo está vacío.');return;}
+  const header=rows[0].map(h=>h.trim().toLowerCase());
+  const idx=name=>header.indexOf(name.toLowerCase());
+  const iMonto=idx('monto'),iDesc=idx('descripcion'),iMedio=idx('medio de pago'),iCat=idx('categoria'),
+        iQuien=idx('quien pago'),iFecha=idx('fecha'),iCuotas=idx('cuotas'),iDividido=idx('dividido'),
+        iMoneda=idx('moneda'),iRecurrente=idx('recurrente'),iEstado=idx('estado'),iNotas=idx('notas'),
+        iCobertura=idx('mes de cobertura');
+  if(iMonto<0||iDesc<0||iFecha<0){alert('El CSV debe tener al menos las columnas Monto, Descripcion y Fecha.');return;}
+  const partnerLower=partnerLabel().toLowerCase();
+  let imported=0,skipped=0;
+  for(let r=1;r<rows.length;r++){
+    const row=rows[r];
+    if(!row||!row.length||row.every(c=>!c.trim()))continue;
+    const amt=parseFloat((row[iMonto]||'').replace(',','.'));
+    const date=normalizeDateStr(row[iFecha]||'');
+    if(!amt||amt<=0||!date){skipped++;continue;}
+    const desc=(row[iDesc]||'').trim()||'Importado';
+    const medioLabel=iMedio>=0?(row[iMedio]||'').trim():'';
+    let medioId=null;
+    if(medioLabel){
+      let m=state.medios.find(x=>x.label.toLowerCase()===medioLabel.toLowerCase());
+      if(!m){m={id:state.nextId++,label:medioLabel,icon:'•'};state.medios.push(m);}
+      medioId=m.id;
+    }
+    const catLabel=iCat>=0?(row[iCat]||'').trim():'';
+    let catId=null;
+    if(catLabel){
+      let c=state.categories.find(x=>x.label.toLowerCase()===catLabel.toLowerCase());
+      if(!c){const newCatId=state.nextId++;c={id:newCatId,label:catLabel,icon:defaultCategoryIcon(catLabel),color:defaultCategoryColor(newCatId)};state.categories.push(c);}
+      catId=c.id;
+    }
+    const quien=iQuien>=0?(row[iQuien]||'').trim().toLowerCase():'';
+    const owner=(quien&&quien===partnerLower)?'partner':'me';
+    const cuotasRaw=iCuotas>=0?(row[iCuotas]||'').trim():'';
+    let cuota=null;
+    if(cuotasRaw&&cuotasRaw.includes('/')){
+      const[a,t]=cuotasRaw.split('/').map(x=>parseInt(x.trim()));
+      if(a&&t)cuota={actual:a,total:t,monto:amt};
+    }
+    const dividido=iDividido>=0?(row[iDividido]||'').trim().toLowerCase():'';
+    const shared=['sí','si','yes','true','1'].includes(dividido);
+    const moneda=iMoneda>=0?(row[iMoneda]||'').trim().toUpperCase():'ARS';
+    const currency=moneda==='USD'?'USD':'ARS';
+    const recurrenteRaw=iRecurrente>=0?(row[iRecurrente]||'').trim().toLowerCase():'';
+    const recurring=['sí','si','yes','true','1'].includes(recurrenteRaw);
+    const estadoRaw=iEstado>=0?(row[iEstado]||'').trim().toLowerCase():'';
+    const paid=!['pendiente','no','false','0'].includes(estadoRaw);
+    const notes=iNotas>=0?((row[iNotas]||'').trim()||null):null;
+    const coverMonthRaw=iCobertura>=0?(row[iCobertura]||'').trim():'';
+    const coverMonth=/^\d{4}-\d{2}$/.test(coverMonthRaw)?coverMonthRaw:null;
+    const newId=state.nextId++;
+    state.expenses.push({id:newId,desc,amt,cat:catId,medio:medioId,paid,date,cuota,currency,notes,owner,shared,coverMonth,recurring,...(recurring?{recurringOrigin:newId}:{})});
+    imported++;
+  }
+  if(imported>0)save();
+  renderAll();
+  const status=$('csvImportStatus');
+  const msg=`✓ Se importaron ${imported} gasto${imported===1?'':'s'}.${skipped?` Se omitieron ${skipped} fila${skipped===1?'':'s'} con datos inválidos.`:''}`;
+  if(status)status.textContent=msg;
+  alert(msg);
 }
 
 function saveExpense(){
