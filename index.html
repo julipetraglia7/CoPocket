@@ -563,6 +563,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       </select>
     </div>
     <div class="filters" id="filterBtns"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px" id="gastosFilterMetrics"></div>
     <div class="card" style="padding:0"><div id="allExpensesList"></div></div>
   </div>
 
@@ -771,6 +772,17 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="form-group"><label class="form-label">Notas (opcional)</label><input class="form-input" type="text" id="inputNotes" placeholder="Ej: cena de trabajo, regalo cumpleaños..."></div>
     <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="inputDate"></div>
     <div class="form-group">
+      <label class="form-label">¿Se cubre con ingresos de otro mes?</label>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+        <span style="font-size:13px;color:var(--text2)">Contar este gasto en otro mes</span>
+        <button class="toggle" id="toggleCoverMonth" onclick="toggleCoverMonthMode()"></button>
+      </div>
+      <div id="coverMonthField" style="display:none;margin-top:4px">
+        <input class="form-input" type="month" id="inputCoverMonth">
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Este gasto va a contar para el balance de ese mes (Inicio, Comparativa, Compartido, etc.), aunque quede cargado con esta fecha.</div>
+      </div>
+    </div>
+    <div class="form-group">
       <label class="form-label">Medio de pago</label>
       <div id="medioSelectExp" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
     </div>
@@ -841,6 +853,10 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       <div id="detailMedioWrap" style="margin-top:8px;display:none">
         <div class="detail-info-label">Medio de pago</div>
         <div class="medio-tag" id="detailMedio"></div>
+      </div>
+      <div id="detailCoverMonthWrap" style="margin-top:8px;display:none">
+        <div class="detail-info-label">Se cubre con ingresos de</div>
+        <div class="medio-tag" id="detailCoverMonth"></div>
       </div>
       <div id="detailNotesWrap" style="margin-top:12px;display:none">
         <div class="detail-info-label">Notas</div>
@@ -1080,7 +1096,7 @@ const getIncomeType=id=>INCOME_TYPES.find(t=>t.id===id)||INCOME_TYPES[2];
 let selectedIncomeType='variable';
 
 let selectedCatId=null,selectedMedioId=null,selectedStatus='paid',editingId=null,detailId=null;
-let activeFilter='all',sortBy='amount',cuotasMode=false,recurringMode=false,editingCatId=null,editingMedioId=null,selectedColor=COLORS[0],selectedCurrency='ARS',selectedOwner='me',selectedShared=false,selectedIncomeOwner='me',editingGoalId=null;
+let activeFilter='all',sortBy='amount',cuotasMode=false,recurringMode=false,coverMonthMode=false,editingCatId=null,editingMedioId=null,selectedColor=COLORS[0],selectedCurrency='ARS',selectedOwner='me',selectedShared=false,selectedIncomeOwner='me',editingGoalId=null;
 let editingIncomeId=null,incomeDetailId=null,recurringIncomeMode=false,selectedMedioOwner='me';
 
 function migrateData(p){
@@ -1177,7 +1193,9 @@ function finishOnboarding(){
 // UTILS
 const getCat=id=>state.categories.find(c=>c.id===id)||{label:'Sin categoría',icon:'S',color:'#9CA3AF'};
 const getMedio=id=>state.medios.find(m=>m.id===id)||null;
-const monthExps=()=>state.expenses.filter(e=>(e.date||'').startsWith(state.activeMonth));
+// Mes al que "pertenece" un gasto para fines de cálculo: su propia fecha, salvo que tenga coverMonth (cubierto con ingresos de otro mes)
+const expMonth=e=>e.coverMonth||(e.date||'').slice(0,7);
+const monthExps=()=>state.expenses.filter(e=>expMonth(e)===state.activeMonth);
 // Helpers de ownership (modo compartido)
 const ownerOf=e=>e.owner||'me';
 const isShared=e=>!!e.shared;
@@ -1257,7 +1275,7 @@ function runSimulation(amount,scope){
   }
   return{thisMonth,nextMonth};
 }
-const monthExpsOf=m=>state.expenses.filter(e=>(e.date||'').startsWith(m));
+const monthExpsOf=m=>state.expenses.filter(e=>expMonth(e)===m);
 const monthIncEntries=()=>state.incomeEntries[state.activeMonth]||[];
 const totalIngs=()=>monthIncEntries().reduce((s,i)=>s+Number(i.amt),0);
 const totalGastos=()=>monthExps().reduce((s,e)=>s+toArs(e),0);
@@ -1451,7 +1469,7 @@ function autoGenerateCuotas(){
 
 // Sobrante (ingresos-gastos) de un mes puntual, repartido por persona si hay modo compartido
 function surplusForMonth(month){
-  const exps=state.expenses.filter(e=>(e.date||'').startsWith(month));
+  const exps=monthExpsOf(month);
   const incs=state.incomeEntries[month]||[];
   if(!state.partnerMode){
     const totalInc=incs.reduce((s,i)=>s+Number(i.amt),0);
@@ -1622,6 +1640,7 @@ function expRow(e){
   const cl=e.cuota?` · cuota ${e.cuota.actual}/${e.cuota.total}`:'';
   const rl=e.recurring?' · recurrente':'';
   const ml=med?` · ${med.label}`:'';
+  const cm=(e.coverMonth&&e.coverMonth!==(e.date||'').slice(0,7))?` · cubre ${monthLabelOf(e.coverMonth)}`:'';
   // Indicador de quién pagó / si es compartido, cuando el modo compartido está activo
   let ol='';
   if(state.partnerMode){
@@ -1629,7 +1648,7 @@ function expRow(e){
   }
   return`<div class="exp-row" onclick="openDetail(${e.id})">
     <div class="exp-icon" style="background:${cat.color}33;border:1.5px solid ${cat.color}55;color:${cat.color};font-weight:700">${(cat.label||'•').charAt(0).toUpperCase()}</div>
-    <div class="exp-info"><div class="exp-name">${e.desc}</div><div class="exp-cat"><span style="color:${cat.color};font-weight:600">${cat.label}</span>${cl}${rl}${ol}${ml}</div></div>
+    <div class="exp-info"><div class="exp-name">${e.desc}</div><div class="exp-cat"><span style="color:${cat.color};font-weight:600">${cat.label}</span>${cl}${rl}${ol}${ml}${cm}</div></div>
     <div class="exp-right"><div class="exp-amt ${e.paid?'paid':''}">${fmtCur(e.amt,e.currency)}</div><div class="exp-status ${e.paid?'done':'pending'}">${e.paid?'Pagado':'Pendiente'}</div></div>
   </div>`;
 }
@@ -1672,6 +1691,13 @@ function renderGastos(){
   if(sortBy==='date')fl.sort((a,b)=>new Date(b.date)-new Date(a.date));
   else if(sortBy==='alpha')fl.sort((a,b)=>(a.desc||'').localeCompare(b.desc||'','es'));
   else fl.sort((a,b)=>toArs(b)-toArs(a));
+  const filterTotal=fl.reduce((s,e)=>s+toArs(e),0);
+  const totalIncomeMonth=totalIngs();
+  const filterPct=totalIncomeMonth>0?(filterTotal/totalIncomeMonth*100):null;
+  const gfm=$('gastosFilterMetrics');
+  if(gfm)gfm.innerHTML=`
+    <div class="metric-card"><div class="metric-lbl">Total del filtro</div><div class="metric-val amber">${fmt(filterTotal)}</div><div class="metric-note">${fl.length} ${fl.length===1?'gasto':'gastos'}</div></div>
+    <div class="metric-card"><div class="metric-lbl">% de tus ingresos</div><div class="metric-val" style="color:var(--info)">${filterPct===null?'—':filterPct.toFixed(1)+'%'}</div><div class="metric-note">del total del mes</div></div>`;
   $('allExpensesList').innerHTML=fl.length?fl.map(expRow).join(''):
     `<div class="empty-state"><div class="empty-text">Sin gastos en este filtro</div></div>`;
 }
@@ -1933,13 +1959,14 @@ function changeMonthBy(delta){setActiveMonth(delta<0?prevMonthStr(state.activeMo
 // MODAL GASTO
 function openModal(){
   clearFieldErrors();
-  editingId=null;cuotasMode=false;recurringMode=false;
+  editingId=null;cuotasMode=false;recurringMode=false;coverMonthMode=false;
   $('toggleRecurring').classList.remove('on');
   $('modalTitle').textContent='Nuevo gasto';$('btnSave').textContent='Guardar gasto';
   $('inputAmt').value='';$('inputDesc').value='';$('inputNotes').value='';
   $('inputDate').value=new Date().toISOString().split('T')[0];
   $('inputCuotaActual').value='';$('inputCuotaTotal').value='';$('inputCuotaMonto').value='';
   $('cuotasFields').style.display='none';$('toggleCuotas').classList.remove('on');
+  $('toggleCoverMonth').classList.remove('on');$('coverMonthField').style.display='none';$('inputCoverMonth').value='';
   selectedCatId=state.categories.length?state.categories[0].id:null;
   selectedMedioId=state.medios.length?state.medios[0].id:null;
   selectedStatus='paid';selectedCurrency='ARS';selectedOwner='me';selectedShared=false;
@@ -1951,6 +1978,15 @@ function openModal(){
   $('modalAdd').classList.add('open');
 }
 function closeModal(){$('modalAdd').classList.remove('open');editingId=null;}
+function toggleCoverMonthMode(){
+  coverMonthMode=!coverMonthMode;
+  $('toggleCoverMonth').classList.toggle('on',coverMonthMode);
+  $('coverMonthField').style.display=coverMonthMode?'block':'none';
+  if(coverMonthMode&&!$('inputCoverMonth').value){
+    const baseMonth=($('inputDate').value||new Date().toISOString().split('T')[0]).slice(0,7);
+    $('inputCoverMonth').value=nextMonthStr(baseMonth);
+  }
+}
 function toggleCuotasMode(){
   cuotasMode=!cuotasMode;
   $('toggleCuotas').classList.toggle('on',cuotasMode);
@@ -2525,12 +2561,14 @@ function saveExpense(){
   if(hasErr)return;
   let cuota=null;
   if(cuotasMode){const actual=parseInt($('inputCuotaActual').value)||1,total=parseInt($('inputCuotaTotal').value)||1,monto=parseFloat($('inputCuotaMonto').value)||amt;cuota={actual,total,monto};}
+  const coverMonth=coverMonthMode?($('inputCoverMonth').value||null):null;
   if(editingId!==null){
     const e=state.expenses.find(x=>x.id===editingId);
     if(e){
       e.amt=amt;e.desc=desc;e.date=date;e.cat=selectedCatId;e.medio=selectedMedioId;
       e.paid=selectedStatus==='paid';e.cuota=cuota;e.currency=selectedCurrency;e.notes=notes;
       e.owner=selectedOwner;e.shared=selectedShared;delete e.mode;
+      e.coverMonth=coverMonth;
       e.recurring=recurringMode;
       if(recurringMode&&!e.recurringOrigin)e.recurringOrigin=e.id;
       if(!recurringMode)delete e.recurringOrigin;
@@ -2543,7 +2581,7 @@ function saveExpense(){
     else{alert('No se encontró el gasto a editar. Cerrá y volvé a abrir.');return;}
   } else {
     const newId=state.nextId++;
-    state.expenses.push({id:newId,desc,amt,cat:selectedCatId,medio:selectedMedioId,paid:selectedStatus==='paid',date,cuota,currency:selectedCurrency,notes,owner:selectedOwner,shared:selectedShared,recurring:recurringMode,...(recurringMode?{recurringOrigin:newId}:{})});
+    state.expenses.push({id:newId,desc,amt,cat:selectedCatId,medio:selectedMedioId,paid:selectedStatus==='paid',date,cuota,currency:selectedCurrency,notes,owner:selectedOwner,shared:selectedShared,coverMonth,recurring:recurringMode,...(recurringMode?{recurringOrigin:newId}:{})});
   }
   save();closeModal();renderAll();
 }
@@ -2560,6 +2598,8 @@ function openDetail(id){
   const btn=$('btnTogglePaid');btn.textContent=e.paid?'Marcar pendiente':'Marcar como pagado';btn.style.background=e.paid?'var(--surface-2)':'';btn.style.color=e.paid?'var(--text)':'';
   const mw=$('detailMedioWrap');
   if(med){mw.style.display='block';$('detailMedio').textContent=med.label;}else mw.style.display='none';
+  const cmw=$('detailCoverMonthWrap');
+  if(e.coverMonth&&e.coverMonth!==(e.date||'').slice(0,7)){cmw.style.display='block';$('detailCoverMonth').textContent=monthLabelOf(e.coverMonth);}else cmw.style.display='none';
   const ci=$('detailCuotaInfo');
   if(e.cuota){ci.style.display='block';$('detailCuotaProg').style.width=Math.round((e.cuota.actual/e.cuota.total)*100)+'%';$('detailCuotaLabel').textContent=`Cuota ${e.cuota.actual} de ${e.cuota.total} · ${fmt(e.cuota.monto||e.amt)}/cuota`;}
   else ci.style.display='none';
@@ -2589,6 +2629,7 @@ function openEditFromDetail(){
   cuotasMode=!!e.cuota;$('toggleCuotas').classList.toggle('on',cuotasMode);$('cuotasFields').style.display=cuotasMode?'block':'none';
   if(e.cuota){$('inputCuotaActual').value=e.cuota.actual;$('inputCuotaTotal').value=e.cuota.total;$('inputCuotaMonto').value=e.cuota.monto||'';}
   recurringMode=!!e.recurring;$('toggleRecurring').classList.toggle('on',recurringMode);
+  coverMonthMode=!!e.coverMonth;$('toggleCoverMonth').classList.toggle('on',coverMonthMode);$('coverMonthField').style.display=coverMonthMode?'block':'none';$('inputCoverMonth').value=e.coverMonth||'';
   renderCatSelectExp();renderMedioSelectExp();updateStatusBtns();updateCurrencyBtns();updateAmtPreview();
   updateOwnerUILabels();selectOwner(selectedOwner);
   $('toggleShared').classList.toggle('on',selectedShared);
