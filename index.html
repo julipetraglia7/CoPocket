@@ -727,7 +727,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
         <button class="btn-secondary" onclick="exportExpensesCSV()">⬇ Descargar CSV de gastos</button>
         <button class="btn-secondary" onclick="document.getElementById('csvImportInput').click()" style="margin-top:8px">⬆ Importar CSV de gastos</button>
         <input type="file" id="csvImportInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvImportChange(event)">
-        <div id="csvImportStatus" style="font-size:11px;color:var(--text3);margin-top:8px">El CSV descarga <strong>todos</strong> tus gastos, de todos los meses (no solo el activo) — si sumás la columna Monto entera vas a ver el total histórico, no el de un mes. Para comparar con "Gastos" de Inicio, filtrá por la columna Mes. Al importar, debe tener las columnas: Monto, Descripcion, Medio de Pago, Categoria, Quien Pago, Fecha, Cuotas, Dividido, Moneda, Recurrente, Estado. Las categorías y medios de pago que no existan se crean automáticamente.</div>
+        <div id="csvImportStatus" style="font-size:11px;color:var(--text3);margin-top:8px">El CSV descarga <strong>todos</strong> tus gastos, de todos los meses (no solo el activo) — si sumás la columna Monto entera vas a ver el total histórico, no el de un mes. Para comparar con "Gastos" de Inicio, filtrá por la columna Mes. Al importar, debe tener las columnas: Monto, Descripcion, Medio de Pago, Categoria, Quien Pago, Fecha, Cuotas, Dividido, Moneda, Recurrente, Estado. Las categorías y medios de pago que no existan se crean automáticamente. Para subcategorías, escribí "Categoría > Subcategoría" en la columna Categoria.</div>
       </div>
     </div>
     <div style="margin-top:16px">
@@ -937,6 +937,12 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="modal-handle"></div>
     <div class="modal-title" id="catModalTitle">Nueva categoría</div>
     <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" type="text" id="catName" placeholder="Ej: Salud"><div class="form-error" id="catNameError"></div></div>
+    <div class="form-group" id="catParentField">
+      <label class="form-label">Categoría padre (opcional)</label>
+      <select class="form-input" id="catParentSelect"></select>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Elegí una categoría principal para convertir esta en una subcategoría (ej: "Comida" → "Delivery").</div>
+    </div>
+    <div id="catParentDisabledNote" style="display:none;font-size:11px;color:var(--text3);margin-bottom:16px">Esta categoría ya tiene subcategorías propias, así que no puede ser subcategoría de otra.</div>
     <div class="form-group"><label class="form-label">Presupuesto mensual (opcional)</label><input class="form-input" type="number" id="catBudget" placeholder="Ej: 50000 — dejá vacío para no fijar tope" inputmode="decimal"></div>
 
     <button class="btn-primary" onclick="saveCat()">Guardar categoría</button>
@@ -1202,6 +1208,20 @@ function finishOnboarding(){
 // UTILS
 const getCat=id=>state.categories.find(c=>c.id===id)||{label:'Sin categoría',icon:'S',color:'#9CA3AF'};
 const getMedio=id=>state.medios.find(m=>m.id===id)||null;
+// Lista de categorías ordenada jerárquicamente: cada principal seguida de sus subcategorías
+function categoryChipList(){
+  const list=[];
+  state.categories.filter(c=>!c.parentId).forEach(top=>{
+    list.push(top);
+    state.categories.filter(c=>c.parentId===top.id).forEach(sub=>list.push(sub));
+  });
+  // Huérfanas (su padre ya no existe) se tratan como principales
+  state.categories.forEach(c=>{
+    if(c.parentId&&!state.categories.some(x=>x.id===c.parentId)&&!list.includes(c))list.push(c);
+  });
+  return list;
+}
+const catChipLabel=c=>c.parentId?('↳ '+c.label):c.label;
 // Mes al que "pertenece" un gasto para fines de cálculo: su propia fecha, salvo que tenga coverMonth (cubierto con ingresos de otro mes)
 const expMonth=e=>e.coverMonth||(e.date||'').slice(0,7);
 const monthExps=()=>state.expenses.filter(e=>expMonth(e)===state.activeMonth);
@@ -1679,7 +1699,7 @@ function renderGastos(){
     ...(hasRecurring?[{id:'recurring',label:'Recurrentes'}]:[]),
     ...(hasCuotas?[{id:'cuotas',label:'En cuotas'}]:[]),
     ...(hasUsd?[{id:'usd',label:'U$D Dólares'}]:[]),
-    ...state.categories.map(c=>({id:c.id,label:c.label})),
+    ...categoryChipList().map(c=>({id:c.id,label:catChipLabel(c)})),
     ...state.medios.map(m=>({id:'m_'+m.id,label:m.label}))
   ];
   $('filterBtns').innerHTML=filters.map(f=>`<button class="filter-btn ${activeFilter===f.id?'active':''}" onclick="setFilter('${f.id}')">${f.label}</button>`).join('');
@@ -1788,9 +1808,10 @@ function renderCatBarsHtml(){
       const lbl=pctUsed>100?`Excedido ${fmt(e.amt-budget)}`:`Te queda ${fmt(budget-e.amt)}`;
       budgetHtml=`<div style="display:flex;justify-content:space-between;font-size:11px;margin-top:6px"><span style="color:var(--text2)">Presupuesto ${fmt(budget)}</span><span style="color:${bColor};font-weight:600">${pctUsed}% · ${lbl}</span></div><div class="comp-bar-bg" style="margin-top:4px"><div class="comp-bar-fill" style="width:${Math.min(100,pctUsed)}%;background:${bColor}"></div></div>`;
     }
+    const parentSuffix=e.parentId?` <span style="font-weight:400;color:var(--text3)">· ${getCat(e.parentId).label}</span>`:'';
     return `<div class="comp-row">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <span style="font-size:13px;color:var(--text);font-weight:600">${e.label}</span>
+        <span style="font-size:13px;color:var(--text);font-weight:600">${e.label}${parentSuffix}</span>
         <span style="font-size:12px;color:${e.color};font-weight:700">${pct}%</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-top:3px">
@@ -1819,13 +1840,16 @@ function renderConfig(){
   const smh=$('splitModeHint');if(smh)smh.textContent=sm==='proportional'?'El que más gana paga más, en proporción a los ingresos de ambos.':'Cada uno paga la mitad exacta, sin importar cuánto gana.';
   renderThemePicker();
   renderUserColorPickers();
-  $('catManageList').innerHTML=state.categories.length?state.categories.map(c=>`
-    <div class="manage-row">
+  $('catManageList').innerHTML=state.categories.length?categoryChipList().map(c=>{
+    const isSub=!!c.parentId;
+    return `<div class="manage-row"${isSub?' style="padding-left:36px"':''}>
       <div class="manage-icon" style="background:${c.color}22;color:${c.color};font-weight:700">${(c.label||'•').charAt(0).toUpperCase()}</div>
-      <span style="flex:1;font-size:13px;color:var(--text)">${c.label}</span>
+      <span style="flex:1;font-size:13px;color:var(--text)">${isSub?'↳ ':''}${c.label}</span>
+      ${!isSub?`<button class="btn-sm" onclick="openCatModal(${c.id})" style="margin-right:6px">+ Sub</button>`:''}
       <button class="btn-sm" onclick="editCat(${c.id})" style="margin-right:6px">Editar</button>
       <button class="btn-sm danger" onclick="deleteCat(${c.id})">Borrar</button>
-    </div>`).join(''):
+    </div>`;
+  }).join(''):
     `<div class="empty-state" style="padding:20px"><div class="empty-text">Sin categorías. Tocá + Nueva.</div></div>`;
   $('medioManageList').innerHTML=state.medios.length?state.medios.map(m=>`
     <div class="manage-row">
@@ -1925,7 +1949,7 @@ function renderComparativa(){
     const cat=getCat(catId);
     return {cat,cur:curByCat[catId]||0,prev:prevByCat[catId]||0};
   }).sort((a,b)=>(b.cur+b.prev)-(a.cur+a.prev));
-  $('compByCat').innerHTML=rows.length?rows.map(r=>compRowHtml(r.cat.label,r.cur,r.prev)).join(''):
+  $('compByCat').innerHTML=rows.length?rows.map(r=>compRowHtml(r.cat.label+(r.cat.parentId?` <span style="font-weight:400;color:var(--text3)">· ${getCat(r.cat.parentId).label}</span>`:''),r.cur,r.prev)).join(''):
     `<div class="empty-state" style="padding:20px"><div class="empty-text">Sin categorías para comparar</div></div>`;
 }
 // Theme picker / custom colors removidos en CoPocket — paleta fija
@@ -2030,8 +2054,8 @@ function updateOwnerUILabels(){
 
 function renderCatSelectExp(){
   if(!state.categories.length){$('catSelectExp').innerHTML=`<span style="font-size:12px;color:var(--text3)">Primero creá categorías en Configuración</span>`;return;}
-  $('catSelectExp').innerHTML=state.categories.map(c=>`
-    <button onclick="selectCatExp(${c.id})" style="padding:6px 12px;border-radius:99px;border:1.5px solid ${selectedCatId===c.id?c.color:'var(--border)'};background:${selectedCatId===c.id?c.color+'22':'var(--bg)'};color:${selectedCatId===c.id?c.color:'var(--text2)'};font-size:12px;font-weight:${selectedCatId===c.id?600:400};font-family:inherit;cursor:pointer;">${c.label}</button>`
+  $('catSelectExp').innerHTML=categoryChipList().map(c=>`
+    <button onclick="selectCatExp(${c.id})" style="padding:6px 12px;border-radius:99px;border:1.5px solid ${selectedCatId===c.id?c.color:'var(--border)'};background:${selectedCatId===c.id?c.color+'22':'var(--bg)'};color:${selectedCatId===c.id?c.color:'var(--text2)'};font-size:12px;font-weight:${selectedCatId===c.id?600:400};font-family:inherit;cursor:pointer;">${catChipLabel(c)}</button>`
   ).join('');
 }
 function selectCatExp(id){selectedCatId=id;renderCatSelectExp();}
@@ -2570,11 +2594,12 @@ function exportExpensesCSV(){
   if(!state.expenses.length){alert('No tenés gastos cargados para exportar.');return;}
   const rows=state.expenses.map(e=>{
     const cat=getCat(e.cat),med=getMedio(e.medio);
+    const catLabel=cat?(cat.parentId?`${getCat(cat.parentId).label} > ${cat.label}`:cat.label):'';
     return[
       e.amt,
       e.desc||'',
       med?med.label:'',
-      cat?cat.label:'',
+      catLabel,
       ownerOf(e)==='partner'?partnerLabel():myLabel(),
       e.date||'',
       expMonth(e),
@@ -2659,12 +2684,21 @@ function importExpensesCSV(text){
       if(!m){m={id:state.nextId++,label:medioLabel,icon:'•'};state.medios.push(m);}
       medioId=m.id;
     }
-    const catLabel=iCat>=0?(row[iCat]||'').trim():'';
+    const catLabelRaw=iCat>=0?(row[iCat]||'').trim():'';
     let catId=null;
-    if(catLabel){
-      let c=state.categories.find(x=>x.label.toLowerCase()===catLabel.toLowerCase());
-      if(!c){const newCatId=state.nextId++;c={id:newCatId,label:catLabel,icon:defaultCategoryIcon(catLabel),color:defaultCategoryColor(newCatId)};state.categories.push(c);}
-      catId=c.id;
+    if(catLabelRaw){
+      if(catLabelRaw.includes('>')){
+        const[parentLabelRaw,subLabelRaw]=catLabelRaw.split('>').map(s=>s.trim());
+        let parent=state.categories.find(x=>!x.parentId&&x.label.toLowerCase()===parentLabelRaw.toLowerCase());
+        if(!parent){const newParentId=state.nextId++;parent={id:newParentId,label:parentLabelRaw,icon:defaultCategoryIcon(parentLabelRaw),color:defaultCategoryColor(newParentId)};state.categories.push(parent);}
+        let sub=subLabelRaw?state.categories.find(x=>x.parentId===parent.id&&x.label.toLowerCase()===subLabelRaw.toLowerCase()):null;
+        if(subLabelRaw&&!sub){const newSubId=state.nextId++;sub={id:newSubId,label:subLabelRaw,icon:defaultCategoryIcon(subLabelRaw),color:defaultCategoryColor(newSubId),parentId:parent.id};state.categories.push(sub);}
+        catId=sub?sub.id:parent.id;
+      } else {
+        let c=state.categories.find(x=>!x.parentId&&x.label.toLowerCase()===catLabelRaw.toLowerCase());
+        if(!c){const newCatId=state.nextId++;c={id:newCatId,label:catLabelRaw,icon:defaultCategoryIcon(catLabelRaw),color:defaultCategoryColor(newCatId)};state.categories.push(c);}
+        catId=c.id;
+      }
     }
     const quien=iQuien>=0?(row[iQuien]||'').trim().toLowerCase():'';
     const owner=(quien&&quien===partnerLower)?'partner':'me';
@@ -2878,8 +2912,36 @@ function defaultCategoryIcon(label){
   return t?t.charAt(0).toUpperCase():'•';
 }
 function defaultCategoryColor(id){return COLORS[Math.abs(Number(id)||0)%COLORS.length];}
-function openCatModal(){clearFieldErrors();editingCatId=null;$('catModalTitle').textContent='Nueva categoría';$('catName').value='';$('catBudget').value='';$('modalCat').classList.add('open');}
-function editCat(id){const c=state.categories.find(x=>x.id===id);if(!c)return;editingCatId=id;$('catModalTitle').textContent='Editar categoría';$('catName').value=c.label;$('catBudget').value=(state.budgets&&state.budgets[id])?state.budgets[id]:'';$('modalCat').classList.add('open');}
+// Categorías raíz válidas como "padre" (no permitimos subcategoría-de-subcategoría)
+function renderCatParentSelect(excludeId){
+  const sel=$('catParentSelect');if(!sel)return;
+  const options=state.categories.filter(c=>!c.parentId&&c.id!==excludeId);
+  sel.innerHTML=`<option value="">Ninguna — es una categoría principal</option>`+
+    options.map(c=>`<option value="${c.id}">${c.label}</option>`).join('');
+}
+function openCatModal(presetParentId){
+  clearFieldErrors();editingCatId=null;
+  $('catModalTitle').textContent='Nueva categoría';$('catName').value='';$('catBudget').value='';
+  renderCatParentSelect(null);
+  $('catParentField').style.display='block';$('catParentDisabledNote').style.display='none';
+  $('catParentSelect').value=presetParentId?String(presetParentId):'';
+  $('modalCat').classList.add('open');
+}
+function editCat(id){
+  const c=state.categories.find(x=>x.id===id);if(!c)return;
+  editingCatId=id;
+  $('catModalTitle').textContent='Editar categoría';$('catName').value=c.label;
+  $('catBudget').value=(state.budgets&&state.budgets[id])?state.budgets[id]:'';
+  const hasChildren=state.categories.some(x=>x.parentId===id);
+  if(hasChildren){
+    $('catParentField').style.display='none';$('catParentDisabledNote').style.display='block';
+  } else {
+    $('catParentField').style.display='block';$('catParentDisabledNote').style.display='none';
+    renderCatParentSelect(id);
+    $('catParentSelect').value=c.parentId?String(c.parentId):'';
+  }
+  $('modalCat').classList.add('open');
+}
 function closeCatModal(){$('modalCat').classList.remove('open');editingCatId=null;}
 function renderEmojiPicker(){}
 function selectEmoji(e){}
@@ -2891,14 +2953,22 @@ function saveCat(){
   const budget=parseFloat($('catBudget').value);
   if(!label){showFieldError('catName','Ingresá un nombre');return;}
   if(!state.budgets)state.budgets={};
+  const hasChildren=editingCatId!==null&&state.categories.some(x=>x.parentId===editingCatId);
+  const parentVal=$('catParentSelect').value;
+  const parentId=(!hasChildren&&parentVal)?Number(parentVal):null;
   let catId;
-  if(editingCatId!==null){const c=state.categories.find(x=>x.id===editingCatId);if(c){c.label=label;c.icon=defaultCategoryIcon(label);if(!c.color)c.color=defaultCategoryColor(c.id);}catId=editingCatId;}
-  else {catId=state.nextId++;state.categories.push({id:catId,label,icon:defaultCategoryIcon(label),color:defaultCategoryColor(catId)});}
+  if(editingCatId!==null){const c=state.categories.find(x=>x.id===editingCatId);if(c){c.label=label;c.icon=defaultCategoryIcon(label);if(!c.color)c.color=defaultCategoryColor(c.id);c.parentId=parentId;}catId=editingCatId;}
+  else {catId=state.nextId++;state.categories.push({id:catId,label,icon:defaultCategoryIcon(label),color:defaultCategoryColor(catId),parentId});}
   if(budget&&budget>0)state.budgets[catId]=budget;
   else delete state.budgets[catId];
   save();closeCatModal();renderAll();
 }
-function deleteCat(id){if(!confirm('¿Eliminar esta categoría?'))return;state.categories=state.categories.filter(x=>x.id!==id);save();renderAll();}
+function deleteCat(id){
+  const hasChildren=state.categories.some(c=>c.parentId===id);
+  if(!confirm(hasChildren?'¿Eliminar esta categoría? Sus subcategorías van a pasar a ser categorías principales.':'¿Eliminar esta categoría?'))return;
+  state.categories=state.categories.filter(x=>x.id!==id);
+  save();renderAll();
+}
 
 // MEDIOS DE PAGO
 function selectMedioOwner(o){
