@@ -1600,8 +1600,9 @@ function renderHome(){
     <div class="metric-card"><div class="metric-lbl">Gastos de ${partnerLabel()}</div><div class="metric-val" style="color:var(--secondary)">${fmt(gastosPareja)}</div><div class="metric-note">individuales</div></div>
     <div class="metric-card"><div class="metric-lbl">Compartidos</div><div class="metric-val" style="color:var(--info)">${fmt(gastosCompartidos)}</div><div class="metric-note">entre los dos</div></div>`;
   }
+  const ahorroTotal=savingsBalance('personal','me')+(state.partnerMode?savingsBalance('personal','partner')+savingsBalance('shared',null):0);
   metricsHtml+=`
-    <div class="metric-card"><div class="metric-lbl">Ahorro</div><div class="metric-val" style="color:var(--warning)">${fmt(savingsBalance('personal','me'))}</div><div class="metric-note">tuyo</div></div>`;
+    <div class="metric-card"><div class="metric-lbl">Ahorro</div><div class="metric-val" style="color:var(--warning)">${fmt(ahorroTotal)}</div><div class="metric-note">${state.partnerMode?'entre los dos':'tuyo'}</div></div>`;
   $('metricGrid').innerHTML=metricsHtml;
   const ah=$('alertHome');
   let alertsHtml='';
