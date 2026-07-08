@@ -644,8 +644,15 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="card" style="padding:18px;margin-bottom:12px">
       <div class="form-group"><label class="form-label">Monto del gasto</label><input class="form-input big" type="number" id="simAmt" placeholder="0" inputmode="decimal"><div class="form-error" id="simAmtError"></div></div>
       <div class="form-group"><label class="form-label">Descripción (opcional)</label><input class="form-input" type="text" id="simDesc" placeholder="Ej: Notebook nueva"></div>
+      <div class="form-group">
+        <label class="form-label">¿De dónde sale la plata?</label>
+        <div class="status-select">
+          <button class="status-btn selected paid" id="btnSimSrcMonth" onclick="selectSimSource('month')">Este mes</button>
+          <button class="status-btn" id="btnSimSrcSavings" onclick="selectSimSource('savings')">Mis ahorros</button>
+        </div>
+      </div>
       <div class="form-group" id="simScopeField" style="display:none">
-        <label class="form-label">¿De quién sería?</label>
+        <label class="form-label" id="simScopeFieldLabel">¿De quién sería?</label>
         <div class="status-select">
           <button class="status-btn selected paid" id="btnSimMe" onclick="selectSimScope('me')"><span id="simMeLabel">Yo</span></button>
           <button class="status-btn" id="btnSimPartner" onclick="selectSimScope('partner')"><span id="simPartnerLabel">Pareja</span></button>
@@ -2459,12 +2466,18 @@ function deleteSavingsEntry(){
 }
 
 // SIMULACIÓN
-let selectedSimScope='total';
+let selectedSimScope='total',selectedSimSource='month';
 function selectSimScope(o){
   selectedSimScope=o;
   $('btnSimMe').className='status-btn'+(o==='me'?' selected paid':'');
   $('btnSimPartner').className='status-btn'+(o==='partner'?' selected paid':'');
   $('btnSimShared').className='status-btn'+(o==='shared'?' selected paid':'');
+}
+function selectSimSource(s){
+  selectedSimSource=s;
+  $('btnSimSrcMonth').className='status-btn'+(s==='month'?' selected paid':'');
+  $('btnSimSrcSavings').className='status-btn'+(s==='savings'?' selected paid':'');
+  const lbl=$('simScopeFieldLabel');if(lbl)lbl.textContent=s==='savings'?'¿De qué ahorro sale?':'¿De quién sería?';
 }
 function renderSimulacion(){
   const sf=$('simScopeField');if(!sf)return;
@@ -2482,36 +2495,51 @@ function runSimulationUI(){
   if(!amt||amt<=0){showFieldError('simAmt','Ingresá un monto');return;}
   const desc=$('simDesc').value.trim();
   const scope=state.partnerMode?selectedSimScope:'total';
-  const{thisMonth,nextMonth}=runSimulation(amt,scope);
   const scopeLabel=scope==='me'?myLabel():scope==='partner'?partnerLabel():scope==='shared'?'Compartido':'Total del hogar';
-  const margenAhora=calcT().margen;
-  let html=`<div class="card" style="padding:18px;margin-bottom:12px">
-    <div class="alert-box alert-${thisMonth.fits?'green':'red'}">
-      <strong>${thisMonth.fits?'✓ Te alcanza este mes':'✗ No te alcanza este mes'}</strong>
-      ${desc?desc+' — ':''}${fmt(amt)} (${scopeLabel})
-    </div>`;
-  html+=simMoneyLine('Balance del mes después de este gasto',margenAhora-amt);
-  if(scope==='shared'){
-    html+=simMoneyLine(`${myLabel()} — después de este gasto`,thisMonth.detail.afterMe)+simMoneyLine(`${partnerLabel()} — después de este gasto`,thisMonth.detail.afterPartner);
-  } else {
-    html+=simMoneyLine('Disponible ahora',thisMonth.detail.available)+simMoneyLine('Después de este gasto',thisMonth.detail.after);
-  }
-  html+=`</div>`;
-  if(nextMonth){
-    const projMargen=recurringBaseline().income-recurringBaseline().expense;
-    html+=`<div class="card" style="padding:18px">
-      <div class="card-title">Estimación para el mes que viene</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Basado en tus ingresos y gastos <strong>recurrentes</strong> (y próximas cuotas). Es una aproximación, no una garantía.</div>
-      <div class="alert-box alert-${nextMonth.fits?'green':'amber'}" style="margin-bottom:0">
-        <strong>${nextMonth.fits?'✓ El mes que viene sí te alcanzaría':'✗ Ni el mes que viene alcanzaría, a este ritmo'}</strong>
+  let html;
+  if(selectedSimSource==='savings'){
+    const bal=scope==='shared'?savingsBalance('shared',null):savingsBalance('personal',scope==='total'?'me':scope);
+    const after=bal-amt;
+    const fits=after>=0;
+    html=`<div class="card" style="padding:18px">
+      <div class="alert-box alert-${fits?'green':'red'}">
+        <strong>${fits?'✓ Te alcanza con tu ahorro':'✗ No te alcanza con tu ahorro'}</strong>
+        ${desc?desc+' — ':''}${fmt(amt)} (${scopeLabel})
       </div>`;
-    html+=simMoneyLine('Balance proyectado después de este gasto',projMargen-amt);
+    html+=simMoneyLine('Ahorro disponible',bal)+simMoneyLine('Después de este gasto',after);
+    if(!fits)html+=`<div style="font-size:11px;color:var(--text3);margin-top:8px">Te faltarían ${fmt(Math.abs(after))} para cubrirlo solo con ahorro.</div>`;
+    html+=`</div>`;
+  } else {
+    const{thisMonth,nextMonth}=runSimulation(amt,scope);
+    const margenAhora=calcT().margen;
+    html=`<div class="card" style="padding:18px;margin-bottom:12px">
+      <div class="alert-box alert-${thisMonth.fits?'green':'red'}">
+        <strong>${thisMonth.fits?'✓ Te alcanza este mes':'✗ No te alcanza este mes'}</strong>
+        ${desc?desc+' — ':''}${fmt(amt)} (${scopeLabel})
+      </div>`;
+    html+=simMoneyLine('Balance del mes después de este gasto',margenAhora-amt);
     if(scope==='shared'){
-      html+=simMoneyLine(`${myLabel()} — proyectado después del gasto`,nextMonth.detail.afterMe)+simMoneyLine(`${partnerLabel()} — proyectado después del gasto`,nextMonth.detail.afterPartner);
+      html+=simMoneyLine(`${myLabel()} — después de este gasto`,thisMonth.detail.afterMe)+simMoneyLine(`${partnerLabel()} — después de este gasto`,thisMonth.detail.afterPartner);
     } else {
-      html+=simMoneyLine('Disponible proyectado',nextMonth.detail.available)+simMoneyLine('Después de este gasto',nextMonth.detail.after);
+      html+=simMoneyLine('Disponible ahora',thisMonth.detail.available)+simMoneyLine('Después de este gasto',thisMonth.detail.after);
     }
     html+=`</div>`;
+    if(nextMonth){
+      const projMargen=recurringBaseline().income-recurringBaseline().expense;
+      html+=`<div class="card" style="padding:18px">
+        <div class="card-title">Estimación para el mes que viene</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Basado en tus ingresos y gastos <strong>recurrentes</strong> (y próximas cuotas). Es una aproximación, no una garantía.</div>
+        <div class="alert-box alert-${nextMonth.fits?'green':'amber'}" style="margin-bottom:0">
+          <strong>${nextMonth.fits?'✓ El mes que viene sí te alcanzaría':'✗ Ni el mes que viene alcanzaría, a este ritmo'}</strong>
+        </div>`;
+      html+=simMoneyLine('Balance proyectado después de este gasto',projMargen-amt);
+      if(scope==='shared'){
+        html+=simMoneyLine(`${myLabel()} — proyectado después del gasto`,nextMonth.detail.afterMe)+simMoneyLine(`${partnerLabel()} — proyectado después del gasto`,nextMonth.detail.afterPartner);
+      } else {
+        html+=simMoneyLine('Disponible proyectado',nextMonth.detail.available)+simMoneyLine('Después de este gasto',nextMonth.detail.after);
+      }
+      html+=`</div>`;
+    }
   }
   $('simResult').innerHTML=html;
 }
