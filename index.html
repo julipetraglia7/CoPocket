@@ -1036,6 +1036,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="savingsDate"></div>
     <button class="btn-primary" id="savingsBtn" onclick="saveSavingsEntry()">Depositar</button>
     <button class="btn-secondary" onclick="closeSavingsModal()">Cancelar</button>
+    <button class="btn-secondary btn-delete" id="btnDeleteSavings" onclick="deleteSavingsEntry()" style="display:none;margin-top:4px">Eliminar movimiento</button>
   </div>
 </div>
 
@@ -2360,14 +2361,14 @@ function saveGoalContribution(){
 function savingsEntriesFor(scope,owner){
   return (state.savingsEntries||[]).filter(e=>e.scope===scope&&(scope==='shared'||e.owner===owner));
 }
-function savingsBalance(scope,owner){
-  return savingsEntriesFor(scope,owner).reduce((s,e)=>s+(e.type==='deposit'?Number(e.amount):-Number(e.amount)),0);
+function savingsBalance(scope,owner,excludeId){
+  return savingsEntriesFor(scope,owner).filter(e=>e.id!==excludeId).reduce((s,e)=>s+(e.type==='deposit'?Number(e.amount):-Number(e.amount)),0);
 }
 function savingsCardHtml(scope,owner,label){
   const bal=savingsBalance(scope,owner);
   const entries=savingsEntriesFor(scope,owner).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
   const rows=entries.length?entries.slice(0,8).map(e=>`
-    <div class="exp-row" style="cursor:default">
+    <div class="exp-row" onclick="openSavingsEntryDetail(${e.id})">
       <div class="exp-icon" style="background:${e.type==='deposit'?'var(--primary-soft)':'var(--secondary-soft)'};color:${e.type==='deposit'?'var(--primary)':'var(--secondary)'};font-weight:700">${e.type==='deposit'?'+':'－'}</div>
       <div class="exp-info"><div class="exp-name">${e.note||(e.type==='deposit'?'Depósito':'Retiro')}</div><div class="exp-cat">${e.date||''}</div></div>
       <div class="exp-right"><div class="exp-amt" style="color:${e.type==='deposit'?'var(--primary)':'var(--secondary)'}">${e.type==='deposit'?'+':'－'}${fmt(e.amount)}</div></div>
@@ -2396,35 +2397,63 @@ function renderAhorro(){
     $('ahorroSharedCard').innerHTML=savingsCardHtml('shared',null,'Ahorro compartido');
   }
 }
-let savingsModalScope='personal',savingsModalOwner='me',savingsModalType='deposit';
+let savingsModalScope='personal',savingsModalOwner='me',savingsModalType='deposit',editingSavingsId=null;
 function openSavingsModal(scope,owner,type){
   clearFieldErrors();
+  editingSavingsId=null;
   savingsModalScope=scope;savingsModalOwner=owner||null;savingsModalType=type;
   $('savingsModalTitle').textContent=type==='deposit'?'Depositar en ahorro':'Retirar de ahorro';
   $('savingsBtn').textContent=type==='deposit'?'Depositar':'Retirar';
   $('savingsAmt').value='';$('savingsNote').value='';
   $('savingsDate').value=new Date().toISOString().split('T')[0];
+  $('btnDeleteSavings').style.display='none';
   $('modalSavings').classList.add('open');
 }
-function closeSavingsModal(){$('modalSavings').classList.remove('open');}
+function openSavingsEntryDetail(id){
+  const e=(state.savingsEntries||[]).find(x=>x.id===id);if(!e)return;
+  clearFieldErrors();
+  editingSavingsId=id;
+  savingsModalScope=e.scope;savingsModalOwner=e.owner||null;savingsModalType=e.type;
+  $('savingsModalTitle').textContent=e.type==='deposit'?'Editar depósito':'Editar retiro';
+  $('savingsBtn').textContent='Guardar cambios';
+  $('savingsAmt').value=e.amount;
+  $('savingsNote').value=e.note||'';
+  $('savingsDate').value=e.date||new Date().toISOString().split('T')[0];
+  $('btnDeleteSavings').style.display='block';
+  $('modalSavings').classList.add('open');
+}
+function closeSavingsModal(){$('modalSavings').classList.remove('open');editingSavingsId=null;}
 function saveSavingsEntry(){
   clearFieldErrors();
   const amt=parseFloat($('savingsAmt').value);
   if(!amt||amt<=0){showFieldError('savingsAmt','Ingresá un monto');return;}
   if(savingsModalType==='withdraw'){
-    const bal=savingsBalance(savingsModalScope,savingsModalOwner);
+    const bal=savingsBalance(savingsModalScope,savingsModalOwner,editingSavingsId);
     if(amt>bal){showFieldError('savingsAmt',`No podés retirar más de lo ahorrado (${fmt(bal)})`);return;}
   }
-  if(!state.savingsEntries)state.savingsEntries=[];
-  state.savingsEntries.push({
-    id:state.nextId++,
-    date:$('savingsDate').value||new Date().toISOString().split('T')[0],
-    type:savingsModalType,
-    amount:amt,
-    note:$('savingsNote').value.trim()||null,
-    scope:savingsModalScope,
-    owner:savingsModalScope==='personal'?savingsModalOwner:undefined
-  });
+  const date=$('savingsDate').value||new Date().toISOString().split('T')[0];
+  const note=$('savingsNote').value.trim()||null;
+  if(editingSavingsId!==null){
+    const e=state.savingsEntries.find(x=>x.id===editingSavingsId);
+    if(e){e.amount=amt;e.note=note;e.date=date;}
+  } else {
+    if(!state.savingsEntries)state.savingsEntries=[];
+    state.savingsEntries.push({
+      id:state.nextId++,
+      date,
+      type:savingsModalType,
+      amount:amt,
+      note,
+      scope:savingsModalScope,
+      owner:savingsModalScope==='personal'?savingsModalOwner:undefined
+    });
+  }
+  save();closeSavingsModal();renderAll();
+}
+function deleteSavingsEntry(){
+  if(editingSavingsId===null)return;
+  if(!confirm('¿Eliminar este movimiento de ahorro?'))return;
+  state.savingsEntries=(state.savingsEntries||[]).filter(x=>x.id!==editingSavingsId);
   save();closeSavingsModal();renderAll();
 }
 
