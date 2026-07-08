@@ -741,8 +741,8 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
         </div>
         <div style="margin-top:16px;border-top:1.5px solid #F472B6;padding-top:14px">
           <div style="font-size:11px;font-weight:700;color:#BE185D;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Zona peligrosa</div>
-          <button class="btn-secondary btn-delete" onclick="resetAllData()">Borrar todos mis datos</button>
-          <div style="font-size:11px;color:var(--text3);margin-top:6px">Esta acción elimina categorías, medios, gastos, ingresos y metas. No se puede deshacer.</div>
+          <button class="btn-secondary btn-delete" onclick="resetAllData()">Borrar gastos, ingresos y ahorro</button>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px">Esta acción elimina gastos, ingresos y ahorro. Categorías, medios de pago y presupuestos se mantienen. No se puede deshacer.</div>
         </div>
       </div>
     </div>
@@ -2521,36 +2521,16 @@ function updateNavCompartido(){
 
 // RESET TOTAL
 async function resetAllData(){
-  if(!confirm('⚠️ ¿BORRAR TODO?\n\nVas a perder:\n• Todas tus categorías\n• Todos tus gastos\n• Todos tus ingresos\n• Todos tus medios de pago\n• Presupuestos, metas y ahorro\n• Configuración del modo compartido\n\nLa cotización del dólar y el tema visual se mantienen.\n\nEsta acción NO se puede deshacer.'))return;
+  if(!confirm('⚠️ ¿Borrar gastos, ingresos y ahorro?\n\nVas a perder:\n• Todos tus gastos\n• Todos tus ingresos\n• Todo tu ahorro (personal, de tu pareja y compartido)\n\nTus categorías, medios de pago y presupuestos se mantienen tal cual están, para que no tengas que volver a cargarlos.\n\nEsta acción NO se puede deshacer.'))return;
   if(!confirm('Última oportunidad. ¿Estás 100% segura?'))return;
-  const preserveName=state.name,preserveTheme=state.theme,preserveDark=state.darkMode,preserveUsd=state.usdRate,preserveColors=state.userColors;
-  state={
-    name:preserveName,
-    monthlyIncomes:{},
-    incomeEntries:{},
-    categories:[],
-    medios:[],
-    expenses:[],
-    activeMonth:new Date().toISOString().slice(0,7),
-    nextId:1,
-    done:true,
-    usdRate:preserveUsd||1000,
-    budgets:{},
-    partnerMode:false,
-    partner:{name:''},
-    splitMode:'proportional',
-    goals:[],
-    savingsEntries:[],
-    autoSavingsEnabled:false,
-    autoSavedMonths:[],
-    cancelledRecurring:[],
-    cancelledRecurringIncomes:[],
-    theme:preserveTheme,
-    darkMode:preserveDark,
-    userColors:preserveColors,
-    categoryColorsMigratedV3:true,
-    lastModified:Date.now()
-  };
+  state.expenses=[];
+  state.incomeEntries={};
+  state.monthlyIncomes={};
+  state.savingsEntries=[];
+  state.autoSavedMonths=[];
+  state.cancelledRecurring=[];
+  state.cancelledRecurringIncomes=[];
+  state.lastModified=Date.now();
   if(saveTimer){clearTimeout(saveTimer);saveTimer=null;}
   pendingCloudSave=false;
   try{localStorage.setItem(SK,JSON.stringify(state));}catch(e){}
@@ -2560,7 +2540,7 @@ async function resetAllData(){
     finally{isSaving=false;}
   }
   renderAll();
-  alert('✓ Datos borrados. Podés empezar de cero.');
+  alert('✓ Se borraron tus gastos, ingresos y ahorro. Categorías, medios de pago y presupuestos quedaron como estaban.');
 }
 
 function changeUsdRate(){
