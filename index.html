@@ -803,6 +803,18 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       <div id="medioSelectExp" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
     </div>
     <div class="form-group">
+      <label class="form-label">¿Se marca pagado automáticamente?</label>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+        <span style="font-size:13px;color:var(--text2)">Marcar como pagado solo, según la fecha</span>
+        <button class="toggle" id="toggleAutoPay" onclick="toggleAutoPayMode()"></button>
+      </div>
+      <div id="autoPayField" style="display:none;margin-top:4px">
+        <label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Días después de la fecha del gasto</label>
+        <input class="form-input" type="number" id="inputAutoPayDays" placeholder="0" inputmode="numeric" min="0" oninput="autoPayUserTouched=true">
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Ej: 0 = se marca pagado el mismo día. 1 = al día siguiente.</div>
+      </div>
+    </div>
+    <div class="form-group">
       <label class="form-label">¿Es en cuotas?</label>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
         <span style="font-size:13px;color:var(--text2)">Activar cuotas</span>
@@ -866,6 +878,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
         <div><div class="detail-info-label">Monto</div><div class="detail-info-val" id="detailAmt"></div></div>
         <div style="text-align:right"><div class="detail-info-label">Estado</div><div style="font-size:14px;font-weight:600" id="detailStatus"></div></div>
       </div>
+      <div id="detailAutoPayNote" style="margin-top:6px;display:none;font-size:11px;color:var(--text3)"></div>
       <div id="detailMedioWrap" style="margin-top:8px;display:none">
         <div class="detail-info-label">Medio de pago</div>
         <div class="medio-tag" id="detailMedio"></div>
@@ -969,6 +982,11 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
         <button class="status-btn selected paid" id="btnMedioOwnerMe" onclick="selectMedioOwner('me')"><span id="medioOwnerMeLabel">Yo</span></button>
         <button class="status-btn" id="btnMedioOwnerPartner" onclick="selectMedioOwner('partner')"><span id="medioOwnerPartnerLabel">Pareja</span></button>
       </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Días para acreditarse (opcional)</label>
+      <input class="form-input" type="number" id="medioAutoPayDays" placeholder="Ej: 0 = mismo día, 1 = al día siguiente" inputmode="numeric" min="0">
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Los gastos nuevos con este medio van a sugerir marcarse como pagados solos, ese tanto tiempo después de su fecha. Dejalo vacío si preferís marcarlo siempre a mano.</div>
     </div>
     <button class="btn-primary" onclick="saveMedio()">Guardar medio de pago</button>
     <button class="btn-secondary" onclick="closeMedioModal()">Cancelar</button>
@@ -1119,7 +1137,7 @@ const getIncomeType=id=>INCOME_TYPES.find(t=>t.id===id)||INCOME_TYPES[2];
 let selectedIncomeType='variable';
 
 let selectedCatId=null,selectedMedioId=null,selectedStatus='paid',editingId=null,detailId=null;
-let activeFilter='all',sortBy='amount',cuotasMode=false,recurringMode=false,coverMonthMode=false,editingCatId=null,editingMedioId=null,selectedColor=COLORS[0],selectedCurrency='ARS',selectedOwner='me',selectedShared=false,selectedIncomeOwner='me',editingGoalId=null;
+let activeFilter='all',sortBy='amount',cuotasMode=false,recurringMode=false,coverMonthMode=false,autoPayMode=false,autoPayUserTouched=false,editingCatId=null,editingMedioId=null,selectedColor=COLORS[0],selectedCurrency='ARS',selectedOwner='me',selectedShared=false,selectedIncomeOwner='me',editingGoalId=null;
 let editingIncomeId=null,incomeDetailId=null,recurringIncomeMode=false,selectedMedioOwner='me';
 
 function migrateData(p){
@@ -1370,7 +1388,15 @@ function migrateCategoryIcons(){
 }
 
 // LIMPIEZA DE DATOS (proyectados antiguos + cuotas duplicadas)
+// Medio de pago fijo "Ahorro": pagar con él descuenta automáticamente del pozo de ahorro correspondiente
+function ensureSavingsMedio(){
+  if(!state.medios.some(m=>m.isSavingsMedio)){
+    state.medios.push({id:state.nextId++,label:'Ahorro',icon:'🏦',isSavingsMedio:true});
+    save();
+  }
+}
 function cleanupData(){
+  ensureSavingsMedio();
   migrateCategoryColors();
   migrateCategoryIcons();
   let changed=false;
@@ -1456,7 +1482,7 @@ function autoGenerateRecurring(){
       )
     );
     if(yaExiste)return;
-    state.expenses.push({
+    const nuevo={
       id:state.nextId++,
       desc:pe.desc,
       amt:pe.amt,
@@ -1467,10 +1493,13 @@ function autoGenerateRecurring(){
       currency:pe.currency||'ARS',
       owner:pe.owner||'me',
       shared:!!pe.shared,
+      autoPayDays:pe.autoPayDays??null,
       recurring:true,
       recurringOrigin:originId,
       autoGenerated:true
-    });
+    };
+    state.expenses.push(nuevo);
+    syncSavingsLinkForExpense(nuevo);
     count++;
   });
   if(count>0)save();
@@ -1497,11 +1526,29 @@ function autoGenerateCuotas(){
       )
     );
     if(yaExiste)return;
-    state.expenses.push({id:state.nextId++,desc:pe.desc,amt:pe.cuota.monto||pe.amt,cat:pe.cat,medio:pe.medio,paid:false,date:state.activeMonth+'-01',currency:pe.currency||'ARS',owner:pe.owner||'me',shared:!!pe.shared,cuota:{actual:nuevaActual,total:pe.cuota.total,monto:pe.cuota.monto||pe.amt},autoGenerated:true,cuotaOrigen:origin});
+    const nuevo={id:state.nextId++,desc:pe.desc,amt:pe.cuota.monto||pe.amt,cat:pe.cat,medio:pe.medio,paid:false,date:state.activeMonth+'-01',currency:pe.currency||'ARS',owner:pe.owner||'me',shared:!!pe.shared,autoPayDays:pe.autoPayDays??null,cuota:{actual:nuevaActual,total:pe.cuota.total,monto:pe.cuota.monto||pe.amt},autoGenerated:true,cuotaOrigen:origin};
+    state.expenses.push(nuevo);
+    syncSavingsLinkForExpense(nuevo);
     count++;
   });
   if(count>0)save();
   return count;
+}
+
+// Marca como pagados automáticamente los gastos cuya fecha + autoPayDays ya llegó (según la fecha real de hoy)
+function autoUpdatePaidStatus(){
+  const today=new Date();today.setHours(0,0,0,0);
+  let changed=false;
+  state.expenses.forEach(e=>{
+    if(e.paid)return;
+    if(e.autoPayDays==null)return;
+    if(!e.date)return;
+    const payDate=new Date(e.date+'T00:00:00');
+    payDate.setDate(payDate.getDate()+Number(e.autoPayDays));
+    if(today>=payDate){e.paid=true;changed=true;}
+  });
+  if(changed)save();
+  return changed;
 }
 
 // Sobrante (ingresos-gastos) de un mes puntual, repartido por persona si hay modo compartido
@@ -1673,12 +1720,19 @@ function renderHome(){
     `<div class="empty-state" style="padding:20px"><div class="empty-text">Sin gastos con medio de pago asignado</div></div>`;
 }
 
+function autoPayDateLabel(e){
+  if(!e.date)return'';
+  const d=new Date(e.date+'T00:00:00');
+  d.setDate(d.getDate()+Number(e.autoPayDays));
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+}
 function expRow(e){
   const cat=getCat(e.cat),med=getMedio(e.medio);
   const cl=e.cuota?` · cuota ${e.cuota.actual}/${e.cuota.total}`:'';
   const rl=e.recurring?' · recurrente':'';
   const ml=med?` · ${med.label}`:'';
   const cm=(e.coverMonth&&e.coverMonth!==(e.date||'').slice(0,7))?` · cubre ${monthLabelOf(e.coverMonth)}`:'';
+  const ap=(!e.paid&&e.autoPayDays!=null)?` · paga sola el ${autoPayDateLabel(e)}`:'';
   // Indicador de quién pagó / si es compartido, cuando el modo compartido está activo
   let ol='';
   if(state.partnerMode){
@@ -1686,7 +1740,7 @@ function expRow(e){
   }
   return`<div class="exp-row" onclick="openDetail(${e.id})">
     <div class="exp-icon" style="background:${cat.color}33;border:1.5px solid ${cat.color}55;color:${cat.color};font-weight:700">${(cat.label||'•').charAt(0).toUpperCase()}</div>
-    <div class="exp-info"><div class="exp-name">${e.desc}</div><div class="exp-cat"><span style="color:${cat.color};font-weight:600">${cat.label}</span>${cl}${rl}${ol}${ml}${cm}</div></div>
+    <div class="exp-info"><div class="exp-name">${e.desc}</div><div class="exp-cat"><span style="color:${cat.color};font-weight:600">${cat.label}</span>${cl}${rl}${ol}${ml}${cm}${ap}</div></div>
     <div class="exp-right"><div class="exp-amt ${e.paid?'paid':''}">${fmtCur(e.amt,e.currency)}</div><div class="exp-status ${e.paid?'done':'pending'}">${e.paid?'Pagado':'Pendiente'}</div></div>
   </div>`;
 }
@@ -1863,9 +1917,8 @@ function renderConfig(){
   $('medioManageList').innerHTML=state.medios.length?state.medios.map(m=>`
     <div class="manage-row">
       <div class="manage-icon" style="background:var(--bg2);color:var(--text2);font-weight:700">${(m.label||'•').charAt(0).toUpperCase()}</div>
-      <span style="flex:1;font-size:13px;color:var(--text)">${m.label}${state.partnerMode?` <span class="medio-tag">${(m.owner||'me')==='partner'?partnerLabel():myLabel()}</span>`:''}</span>
-      <button class="btn-sm" onclick="editMedio(${m.id})" style="margin-right:6px">Editar</button>
-      <button class="btn-sm danger" onclick="deleteMedio(${m.id})">Borrar</button>
+      <span style="flex:1;font-size:13px;color:var(--text)">${m.label}${state.partnerMode&&!m.isSavingsMedio?` <span class="medio-tag">${(m.owner||'me')==='partner'?partnerLabel():myLabel()}</span>`:''}${m.autoPayDays!=null?` <span class="medio-tag">${m.autoPayDays===0?'se acredita el mismo día':`se acredita a los ${m.autoPayDays}d`}</span>`:''}</span>
+      ${m.isSavingsMedio?'<span style="font-size:11px;color:var(--text3)">Fijo</span>':`<button class="btn-sm" onclick="editMedio(${m.id})" style="margin-right:6px">Editar</button><button class="btn-sm danger" onclick="deleteMedio(${m.id})">Borrar</button>`}
     </div>`).join(''):
     `<div class="empty-state" style="padding:20px"><div class="empty-text">Sin medios de pago. Tocá + Nuevo.</div></div>`;
 }
@@ -1983,6 +2036,7 @@ function applyDarkMode(){
 function setActiveMonth(newMonth){
   state.activeMonth=newMonth;save();
   const c=autoGenerateCuotas(),r=autoGenerateRecurring(),i=autoGenerateRecurringIncomes(),s=autoGenerateSavingsFromSurplus();
+  autoUpdatePaidStatus();
   if(c+r+i>0){
     const parts=[];
     if(c>0)parts.push(`${c} cuota${c>1?'s':''}`);
@@ -2001,7 +2055,7 @@ function changeMonthBy(delta){setActiveMonth(delta<0?prevMonthStr(state.activeMo
 // MODAL GASTO
 function openModal(){
   clearFieldErrors();
-  editingId=null;cuotasMode=false;recurringMode=false;coverMonthMode=false;
+  editingId=null;cuotasMode=false;recurringMode=false;coverMonthMode=false;autoPayMode=false;autoPayUserTouched=false;
   $('toggleRecurring').classList.remove('on');
   $('modalTitle').textContent='Nuevo gasto';$('btnSave').textContent='Guardar gasto';
   $('inputAmt').value='';$('inputDesc').value='';$('inputNotes').value='';
@@ -2009,10 +2063,12 @@ function openModal(){
   $('inputCuotaActual').value='';$('inputCuotaTotal').value='';$('inputCuotaMonto').value='';
   $('cuotasFields').style.display='none';$('toggleCuotas').classList.remove('on');
   $('toggleCoverMonth').classList.remove('on');$('coverMonthField').style.display='none';$('inputCoverMonth').value='';
+  $('toggleAutoPay').classList.remove('on');$('autoPayField').style.display='none';$('inputAutoPayDays').value='';
   selectedCatId=state.categories.length?state.categories[0].id:null;
   selectedMedioId=state.medios.length?state.medios[0].id:null;
   selectedStatus='paid';selectedCurrency='ARS';selectedOwner='me';selectedShared=false;
   renderCatSelectExp();renderMedioSelectExp();updateStatusBtns();updateCurrencyBtns();updateAmtPreview();
+  applyAutoPaySuggestion(selectedMedioId);
   updateOwnerUILabels();selectOwner('me');
   $('toggleShared').classList.remove('on');
   $('ownerFieldExp').style.display=state.partnerMode?'block':'none';
@@ -2020,6 +2076,28 @@ function openModal(){
   $('modalAdd').classList.add('open');
 }
 function closeModal(){$('modalAdd').classList.remove('open');editingId=null;}
+function toggleAutoPayMode(){
+  autoPayMode=!autoPayMode;
+  autoPayUserTouched=true;
+  $('toggleAutoPay').classList.toggle('on',autoPayMode);
+  $('autoPayField').style.display=autoPayMode?'block':'none';
+}
+// Sugiere la regla de "pagado solo" configurada en el medio elegido, salvo que el usuario ya la haya tocado a mano
+function applyAutoPaySuggestion(medioId){
+  if(autoPayUserTouched)return;
+  const m=getMedio(medioId);
+  if(m&&m.autoPayDays!=null){
+    autoPayMode=true;
+    $('toggleAutoPay').classList.add('on');
+    $('autoPayField').style.display='block';
+    $('inputAutoPayDays').value=m.autoPayDays;
+  } else {
+    autoPayMode=false;
+    $('toggleAutoPay').classList.remove('on');
+    $('autoPayField').style.display='none';
+    $('inputAutoPayDays').value='';
+  }
+}
 function toggleCoverMonthMode(){
   coverMonthMode=!coverMonthMode;
   $('toggleCoverMonth').classList.toggle('on',coverMonthMode);
@@ -2076,7 +2154,7 @@ function renderMedioSelectExp(){
     <button onclick="selectMedioExp(${m.id})" style="padding:6px 12px;border-radius:99px;border:1.5px solid ${selectedMedioId===m.id?'var(--accent)':'var(--border)'};background:${selectedMedioId===m.id?'var(--bg2)':'var(--bg)'};color:${selectedMedioId===m.id?'var(--accent)':'var(--text2)'};font-size:12px;font-weight:${selectedMedioId===m.id?600:400};font-family:inherit;cursor:pointer;">${m.label}</button>`
   ).join('');
 }
-function selectMedioExp(id){selectedMedioId=id;renderMedioSelectExp();}
+function selectMedioExp(id){selectedMedioId=id;renderMedioSelectExp();applyAutoPaySuggestion(id);}
 
 function selectStatus(s){selectedStatus=s;updateStatusBtns();}
 function updateStatusBtns(){
@@ -2372,6 +2450,29 @@ function savingsEntriesFor(scope,owner){
 function savingsBalance(scope,owner,excludeId){
   return savingsEntriesFor(scope,owner).filter(e=>e.id!==excludeId).reduce((s,e)=>s+(e.type==='deposit'?Number(e.amount):-Number(e.amount)),0);
 }
+// Si un gasto se paga con el medio fijo "Ahorro", mantiene sincronizado un retiro automático en ese pozo
+function syncSavingsLinkForExpense(e){
+  if(!state.savingsEntries)state.savingsEntries=[];
+  const savingsMedio=state.medios.find(m=>m.isSavingsMedio);
+  const linkedIdx=state.savingsEntries.findIndex(x=>x.linkedExpenseId===e.id);
+  const usesSavings=savingsMedio&&e.medio===savingsMedio.id;
+  if(!usesSavings){
+    if(linkedIdx>=0)state.savingsEntries.splice(linkedIdx,1);
+    return;
+  }
+  const scope=isShared(e)?'shared':'personal';
+  const owner=scope==='personal'?ownerOf(e):undefined;
+  const amount=toArs(e);
+  if(linkedIdx>=0){
+    const entry=state.savingsEntries[linkedIdx];
+    entry.amount=amount;entry.date=e.date;entry.scope=scope;entry.owner=owner;entry.note=`Gasto: ${e.desc}`;
+  } else {
+    state.savingsEntries.push({id:state.nextId++,date:e.date,type:'withdraw',amount,note:`Gasto: ${e.desc}`,scope,owner,linkedExpenseId:e.id});
+  }
+}
+function removeSavingsLinkForExpense(expenseId){
+  state.savingsEntries=(state.savingsEntries||[]).filter(x=>x.linkedExpenseId!==expenseId);
+}
 function savingsCardHtml(scope,owner,label){
   const bal=savingsBalance(scope,owner);
   const entries=savingsEntriesFor(scope,owner).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -2384,7 +2485,7 @@ function savingsCardHtml(scope,owner,label){
   return `<div class="card" style="padding:0;margin-bottom:12px">
     <div style="padding:18px 16px 14px;border-bottom:1px solid var(--border)">
       <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">${label}</div>
-      <div style="font-family:'Space Grotesk',serif;font-size:26px;color:var(--text);margin-top:4px">${fmt(bal)}</div>
+      <div style="font-family:'Space Grotesk',serif;font-size:26px;color:${bal<0?'var(--error)':'var(--text)'};margin-top:4px">${fmt(bal)}</div>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn-sm" onclick="openSavingsModal('${scope}','${owner||''}','deposit')">+ Depositar</button>
         <button class="btn-sm" onclick="openSavingsModal('${scope}','${owner||''}','withdraw')">－ Retirar</button>
@@ -2781,6 +2882,8 @@ function saveExpense(){
   let cuota=null;
   if(cuotasMode){const actual=parseInt($('inputCuotaActual').value)||1,total=parseInt($('inputCuotaTotal').value)||1,monto=parseFloat($('inputCuotaMonto').value)||amt;cuota={actual,total,monto};}
   const coverMonth=coverMonthMode?($('inputCoverMonth').value||null):null;
+  const autoPayDays=autoPayMode?Math.max(0,parseInt($('inputAutoPayDays').value)||0):null;
+  let savedExpense=null;
   if(editingId!==null){
     const e=state.expenses.find(x=>x.id===editingId);
     if(e){
@@ -2788,6 +2891,7 @@ function saveExpense(){
       e.paid=selectedStatus==='paid';e.cuota=cuota;e.currency=selectedCurrency;e.notes=notes;
       e.owner=selectedOwner;e.shared=selectedShared;delete e.mode;
       e.coverMonth=coverMonth;
+      e.autoPayDays=autoPayDays;
       e.recurring=recurringMode;
       if(recurringMode&&!e.recurringOrigin)e.recurringOrigin=e.id;
       if(!recurringMode)delete e.recurringOrigin;
@@ -2796,12 +2900,15 @@ function saveExpense(){
         const origin=e.recurringOrigin||e.id;
         state.cancelledRecurring=state.cancelledRecurring.filter(x=>x!==origin);
       }
+      savedExpense=e;
     }
     else{alert('No se encontró el gasto a editar. Cerrá y volvé a abrir.');return;}
   } else {
     const newId=state.nextId++;
-    state.expenses.push({id:newId,desc,amt,cat:selectedCatId,medio:selectedMedioId,paid:selectedStatus==='paid',date,cuota,currency:selectedCurrency,notes,owner:selectedOwner,shared:selectedShared,coverMonth,recurring:recurringMode,...(recurringMode?{recurringOrigin:newId}:{})});
+    savedExpense={id:newId,desc,amt,cat:selectedCatId,medio:selectedMedioId,paid:selectedStatus==='paid',date,cuota,currency:selectedCurrency,notes,owner:selectedOwner,shared:selectedShared,coverMonth,autoPayDays,recurring:recurringMode,...(recurringMode?{recurringOrigin:newId}:{})};
+    state.expenses.push(savedExpense);
   }
+  syncSavingsLinkForExpense(savedExpense);
   save();closeModal();renderAll();
 }
 
@@ -2814,6 +2921,8 @@ function openDetail(id){
   $('detailAmt').textContent=fmtCur(e.amt,e.currency);
   $('detailAmt').title=e.currency==='USD'?`≈ ${fmt(toArs(e))} ARS`:'';
   $('detailStatus').textContent=e.paid?'Pagado':'Pendiente';$('detailStatus').style.color=e.paid?'var(--primary-pressed)':'var(--warning)';
+  const apn=$('detailAutoPayNote');
+  if(!e.paid&&e.autoPayDays!=null){apn.style.display='block';apn.textContent=`Se va a marcar pagado solo el ${autoPayDateLabel(e)}`;}else apn.style.display='none';
   const btn=$('btnTogglePaid');btn.textContent=e.paid?'Marcar pendiente':'Marcar como pagado';btn.style.background=e.paid?'var(--surface-2)':'';btn.style.color=e.paid?'var(--text)':'';
   const mw=$('detailMedioWrap');
   if(med){mw.style.display='block';$('detailMedio').textContent=med.label;}else mw.style.display='none';
@@ -2838,7 +2947,12 @@ function cancelRecurring(){
 }
 function closeDetail(){$('modalDetail').classList.remove('open');detailId=null;}
 function togglePaid(){const e=state.expenses.find(x=>x.id===detailId);if(e){e.paid=!e.paid;save();closeDetail();renderAll();}}
-function deleteExpense(){if(!confirm('¿Eliminar este gasto?'))return;state.expenses=state.expenses.filter(x=>x.id!==detailId);save();closeDetail();renderAll();}
+function deleteExpense(){
+  if(!confirm('¿Eliminar este gasto?'))return;
+  removeSavingsLinkForExpense(detailId);
+  state.expenses=state.expenses.filter(x=>x.id!==detailId);
+  save();closeDetail();renderAll();
+}
 function openEditFromDetail(){
   const e=state.expenses.find(x=>x.id===detailId);if(!e)return;closeDetail();
   editingId=e.id;selectedCatId=e.cat;selectedMedioId=e.medio??null;selectedStatus=e.paid?'paid':'pending';selectedCurrency=e.currency||'ARS';selectedOwner=e.owner||'me';selectedShared=!!e.shared;
@@ -2849,6 +2963,8 @@ function openEditFromDetail(){
   if(e.cuota){$('inputCuotaActual').value=e.cuota.actual;$('inputCuotaTotal').value=e.cuota.total;$('inputCuotaMonto').value=e.cuota.monto||'';}
   recurringMode=!!e.recurring;$('toggleRecurring').classList.toggle('on',recurringMode);
   coverMonthMode=!!e.coverMonth;$('toggleCoverMonth').classList.toggle('on',coverMonthMode);$('coverMonthField').style.display=coverMonthMode?'block':'none';$('inputCoverMonth').value=e.coverMonth||'';
+  autoPayUserTouched=true;autoPayMode=e.autoPayDays!=null;
+  $('toggleAutoPay').classList.toggle('on',autoPayMode);$('autoPayField').style.display=autoPayMode?'block':'none';$('inputAutoPayDays').value=e.autoPayDays!=null?e.autoPayDays:'';
   renderCatSelectExp();renderMedioSelectExp();updateStatusBtns();updateCurrencyBtns();updateAmtPreview();
   updateOwnerUILabels();selectOwner(selectedOwner);
   $('toggleShared').classList.toggle('on',selectedShared);
@@ -3015,13 +3131,14 @@ function selectMedioOwner(o){
   $('btnMedioOwnerPartner').className='status-btn'+(o==='partner'?' selected paid':'');
 }
 function openMedioModal(){
-  clearFieldErrors();editingMedioId=null;$('medioModalTitle').textContent='Nuevo medio de pago';$('medioName').value='';
+  clearFieldErrors();editingMedioId=null;$('medioModalTitle').textContent='Nuevo medio de pago';$('medioName').value='';$('medioAutoPayDays').value='';
   selectedMedioOwner='me';updateOwnerUILabels();selectMedioOwner('me');
   $('ownerFieldMedio').style.display=state.partnerMode?'block':'none';
   $('modalMedio').classList.add('open');
 }
 function editMedio(id){
-  const m=state.medios.find(x=>x.id===id);if(!m)return;editingMedioId=id;$('medioModalTitle').textContent='Editar medio';$('medioName').value=m.label;
+  const m=state.medios.find(x=>x.id===id);if(!m||m.isSavingsMedio)return;editingMedioId=id;$('medioModalTitle').textContent='Editar medio';$('medioName').value=m.label;
+  $('medioAutoPayDays').value=m.autoPayDays!=null?m.autoPayDays:'';
   selectedMedioOwner=m.owner||'me';updateOwnerUILabels();selectMedioOwner(selectedMedioOwner);
   $('ownerFieldMedio').style.display=state.partnerMode?'block':'none';
   $('modalMedio').classList.add('open');
@@ -3033,11 +3150,18 @@ function saveMedio(){
   clearFieldErrors();
   const label=$('medioName').value.trim();
   if(!label){showFieldError('medioName','Ingresá un nombre');return;}
-  if(editingMedioId!==null){const m=state.medios.find(x=>x.id===editingMedioId);if(m){m.label=label;m.icon='•';m.owner=selectedMedioOwner;}}
-  else state.medios.push({id:state.nextId++,label,icon:'•',owner:selectedMedioOwner});
+  const autoPayRaw=$('medioAutoPayDays').value;
+  const autoPayDays=autoPayRaw!==''?Math.max(0,parseInt(autoPayRaw)||0):null;
+  if(editingMedioId!==null){const m=state.medios.find(x=>x.id===editingMedioId);if(m){m.label=label;m.icon='•';m.owner=selectedMedioOwner;m.autoPayDays=autoPayDays;}}
+  else state.medios.push({id:state.nextId++,label,icon:'•',owner:selectedMedioOwner,autoPayDays});
   save();closeMedioModal();renderAll();
 }
-function deleteMedio(id){if(!confirm('¿Eliminar este medio de pago?'))return;state.medios=state.medios.filter(x=>x.id!==id);save();renderAll();}
+function deleteMedio(id){
+  const m=state.medios.find(x=>x.id===id);
+  if(m&&m.isSavingsMedio){alert('El medio "Ahorro" es fijo y no se puede eliminar.');return;}
+  if(!confirm('¿Eliminar este medio de pago?'))return;
+  state.medios=state.medios.filter(x=>x.id!==id);save();renderAll();
+}
 
 const _modalClosers={modalAdd:closeModal,modalDetail:closeDetail,modalCat:closeCatModal,modalMedio:closeMedioModal,modalIncome:closeIncomeModal,modalIncomeDetail:closeIncomeDetail,modalGoal:closeGoalModal,modalGoalContribution:closeGoalContribModal,modalSavings:closeSavingsModal};
 Object.entries(_modalClosers).forEach(([id,fn])=>{
@@ -3058,6 +3182,7 @@ function mostrarApp(){
     cleanupData();
     fetchUsdRate();
     const c=autoGenerateCuotas(),r=autoGenerateRecurring(),i=autoGenerateRecurringIncomes(),s=autoGenerateSavingsFromSurplus();
+    autoUpdatePaidStatus();
     if(c+r+i>0){
       const parts=[];
       if(c>0)parts.push(`${c} cuota${c>1?'s':''}`);
