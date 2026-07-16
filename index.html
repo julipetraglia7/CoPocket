@@ -776,6 +776,8 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modalTitle">Nuevo gasto</div>
+    <div class="form-group"><label class="form-label">Descripción</label><input class="form-input" type="text" id="inputDesc" placeholder="Ej: Supermercado Carrefour"><div class="form-error" id="inputDescError"></div></div>
+    <div class="form-group"><label class="form-label" id="lblAmt">Monto ($)</label><input class="form-input big" type="number" id="inputAmt" placeholder="0" inputmode="decimal" oninput="updateAmtPreview()"><div class="form-error" id="inputAmtError"></div><div id="amtConvert" style="font-size:11px;color:var(--text3);margin-top:4px;display:none"></div></div>
     <div class="form-group">
       <label class="form-label">Moneda</label>
       <div class="status-select">
@@ -783,10 +785,43 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
         <button class="status-btn" id="btnCurUsd" onclick="selectCurrency('USD')">U$D Dólares</button>
       </div>
     </div>
-    <div class="form-group"><label class="form-label" id="lblAmt">Monto ($)</label><input class="form-input big" type="number" id="inputAmt" placeholder="0" inputmode="decimal" oninput="updateAmtPreview()"><div class="form-error" id="inputAmtError"></div><div id="amtConvert" style="font-size:11px;color:var(--text3);margin-top:4px;display:none"></div></div>
-    <div class="form-group"><label class="form-label">Descripción</label><input class="form-input" type="text" id="inputDesc" placeholder="Ej: Supermercado Carrefour"><div class="form-error" id="inputDescError"></div></div>
     <div class="form-group"><label class="form-label">Notas (opcional)</label><input class="form-input" type="text" id="inputNotes" placeholder="Ej: cena de trabajo, regalo cumpleaños..."></div>
     <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="inputDate"></div>
+    <div class="form-group">
+      <label class="form-label">Medio de pago</label>
+      <div id="medioSelectExp" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Categoría</label><div id="catSelectExp" style="display:flex;gap:8px;flex-wrap:wrap;"></div></div>
+    <div class="form-group">
+      <label class="form-label">¿Es en cuotas?</label>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+        <span style="font-size:13px;color:var(--text2)">Activar cuotas</span>
+        <button class="toggle" id="toggleCuotas" onclick="toggleCuotasMode()"></button>
+      </div>
+      <div id="cuotasFields" style="display:none;margin-top:8px">
+        <label class="form-label">Datos de la cuota</label>
+        <div class="form-row-3">
+          <div><label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Cuota actual</label><input class="form-input" type="number" id="inputCuotaActual" placeholder="3" inputmode="numeric"></div>
+          <div><label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Total cuotas</label><input class="form-input" type="number" id="inputCuotaTotal" placeholder="12" inputmode="numeric"></div>
+          <div><label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Monto/cuota</label><input class="form-input" type="number" id="inputCuotaMonto" placeholder="Auto" inputmode="decimal"></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">¿Es recurrente?</label>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+        <span style="font-size:13px;color:var(--text2)">Renovar cada mes (ej: Netflix, alquiler)</span>
+        <button class="toggle" id="toggleRecurring" onclick="toggleRecurringMode()"></button>
+      </div>
+    </div>
+    <div class="form-group" id="pagadorFieldExp" style="display:none">
+      <label class="form-label">¿Quién pagó?</label>
+      <div class="status-select">
+        <button class="status-btn selected paid" id="btnPagadorMe" onclick="selectPagador('me')"><span id="pagadorMeLabel">Julieta</span></button>
+        <button class="status-btn" id="btnPagadorPartner" onclick="selectPagador('partner')"><span id="pagadorPartnerLabel">Agus</span></button>
+        <button class="status-btn" id="btnPagadorShared" onclick="selectPagador('shared')">Compartido</button>
+      </div>
+    </div>
     <div class="form-group">
       <label class="form-label">¿Se cubre con ingresos de otro mes?</label>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
@@ -798,49 +833,6 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
         <div style="font-size:11px;color:var(--text3);margin-top:4px">Este gasto va a contar para el balance de ese mes (Inicio, Gastos, Compartido, etc.), aunque quede cargado con esta fecha.</div>
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Medio de pago</label>
-      <div id="medioSelectExp" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">¿Es en cuotas?</label>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
-        <span style="font-size:13px;color:var(--text2)">Activar cuotas</span>
-        <button class="toggle" id="toggleCuotas" onclick="toggleCuotasMode()"></button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">¿Es recurrente?</label>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
-        <span style="font-size:13px;color:var(--text2)">Renovar cada mes (ej: Netflix, alquiler)</span>
-        <button class="toggle" id="toggleRecurring" onclick="toggleRecurringMode()"></button>
-      </div>
-    </div>
-    <div class="form-group" id="ownerFieldExp" style="display:none">
-      <label class="form-label">¿Quién pagó?</label>
-      <div class="status-select">
-        <button class="status-btn selected paid" id="btnOwnerMe" onclick="selectOwner('me')"><span id="ownerMeLabel">Yo</span></button>
-        <button class="status-btn" id="btnOwnerPartner" onclick="selectOwner('partner')"><span id="ownerPartnerLabel">Pareja</span></button>
-      </div>
-    </div>
-    <div class="form-group" id="sharedFieldExp" style="display:none">
-      <label class="form-label">¿Es compartido?</label>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
-        <span style="font-size:13px;color:var(--text2)">Dividir entre ambos</span>
-        <button class="toggle" id="toggleShared" onclick="toggleSharedMode()"></button>
-      </div>
-    </div>
-    <div id="cuotasFields" style="display:none">
-      <div class="form-group">
-        <label class="form-label">Datos de la cuota</label>
-        <div class="form-row-3">
-          <div><label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Cuota actual</label><input class="form-input" type="number" id="inputCuotaActual" placeholder="3" inputmode="numeric"></div>
-          <div><label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Total cuotas</label><input class="form-input" type="number" id="inputCuotaTotal" placeholder="12" inputmode="numeric"></div>
-          <div><label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Monto/cuota</label><input class="form-input" type="number" id="inputCuotaMonto" placeholder="Auto" inputmode="decimal"></div>
-        </div>
-      </div>
-    </div>
-    <div class="form-group"><label class="form-label">Categoría</label><div id="catSelectExp" style="display:flex;gap:8px;flex-wrap:wrap;"></div></div>
     <button class="btn-primary" id="btnSave" onclick="saveExpense()">Guardar gasto</button>
     <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
   </div>
@@ -1980,10 +1972,8 @@ function openModal(){
   selectedMedioId=state.medios.length?state.medios[0].id:null;
   selectedCurrency='ARS';selectedOwner='me';selectedShared=false;
   renderCatSelectExp();renderMedioSelectExp();updateCurrencyBtns();updateAmtPreview();
-  updateOwnerUILabels();selectOwner('me');
-  $('toggleShared').classList.remove('on');
-  $('ownerFieldExp').style.display=state.partnerMode?'block':'none';
-  $('sharedFieldExp').style.display=state.partnerMode?'block':'none';
+  updateOwnerUILabels();selectPagador('me');
+  $('pagadorFieldExp').style.display=state.partnerMode?'block':'none';
   $('modalAdd').classList.add('open');
 }
 function closeModal(){$('modalAdd').classList.remove('open');editingId=null;}
@@ -2007,14 +1997,12 @@ function toggleRecurringMode(){
   $('toggleRecurring').classList.toggle('on',recurringMode);
   if(recurringMode&&cuotasMode){cuotasMode=false;$('toggleCuotas').classList.remove('on');$('cuotasFields').style.display='none';}
 }
-function selectOwner(o){
-  selectedOwner=o;
-  $('btnOwnerMe').className='status-btn'+(o==='me'?' selected paid':'');
-  $('btnOwnerPartner').className='status-btn'+(o==='partner'?' selected paid':'');
-}
-function toggleSharedMode(){
-  selectedShared=!selectedShared;
-  $('toggleShared').classList.toggle('on',selectedShared);
+function selectPagador(who){
+  if(who==='shared'){selectedShared=true;}
+  else{selectedOwner=who;selectedShared=false;}
+  $('btnPagadorMe').className='status-btn'+(!selectedShared&&selectedOwner==='me'?' selected paid':'');
+  $('btnPagadorPartner').className='status-btn'+(!selectedShared&&selectedOwner==='partner'?' selected paid':'');
+  $('btnPagadorShared').className='status-btn'+(selectedShared?' selected paid':'');
 }
 function selectIncomeOwner(o){
   selectedIncomeOwner=o;
@@ -2024,8 +2012,8 @@ function selectIncomeOwner(o){
 function updateOwnerUILabels(){
   // Llena los labels con nombres reales
   const me=myLabel(),partner=partnerLabel();
-  ['ownerMeLabel','incOwnerMeLabel','medioOwnerMeLabel','goalOwnerMeLabel'].forEach(id=>{const el=$(id);if(el)el.textContent=me;});
-  ['ownerPartnerLabel','incOwnerPartnerLabel','medioOwnerPartnerLabel','goalOwnerPartnerLabel'].forEach(id=>{const el=$(id);if(el)el.textContent=partner;});
+  ['pagadorMeLabel','incOwnerMeLabel','medioOwnerMeLabel','goalOwnerMeLabel'].forEach(id=>{const el=$(id);if(el)el.textContent=me;});
+  ['pagadorPartnerLabel','incOwnerPartnerLabel','medioOwnerPartnerLabel','goalOwnerPartnerLabel'].forEach(id=>{const el=$(id);if(el)el.textContent=partner;});
 }
 
 function renderCatSelectExp(){
@@ -2960,10 +2948,8 @@ function openEditFromDetail(){
   recurringMode=!!e.recurring;$('toggleRecurring').classList.toggle('on',recurringMode);
   coverMonthMode=!!e.coverMonth;$('toggleCoverMonth').classList.toggle('on',coverMonthMode);$('coverMonthField').style.display=coverMonthMode?'block':'none';$('inputCoverMonth').value=e.coverMonth||'';
   renderCatSelectExp();renderMedioSelectExp();updateCurrencyBtns();updateAmtPreview();
-  updateOwnerUILabels();selectOwner(selectedOwner);
-  $('toggleShared').classList.toggle('on',selectedShared);
-  $('ownerFieldExp').style.display=state.partnerMode?'block':'none';
-  $('sharedFieldExp').style.display=state.partnerMode?'block':'none';
+  updateOwnerUILabels();selectPagador(selectedShared?'shared':selectedOwner);
+  $('pagadorFieldExp').style.display=state.partnerMode?'block':'none';
   $('modalAdd').classList.add('open');
 }
 
