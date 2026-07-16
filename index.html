@@ -633,28 +633,39 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
 
   <!-- SIMULACION -->
   <div id="screen-simulacion" class="screen">
-    <div class="section-title flush">¿Te alcanza para este gasto?</div>
-    <div class="card" style="padding:18px;margin-bottom:12px">
-      <div class="form-group"><label class="form-label">Monto del gasto</label><input class="form-input big" type="number" id="simAmt" placeholder="0" inputmode="decimal"><div class="form-error" id="simAmtError"></div></div>
-      <div class="form-group"><label class="form-label">Descripción (opcional)</label><input class="form-input" type="text" id="simDesc" placeholder="Ej: Notebook nueva"></div>
-      <div class="form-group">
-        <label class="form-label">¿De dónde sale la plata?</label>
-        <div class="status-select">
-          <button class="status-btn selected paid" id="btnSimSrcMonth" onclick="selectSimSource('month')">Este mes</button>
-          <button class="status-btn" id="btnSimSrcSavings" onclick="selectSimSource('savings')">Mis ahorros</button>
-        </div>
+    <div id="buybyePendingBanner"></div>
+    <div id="buybyeStep1">
+      <div class="section-title flush">¿Vale la pena esta compra?</div>
+      <div class="card" style="padding:18px;margin-bottom:12px">
+        <div class="form-group"><label class="form-label">Monto del gasto</label><input class="form-input big" type="number" id="simAmt" placeholder="0" inputmode="decimal"><div class="form-error" id="simAmtError"></div></div>
+        <div class="form-group"><label class="form-label">¿Qué es? (opcional)</label><input class="form-input" type="text" id="simDesc" placeholder="Ej: Zapatillas nuevas"></div>
+        <button class="btn-primary" onclick="runBuybyeCalc()">Calcular</button>
       </div>
-      <div class="form-group" id="simScopeField" style="display:none">
-        <label class="form-label" id="simScopeFieldLabel">¿De quién sería?</label>
-        <div class="status-select">
-          <button class="status-btn selected paid" id="btnSimMe" onclick="selectSimScope('me')"><span id="simMeLabel">Yo</span></button>
-          <button class="status-btn" id="btnSimPartner" onclick="selectSimScope('partner')"><span id="simPartnerLabel">Pareja</span></button>
-          <button class="status-btn" id="btnSimShared" onclick="selectSimScope('shared')">Compartido</button>
-        </div>
-      </div>
-      <button class="btn-primary" onclick="runSimulationUI()">Simular</button>
     </div>
-    <div id="simResult"></div>
+    <div id="buybyeResult"></div>
+    <div id="buybyeUnsureForm" style="display:none">
+      <div class="section-title flush">Pensalo un poco más</div>
+      <div class="card" style="padding:18px">
+        <div class="form-group"><label class="form-label">Nombre del gasto</label><input class="form-input" id="unsureDesc" placeholder="Ej: Zapatillas nuevas"></div>
+        <div class="form-group"><label class="form-label">Categoría</label><div id="unsureCatSelect" style="display:flex;gap:8px;flex-wrap:wrap;"></div></div>
+        <div class="form-group">
+          <label class="form-label">¿Cuánto querés esperar?</label>
+          <div class="filters" id="unsureTimerSelect">
+            <button class="filter-btn" data-h="1" onclick="selectUnsureTimer(1)">1 hora</button>
+            <button class="filter-btn" data-h="3" onclick="selectUnsureTimer(3)">3 horas</button>
+            <button class="filter-btn" data-h="24" onclick="selectUnsureTimer(24)">24 horas</button>
+            <button class="filter-btn" data-h="48" onclick="selectUnsureTimer(48)">48 horas</button>
+            <button class="filter-btn" data-h="72" onclick="selectUnsureTimer(72)">72 horas</button>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="confirmUnsureTimer()">Guardar y esperar</button>
+        <button class="btn-secondary" onclick="cancelUnsureForm()">Cancelar</button>
+      </div>
+    </div>
+    <div class="section-title flush" id="buybyeStatsTitle" style="display:none">Lo que no compraste</div>
+    <div class="card" id="buybyeStatsCard" style="padding:18px;margin-bottom:12px;display:none"></div>
+    <div class="section-title flush" id="buybyePendingTitle" style="display:none">Pendientes de decidir</div>
+    <div class="card" id="buybyePendingList" style="padding:0;display:none"></div>
   </div>
 
   <!-- CONFIG -->
@@ -670,6 +681,12 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
           <label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">1 USD equivale a (en pesos):</label>
           <input class="form-input" type="number" id="usdRateInput" placeholder="1000" onchange="changeUsdRate()" inputmode="decimal">
           <div style="font-size:11px;color:var(--text3);margin-top:6px" id="usdRateLabel">Tus gastos en dólares se convierten con esta cotización.</div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-title">Sueldo por hora</div>
+          <label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Tus horas de trabajo por semana:</label>
+          <input class="form-input" type="number" id="workHoursInput" placeholder="Ej: 40" onchange="changeWorkHours()" inputmode="decimal">
+          <div style="font-size:11px;color:var(--text3);margin-top:6px">Con esto calculamos cuánto vale tu hora de trabajo para la calculadora de Simulación.</div>
         </div>
         <div class="card" style="margin-top:16px">
           <div class="card-title">Ahorro automático</div>
@@ -1247,59 +1264,6 @@ function personFinance(owner){
   const remaining=income-individual-sharedContribution;
   return{income,individual,sharedContribution,remaining,ratios};
 }
-// Próxima cuota en pesos de un gasto en cuotas no terminado
-const nextCuotaArs=e=>toArs({amt:(e.cuota&&e.cuota.monto)||e.amt,currency:e.currency});
-// Proxy de "lo que se repetiría el mes que viene": ingresos y gastos recurrentes + próximas cuotas
-function recurringBaseline(){
-  const income=monthIncEntries().filter(i=>i.recurring).reduce((s,i)=>s+Number(i.amt),0);
-  const recExp=monthExps().filter(e=>e.recurring).reduce((s,e)=>s+toArs(e),0);
-  const nextCuotas=monthExps().filter(e=>e.cuota&&e.cuota.actual<e.cuota.total).reduce((s,e)=>s+nextCuotaArs(e),0);
-  return{income,expense:recExp+nextCuotas};
-}
-// Igual que personFinance, pero proyectando solo lo recurrente/en curso (estimación del mes que viene)
-function projectedPersonFinance(owner){
-  const income=monthIncBy(owner).filter(i=>i.recurring).reduce((s,i)=>s+Number(i.amt),0);
-  const indivExps=monthExpsIndividual(owner);
-  const individual=indivExps.filter(e=>e.recurring).reduce((s,e)=>s+toArs(e),0)+
-    indivExps.filter(e=>e.cuota&&e.cuota.actual<e.cuota.total).reduce((s,e)=>s+nextCuotaArs(e),0);
-  const ratios=splitRatios();
-  const sharedExps=monthExpsShared();
-  const sharedTotal=sharedExps.filter(e=>e.recurring).reduce((s,e)=>s+toArs(e),0)+
-    sharedExps.filter(e=>e.cuota&&e.cuota.actual<e.cuota.total).reduce((s,e)=>s+nextCuotaArs(e),0);
-  const sharedContribution=sharedTotal*ratios[owner];
-  const remaining=income-individual-sharedContribution;
-  return{income,individual,sharedContribution,remaining};
-}
-// Simulación: ¿alcanza un gasto hipotético este mes? Si no, ¿alcanzaría el mes que viene?
-function runSimulation(amount,scope){
-  let thisMonth;
-  if(scope==='shared'){
-    const pfMe=personFinance('me'),pfPartner=personFinance('partner'),ratios=splitRatios();
-    const shareMe=amount*ratios.me,sharePartner=amount*ratios.partner;
-    thisMonth={fits:(pfMe.remaining-shareMe)>=0&&(pfPartner.remaining-sharePartner)>=0,detail:{afterMe:pfMe.remaining-shareMe,afterPartner:pfPartner.remaining-sharePartner,shareMe,sharePartner}};
-  } else if(scope==='total'){
-    const{margen}=calcT();
-    thisMonth={fits:(margen-amount)>=0,detail:{after:margen-amount,available:margen}};
-  } else {
-    const pf=personFinance(scope);
-    thisMonth={fits:(pf.remaining-amount)>=0,detail:{after:pf.remaining-amount,available:pf.remaining}};
-  }
-  let nextMonth=null;
-  if(!thisMonth.fits){
-    if(scope==='shared'){
-      const pMe=projectedPersonFinance('me'),pPartner=projectedPersonFinance('partner'),ratios=splitRatios();
-      const shareMe=amount*ratios.me,sharePartner=amount*ratios.partner;
-      nextMonth={fits:(pMe.remaining-shareMe)>=0&&(pPartner.remaining-sharePartner)>=0,detail:{afterMe:pMe.remaining-shareMe,afterPartner:pPartner.remaining-sharePartner}};
-    } else if(scope==='total'){
-      const b=recurringBaseline(),projMargen=b.income-b.expense;
-      nextMonth={fits:(projMargen-amount)>=0,detail:{after:projMargen-amount,available:projMargen}};
-    } else {
-      const p=projectedPersonFinance(scope);
-      nextMonth={fits:(p.remaining-amount)>=0,detail:{after:p.remaining-amount,available:p.remaining}};
-    }
-  }
-  return{thisMonth,nextMonth};
-}
 const monthExpsOf=m=>state.expenses.filter(e=>expMonth(e)===m);
 const monthIncEntries=()=>state.incomeEntries[state.activeMonth]||[];
 const totalIngs=()=>monthIncEntries().reduce((s,i)=>s+Number(i.amt),0);
@@ -1369,6 +1333,9 @@ function cleanupData(){
   ensureSavingsMedio();
   migrateCategoryColors();
   migrateCategoryIcons();
+  if(!state.buybyeStats)state.buybyeStats={savedAmount:0,savedHours:0};
+  if(!state.buybyeHistory)state.buybyeHistory=[];
+  if(!state.buybyePending)state.buybyePending=[];
   let changed=false;
   const before=state.expenses.length;
   // Sacar entries proyectadas viejas (de la feature removida)
@@ -1855,6 +1822,7 @@ function renderConfig(){
   $('activeMonth').value=state.activeMonth;
   const td=$('toggleDark');if(td)td.classList.toggle('on',!!state.darkMode);
   const ur=$('usdRateInput');if(ur)ur.value=state.usdRate||1000;
+  const whi=$('workHoursInput');if(whi)whi.value=state.workHoursPerWeek||'';
   const tas=$('toggleAutoSavings');if(tas)tas.classList.toggle('on',!!state.autoSavingsEnabled);
   // Modo compartido
   const tp=$('togglePartnerMode');if(tp)tp.classList.toggle('on',!!state.partnerMode);
@@ -2067,8 +2035,8 @@ function selectIncomeOwner(o){
 function updateOwnerUILabels(){
   // Llena los labels con nombres reales
   const me=myLabel(),partner=partnerLabel();
-  ['ownerMeLabel','incOwnerMeLabel','medioOwnerMeLabel','goalOwnerMeLabel','simMeLabel'].forEach(id=>{const el=$(id);if(el)el.textContent=me;});
-  ['ownerPartnerLabel','incOwnerPartnerLabel','medioOwnerPartnerLabel','goalOwnerPartnerLabel','simPartnerLabel'].forEach(id=>{const el=$(id);if(el)el.textContent=partner;});
+  ['ownerMeLabel','incOwnerMeLabel','medioOwnerMeLabel','goalOwnerMeLabel'].forEach(id=>{const el=$(id);if(el)el.textContent=me;});
+  ['ownerPartnerLabel','incOwnerPartnerLabel','medioOwnerPartnerLabel','goalOwnerPartnerLabel'].forEach(id=>{const el=$(id);if(el)el.textContent=partner;});
 }
 
 function renderCatSelectExp(){
@@ -2501,82 +2469,195 @@ function deleteSavingsEntry(){
 }
 
 // SIMULACIÓN
-let selectedSimScope='total',selectedSimSource='month';
-function selectSimScope(o){
-  selectedSimScope=o;
-  $('btnSimMe').className='status-btn'+(o==='me'?' selected paid':'');
-  $('btnSimPartner').className='status-btn'+(o==='partner'?' selected paid':'');
-  $('btnSimShared').className='status-btn'+(o==='shared'?' selected paid':'');
+// BUYBYE — calculadora de decisión de compra
+// Sueldo por hora: ingreso propio de este mes ÷ (horas semanales × semanas promedio por mes)
+function hourlyWage(){
+  const hrsWeek=Number(state.workHoursPerWeek)||0;
+  if(hrsWeek<=0)return 0;
+  const monthlyIncome=totalIncBy('me');
+  if(monthlyIncome<=0)return 0;
+  return monthlyIncome/(hrsWeek*4.345);
 }
-function selectSimSource(s){
-  selectedSimSource=s;
-  $('btnSimSrcMonth').className='status-btn'+(s==='month'?' selected paid':'');
-  $('btnSimSrcSavings').className='status-btn'+(s==='savings'?' selected paid':'');
-  const lbl=$('simScopeFieldLabel');if(lbl)lbl.textContent=s==='savings'?'¿De qué ahorro sale?':'¿De quién sería?';
+function fmtHoursLabel(h){
+  if(h==null)return '—';
+  const totalMin=Math.round(Math.abs(h)*60);
+  const hh=Math.floor(totalMin/60),mm=totalMin%60;
+  if(hh<=0)return `${mm} min`;
+  if(mm===0)return `${hh} h`;
+  return `${hh} h ${mm} min`;
 }
-function renderSimulacion(){
-  const sf=$('simScopeField');if(!sf)return;
-  sf.style.display=state.partnerMode?'block':'none';
-  if(!state.partnerMode)selectedSimScope='total';
-  else if(selectedSimScope==='total'){selectedSimScope='me';selectSimScope('me');}
-  updateOwnerUILabels();
+// Veredicto: ¿entra en el sobrante de ingresos de este mes, en el ahorro, o en ninguno?
+function buybyeVerdict(amt){
+  const margen=calcT().margen;
+  const ahorro=savingsBalance('personal','me')+(state.partnerMode?savingsBalance('personal','partner')+savingsBalance('shared',null):0);
+  if(amt<=margen)return{tone:'green',title:'Te alcanza cómodo',msg:'Entra en lo que te sobra de ingresos este mes.'};
+  if(amt<=margen+ahorro)return{tone:'amber',title:'Te alcanza, pero de tu ahorro',msg:'No entra en el sobrante de ingresos de este mes — usarías parte de tu ahorro.'};
+  return{tone:'red',title:'No te alcanza',msg:'Supera lo que te sobra este mes y tu ahorro actual.'};
 }
-function simMoneyLine(label,val){
-  return `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);padding:3px 0"><span>${label}</span><span style="font-weight:600;color:var(--text)">${fmt(val)}</span></div>`;
-}
-function runSimulationUI(){
+let lastBuybyeCalc=null;
+function runBuybyeCalc(){
   clearFieldErrors();
   const amt=parseFloat($('simAmt').value);
   if(!amt||amt<=0){showFieldError('simAmt','Ingresá un monto');return;}
   const desc=$('simDesc').value.trim();
-  const scope=state.partnerMode?selectedSimScope:'total';
-  const scopeLabel=scope==='me'?myLabel():scope==='partner'?partnerLabel():scope==='shared'?'Compartido':'Total del hogar';
-  let html;
-  if(selectedSimSource==='savings'){
-    const bal=scope==='shared'?savingsBalance('shared',null):savingsBalance('personal',scope==='total'?'me':scope);
-    const after=bal-amt;
-    const fits=after>=0;
-    html=`<div class="card" style="padding:18px">
-      <div class="alert-box alert-${fits?'green':'red'}">
-        <strong>${fits?'✓ Te alcanza con tu ahorro':'✗ No te alcanza con tu ahorro'}</strong>
-        ${desc?desc+' — ':''}${fmt(amt)} (${scopeLabel})
-      </div>`;
-    html+=simMoneyLine('Ahorro disponible',bal)+simMoneyLine('Después de este gasto',after);
-    if(!fits)html+=`<div style="font-size:11px;color:var(--text3);margin-top:8px">Te faltarían ${fmt(Math.abs(after))} para cubrirlo solo con ahorro.</div>`;
-    html+=`</div>`;
+  const w=hourlyWage();
+  const hours=w>0?amt/w:null;
+  const v=buybyeVerdict(amt);
+  lastBuybyeCalc={amt,desc};
+  let html=`<div class="card" style="padding:18px;margin-bottom:12px">
+    <div class="alert-box alert-${v.tone}"><strong>${v.title}</strong>${v.msg}</div>`;
+  if(hours!=null){
+    html+=`<div style="text-align:center;margin:18px 0">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Tenés que trabajar</div>
+      <div style="font-family:'Space Grotesk',serif;font-size:28px;color:var(--text)">${fmtHoursLabel(hours)}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">para pagar ${desc?`"${desc}"`:'esto'} (${fmt(amt)})</div>
+    </div>`;
   } else {
-    const{thisMonth,nextMonth}=runSimulation(amt,scope);
-    const margenAhora=calcT().margen;
-    html=`<div class="card" style="padding:18px;margin-bottom:12px">
-      <div class="alert-box alert-${thisMonth.fits?'green':'red'}">
-        <strong>${thisMonth.fits?'✓ Te alcanza este mes':'✗ No te alcanza este mes'}</strong>
-        ${desc?desc+' — ':''}${fmt(amt)} (${scopeLabel})
-      </div>`;
-    html+=simMoneyLine('Balance del mes después de este gasto',margenAhora-amt);
-    if(scope==='shared'){
-      html+=simMoneyLine(`${myLabel()} — después de este gasto`,thisMonth.detail.afterMe)+simMoneyLine(`${partnerLabel()} — después de este gasto`,thisMonth.detail.afterPartner);
+    html+=`<div class="alert-box alert-amber" style="margin-top:10px">Configurá tus horas de trabajo semanales en Configuración para ver cuánto tiempo de trabajo representa.</div>`;
+  }
+  html+=`<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+    <button class="btn-primary green-btn" onclick="buybyeDecide('bought')">Comprarlo igual</button>
+    <button class="btn-primary" onclick="buybyeDecide('skip')">No comprarlo</button>
+    <button class="btn-secondary" onclick="buybyeDecide('unsure')">Insegur@</button>
+  </div></div>`;
+  $('buybyeResult').innerHTML=html;
+  $('buybyeUnsureForm').style.display='none';
+}
+function buybyeDecide(action){
+  if(!lastBuybyeCalc)return;
+  const{amt,desc}=lastBuybyeCalc;
+  if(action==='unsure'){openUnsureForm(desc,amt);return;}
+  if(action==='skip'){
+    const w=hourlyWage();
+    logBuybyeSkip(desc,amt,w>0?amt/w:null);
+  }
+  $('buybyeResult').innerHTML='';
+  $('simAmt').value='';$('simDesc').value='';
+  lastBuybyeCalc=null;
+  renderSimulacion();
+}
+function logBuybyeSkip(desc,amt,hours){
+  if(!state.buybyeStats)state.buybyeStats={savedAmount:0,savedHours:0};
+  if(!state.buybyeHistory)state.buybyeHistory=[];
+  state.buybyeStats.savedAmount+=amt;
+  if(hours!=null)state.buybyeStats.savedHours+=hours;
+  state.buybyeHistory.unshift({id:state.nextId++,date:new Date().toISOString().split('T')[0],desc:desc||'Gasto sin nombre',amt,hours});
+  save();
+}
+// "Insegur@" — mini-form: nombre, categoría, timer de espera
+let selectedUnsureCatId=null,selectedUnsureHours=null,pendingUnsureAmt=0;
+function openUnsureForm(desc,amt){
+  pendingUnsureAmt=amt;
+  selectedUnsureCatId=state.categories[0]?state.categories[0].id:null;
+  selectedUnsureHours=null;
+  $('unsureDesc').value=desc||'';
+  renderUnsureCatSelect();
+  renderUnsureTimerSelect();
+  $('buybyeUnsureForm').style.display='block';
+  $('buybyeResult').innerHTML='';
+}
+function renderUnsureCatSelect(){
+  const el=$('unsureCatSelect');if(!el)return;
+  el.innerHTML=categoryChipList().map(c=>`<button onclick="selectUnsureCat(${c.id})" style="padding:6px 12px;border-radius:99px;border:1.5px solid ${selectedUnsureCatId===c.id?c.color:'var(--border)'};background:${selectedUnsureCatId===c.id?c.color+'22':'var(--bg)'};color:${selectedUnsureCatId===c.id?c.color:'var(--text2)'};font-size:12px;font-weight:${selectedUnsureCatId===c.id?600:400};font-family:inherit;cursor:pointer;">${catChipLabel(c)}</button>`).join('');
+}
+function selectUnsureCat(id){selectedUnsureCatId=id;renderUnsureCatSelect();}
+function renderUnsureTimerSelect(){
+  const el=$('unsureTimerSelect');if(!el)return;
+  [...el.children].forEach(b=>b.classList.toggle('active',Number(b.dataset.h)===selectedUnsureHours));
+}
+function selectUnsureTimer(h){selectedUnsureHours=h;renderUnsureTimerSelect();}
+function cancelUnsureForm(){$('buybyeUnsureForm').style.display='none';lastBuybyeCalc=null;}
+function confirmUnsureTimer(){
+  if(!selectedUnsureHours){alert('Elegí cuánto tiempo querés esperar.');return;}
+  const desc=$('unsureDesc').value.trim()||'Gasto sin nombre';
+  if(!state.buybyePending)state.buybyePending=[];
+  const now=Date.now();
+  const entry={id:state.nextId++,desc,cat:selectedUnsureCatId,amt:pendingUnsureAmt,createdAt:now,resolveAt:now+selectedUnsureHours*3600*1000};
+  state.buybyePending.push(entry);
+  save();
+  requestBuybyeNotificationPermission();
+  scheduleBuybyeTimer(entry);
+  $('buybyeUnsureForm').style.display='none';
+  $('simAmt').value='';$('simDesc').value='';
+  lastBuybyeCalc=null;
+  renderSimulacion();
+}
+// Reconsideración pendiente: al vencer el timer, se resuelve acá (comprar o no comprar)
+function resolvePendingBuybye(id,action){
+  const idx=(state.buybyePending||[]).findIndex(x=>x.id===id);
+  if(idx<0)return;
+  const entry=state.buybyePending[idx];
+  state.buybyePending.splice(idx,1);
+  if(buybyeTimers[id]){clearTimeout(buybyeTimers[id]);delete buybyeTimers[id];}
+  if(action==='skip'){
+    const w=hourlyWage();
+    logBuybyeSkip(entry.desc,entry.amt,w>0?entry.amt/w:null);
+  }
+  save();
+  renderSimulacion();
+}
+// Notificación real solo funciona con la pestaña abierta (app sin backend); igual se muestra al reabrir la app
+function requestBuybyeNotificationPermission(){
+  if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+}
+const buybyeTimers={};
+function scheduleBuybyeTimer(entry){
+  if(buybyeTimers[entry.id])clearTimeout(buybyeTimers[entry.id]);
+  const ms=entry.resolveAt-Date.now();
+  if(ms<=0){notifyBuybyePending(entry);return;}
+  buybyeTimers[entry.id]=setTimeout(()=>notifyBuybyePending(entry),Math.min(ms,2147000000));
+}
+function notifyBuybyePending(entry){
+  const stillPending=(state.buybyePending||[]).some(x=>x.id===entry.id);
+  if(!stillPending)return;
+  if('Notification' in window&&Notification.permission==='granted'){
+    try{new Notification('CoPocket',{body:`¿Todavía querés comprar "${entry.desc}" (${fmt(entry.amt)})?`});}catch(e){}
+  }
+  renderSimulacion();
+}
+function checkBuybyePendingOnLoad(){
+  (state.buybyePending||[]).forEach(entry=>{if(entry.resolveAt>Date.now())scheduleBuybyeTimer(entry);});
+}
+function renderSimulacion(){
+  const now=Date.now();
+  const pending=state.buybyePending||[];
+  const due=pending.filter(p=>p.resolveAt<=now);
+  const banner=$('buybyePendingBanner');
+  if(banner)banner.innerHTML=due.length?`<div class="alert-box alert-amber" style="margin-bottom:12px"><strong>Tenés ${due.length} decisión${due.length>1?'es':''} pendiente${due.length>1?'s':''}</strong>Ya pasó el tiempo que pediste para pensarlo — decidí más abajo.</div>`:'';
+  const stats=state.buybyeStats||{savedAmount:0,savedHours:0};
+  const stc=$('buybyeStatsCard'),stt=$('buybyeStatsTitle');
+  if(stc&&stt){
+    if(stats.savedAmount>0){
+      stt.style.display='';stc.style.display='';
+      const hist=(state.buybyeHistory||[]).slice(0,6);
+      stc.innerHTML=`<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:${hist.length?'14px':'0'}">
+        <div><div style="font-size:11px;color:var(--text3)">Plata ahorrada</div><div style="font-family:'Space Grotesk',serif;font-size:22px;color:var(--primary-pressed)">${fmt(stats.savedAmount)}</div></div>
+        <div><div style="font-size:11px;color:var(--text3)">Horas de trabajo evitadas</div><div style="font-family:'Space Grotesk',serif;font-size:22px;color:var(--primary-pressed)">${fmtHoursLabel(stats.savedHours)}</div></div>
+      </div>`+hist.map(h=>`<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);padding:6px 0;border-top:1px solid var(--border)"><span>${h.desc}</span><span>${fmt(h.amt)} · ${h.date}</span></div>`).join('');
     } else {
-      html+=simMoneyLine('Disponible ahora',thisMonth.detail.available)+simMoneyLine('Después de este gasto',thisMonth.detail.after);
-    }
-    html+=`</div>`;
-    if(nextMonth){
-      const projMargen=recurringBaseline().income-recurringBaseline().expense;
-      html+=`<div class="card" style="padding:18px">
-        <div class="card-title">Estimación para el mes que viene</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Basado en tus ingresos y gastos <strong>recurrentes</strong> (y próximas cuotas). Es una aproximación, no una garantía.</div>
-        <div class="alert-box alert-${nextMonth.fits?'green':'amber'}" style="margin-bottom:0">
-          <strong>${nextMonth.fits?'✓ El mes que viene sí te alcanzaría':'✗ Ni el mes que viene alcanzaría, a este ritmo'}</strong>
-        </div>`;
-      html+=simMoneyLine('Balance proyectado después de este gasto',projMargen-amt);
-      if(scope==='shared'){
-        html+=simMoneyLine(`${myLabel()} — proyectado después del gasto`,nextMonth.detail.afterMe)+simMoneyLine(`${partnerLabel()} — proyectado después del gasto`,nextMonth.detail.afterPartner);
-      } else {
-        html+=simMoneyLine('Disponible proyectado',nextMonth.detail.available)+simMoneyLine('Después de este gasto',nextMonth.detail.after);
-      }
-      html+=`</div>`;
+      stt.style.display='none';stc.style.display='none';stc.innerHTML='';
     }
   }
-  $('simResult').innerHTML=html;
+  const pl=$('buybyePendingList'),plt=$('buybyePendingTitle');
+  if(pl&&plt){
+    if(pending.length){
+      plt.style.display='';pl.style.display='';
+      pl.innerHTML=pending.slice().sort((a,b)=>a.resolveAt-b.resolveAt).map(p=>{
+        const isDue=p.resolveAt<=now;
+        const cat=getCat(p.cat);
+        const remainLabel=isDue?'Ya podés decidir':`Faltan ${fmtHoursLabel((p.resolveAt-now)/3600000)}`;
+        return `<div class="exp-row" style="cursor:default">
+          <div class="exp-icon" style="background:${(cat.color||'#999')+'22'};color:${cat.color||'#666'}">${(cat.label||'•').charAt(0).toUpperCase()}</div>
+          <div class="exp-info"><div class="exp-name">${p.desc}</div><div class="exp-cat">${remainLabel}</div></div>
+          <div class="exp-right"><div class="exp-amt">${fmt(p.amt)}</div>
+            ${isDue?`<div style="display:flex;gap:4px;margin-top:4px"><button class="btn-sm" onclick="resolvePendingBuybye(${p.id},'bought')">Comprar</button><button class="btn-sm danger" onclick="resolvePendingBuybye(${p.id},'skip')">No</button></div>`:''}
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      plt.style.display='none';pl.style.display='none';pl.innerHTML='';
+    }
+  }
 }
 
 function toggleAutoSavings(){
@@ -2639,6 +2720,10 @@ async function resetAllData(){
 function changeUsdRate(){
   const v=parseFloat($('usdRateInput').value);
   if(v>0){state.usdRate=v;save();renderAll();}
+}
+function changeWorkHours(){
+  const v=parseFloat($('workHoursInput').value);
+  state.workHoursPerWeek=v>0?v:null;save();renderAll();
 }
 async function fetchUsdRate(){
   try{
@@ -3110,6 +3195,7 @@ function mostrarApp(){
     fetchUsdRate();
     const c=autoGenerateCuotas(),r=autoGenerateRecurring(),i=autoGenerateRecurringIncomes(),s=autoGenerateSavingsFromSurplus();
     autoUpdatePaidStatus();
+    checkBuybyePendingOnLoad();
     if(c+r+i>0){
       const parts=[];
       if(c>0)parts.push(`${c} cuota${c>1?'s':''}`);
