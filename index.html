@@ -471,7 +471,6 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="nav-link active" onclick="showScreen('home',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Inicio</div>
     <div class="nav-link" onclick="showScreen('gastos',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span> Gastos</div>
     <div class="nav-link" onclick="showScreen('ingresos',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z"/></svg></span> Ingresos</div>
-    <div class="nav-link" onclick="showScreen('comparativa',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg></span> Comparativa</div>
     <div class="nav-link" onclick="showScreen('metas',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> Metas</div>
     <div class="nav-link" onclick="showScreen('ahorro',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Ahorro</div>
     <div class="nav-link" onclick="showScreen('simulacion',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> Simulación</div>
@@ -564,7 +563,9 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     </div>
     <div class="filters" id="filterBtns"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px" id="gastosFilterMetrics"></div>
-    <div class="card" style="padding:0"><div id="allExpensesList"></div></div>
+    <div class="card" style="padding:0;margin-bottom:12px"><div id="allExpensesList"></div></div>
+    <div class="section-title flush">Vs. mes anterior</div>
+    <div class="card" style="padding:0" id="gastosCompareCard"></div>
   </div>
 
   <!-- INGRESOS -->
@@ -575,6 +576,8 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       <div class="income-total" id="incomeTotalBig">$0</div>
       <div class="income-sub" id="incomeSubLabel">—</div>
     </div>
+    <div class="section-title flush">Vs. mes anterior</div>
+    <div class="card" style="padding:0;margin-bottom:12px" id="incomeCompareCard"></div>
     <div class="card" id="incomeAvailCard" style="padding:18px;margin-bottom:12px;display:none">
       <div class="card-title" style="margin-bottom:12px">¿Cuánto tiene cada uno para gastar?</div>
       <div id="incomeAvailBody" style="display:grid;grid-template-columns:1fr 1fr;gap:14px"></div>
@@ -590,16 +593,6 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       </div>
       <div class="card" style="padding:0"><div id="incomeList"></div></div>
     </div>
-  </div>
-
-  <!-- COMPARATIVA -->
-  <div id="screen-comparativa" class="screen">
-    <div class="section-title flush">Total del mes</div>
-    <div class="card" style="padding:18px;margin-bottom:12px" id="compSummary"></div>
-    <div class="section-title flush" id="compTypeTitle" style="display:none">Individuales vs. compartidos</div>
-    <div class="card" style="padding:0;margin-bottom:12px;display:none" id="compTypeCard"></div>
-    <div class="section-title flush">Por categoría</div>
-    <div class="card" style="padding:0" id="compByCat"></div>
   </div>
 
   <!-- COMPARTIDO -->
@@ -761,7 +754,6 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <div class="mn-item active" onclick="showScreen('home',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><span>Inicio</span></div>
   <div class="mn-item" onclick="showScreen('gastos',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></div><span>Gastos</span></div>
   <div class="mn-item" onclick="showScreen('ingresos',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z"/></svg></div><span>Ingresos</span></div>
-  <div class="mn-item" onclick="showScreen('comparativa',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg></div><span>Vs. mes</span></div>
   <div class="mn-item" onclick="showScreen('metas',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><span>Metas</span></div>
   <div class="mn-item" onclick="showScreen('ahorro',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><span>Ahorro</span></div>
   <div class="mn-item" onclick="showScreen('simulacion',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><span>Simular</span></div>
@@ -795,7 +787,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       </div>
       <div id="coverMonthField" style="display:none;margin-top:4px">
         <input class="form-input" type="month" id="inputCoverMonth">
-        <div style="font-size:11px;color:var(--text3);margin-top:4px">Este gasto va a contar para el balance de ese mes (Inicio, Comparativa, Compartido, etc.), aunque quede cargado con esta fecha.</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Este gasto va a contar para el balance de ese mes (Inicio, Gastos, Compartido, etc.), aunque quede cargado con esta fecha.</div>
       </div>
     </div>
     <div class="form-group">
@@ -1229,6 +1221,9 @@ const monthExps=()=>state.expenses.filter(e=>expMonth(e)===state.activeMonth);
 // Helpers de ownership (modo compartido)
 const ownerOf=e=>e.owner||'me';
 const isShared=e=>!!e.shared;
+function savingsMedioIdOf(){const m=state.medios.find(x=>x.isSavingsMedio);return m?m.id:null;}
+// Gasto pagado con el medio fijo "Ahorro": ya salió de los ahorros, no debe restar del superávit de ingresos
+const isSavingsFunded=e=>{const id=savingsMedioIdOf();return id!=null&&e.medio===id;};
 const monthExpsBy=owner=>monthExps().filter(e=>ownerOf(e)===owner);
 const monthExpsShared=()=>monthExps().filter(isShared);
 const monthExpsIndividual=owner=>monthExps().filter(e=>ownerOf(e)===owner&&!isShared(e));
@@ -1308,7 +1303,7 @@ function runSimulation(amount,scope){
 const monthExpsOf=m=>state.expenses.filter(e=>expMonth(e)===m);
 const monthIncEntries=()=>state.incomeEntries[state.activeMonth]||[];
 const totalIngs=()=>monthIncEntries().reduce((s,i)=>s+Number(i.amt),0);
-const totalGastos=()=>monthExps().reduce((s,e)=>s+toArs(e),0);
+const totalGastos=()=>monthExps().filter(e=>!isSavingsFunded(e)).reduce((s,e)=>s+toArs(e),0);
 function calcT(){const t=totalGastos(),ing=totalIngs();return{total:t,ingresos:ing,margen:ing-t};}
 function catT(){const m={};monthExps().forEach(e=>{m[e.cat]=(m[e.cat]||0)+toArs(e);});return m;}
 function medioT(){const m={};monthExps().forEach(e=>{if(e.medio)m[e.medio]=(m[e.medio]||0)+toArs(e);});return m;}
@@ -1525,7 +1520,7 @@ function autoUpdatePaidStatus(){
 
 // Sobrante (ingresos-gastos) de un mes puntual, repartido por persona si hay modo compartido
 function surplusForMonth(month){
-  const exps=monthExpsOf(month);
+  const exps=monthExpsOf(month).filter(e=>!isSavingsFunded(e));
   const incs=state.incomeEntries[month]||[];
   if(!state.partnerMode){
     const totalInc=incs.reduce((s,i)=>s+Number(i.amt),0);
@@ -1585,14 +1580,14 @@ function drawD(id,sz,entries,tot){
 }
 
 // RENDER ALL
-function renderAll(){updateHeader();renderHome();renderGastos();renderIngresos();renderComparativa();renderGoalsScreen();renderAhorro();renderSimulacion();renderConfig();renderCompartido();updateNavCompartido();}
+function renderAll(){updateHeader();renderHome();renderGastos();renderIngresos();renderGoalsScreen();renderAhorro();renderSimulacion();renderConfig();renderCompartido();updateNavCompartido();}
 
 function updateHeader(){
   const{total,ingresos,margen}=calcT();
   const pct=ingresos>0?Math.min(100,Math.round((total/ingresos)*100)):0;
   const ml=monthLabel(),gr=state.name?`Hola, ${state.name}`:'Hola';
   const sb=$('sbBalance');if(sb){sb.textContent=fmt(Math.abs(margen));sb.className='sb-val'+(margen<0?' red':'');}
-  const sbs=$('sbBalanceSub');if(sbs)sbs.textContent=margen>=0?'superávit':'déficit';
+  const sbs=$('sbBalanceSub');if(sbs)sbs.textContent=margen>=0?'superávit de ingresos':'déficit de ingresos';
   const sp=$('sbProg');if(sp)sp.style.width=pct+'%';
   const spl=$('sbProgLabel');if(spl)spl.textContent=pct+'% de ingresos gastado';
   const sbm=$('sbMonth');if(sbm)sbm.textContent=ml;
@@ -1602,7 +1597,7 @@ function updateHeader(){
   const mhm=$('mhMonth');if(mhm)mhm.textContent=ml;
   const mg=$('mhGreeting');if(mg)mg.textContent=gr;
   const mb=$('mhBalance');if(mb){mb.textContent=fmt(Math.abs(margen));mb.className='mh-bal-amount'+(margen<0?' red':'');}
-  const mbs=$('mhBalanceSub');if(mbs)mbs.textContent=margen>=0?'superávit del mes':'déficit del mes';
+  const mbs=$('mhBalanceSub');if(mbs)mbs.textContent=margen>=0?'superávit de ingresos':'déficit de ingresos';
   const mi=$('mhIngresos');if(mi)mi.textContent=fmt(ingresos);
   const mg2=$('mhGastos');if(mg2)mg2.textContent=fmt(total);
   const mpr=$('mhProg');if(mpr)mpr.style.width=pct+'%';
@@ -1612,11 +1607,13 @@ function updateHeader(){
 
 function renderHome(){
   const{total,ingresos,margen}=calcT();
+  const ahorroMov=savingsMonthMovement(state.activeMonth);
   let metricsHtml=`
     <div class="metric-card"><div class="metric-lbl">Ingresos</div><div class="metric-val emerald">${fmt(ingresos)}</div><div class="metric-note">del mes</div></div>
-    <div class="metric-card"><div class="metric-lbl">Gastos</div><div class="metric-val amber">${fmt(total)}</div><div class="metric-note">del mes</div></div>
+    <div class="metric-card"><div class="metric-lbl">Gastos</div><div class="metric-val amber">${fmt(total)}</div><div class="metric-note">pagados con ingresos</div></div>
     <div class="metric-card"><div class="metric-lbl">Pagado</div><div class="metric-val">${fmt(monthExps().filter(e=>e.paid).reduce((s,e)=>s+toArs(e),0))}</div><div class="metric-note">confirmado</div></div>
-    <div class="metric-card"><div class="metric-lbl">${margen>=0?'Superávit':'Déficit'}</div><div class="metric-val ${margen>=0?'green':'red'}">${fmt(Math.abs(margen))}</div><div class="metric-note">${margen>=0?'disponible':'en rojo'}</div></div>`;
+    <div class="metric-card"><div class="metric-lbl">${margen>=0?'Superávit ingresos':'Déficit ingresos'}</div><div class="metric-val ${margen>=0?'green':'red'}">${fmt(Math.abs(margen))}</div><div class="metric-note">${margen>=0?'disponible este mes':'en rojo este mes'}</div></div>
+    <div class="metric-card"><div class="metric-lbl">${ahorroMov>=0?'Superávit ahorro':'Uso de ahorro'}</div><div class="metric-val ${ahorroMov>=0?'green':'red'}">${fmt(Math.abs(ahorroMov))}</div><div class="metric-note">${ahorroMov>=0?'ahorraste este mes':'usaste de tus ahorros'}</div></div>`;
   if(state.partnerMode){
     const misGastos=monthExpsIndividual('me').reduce((s,e)=>s+toArs(e),0);
     const gastosPareja=monthExpsIndividual('partner').reduce((s,e)=>s+toArs(e),0);
@@ -1757,6 +1754,7 @@ function renderGastos(){
     <div class="metric-card"><div class="metric-lbl">% de tus ingresos</div><div class="metric-val" style="color:var(--info)">${filterPct===null?'—':filterPct.toFixed(1)+'%'}</div><div class="metric-note">del total del mes</div></div>`;
   $('allExpensesList').innerHTML=fl.length?fl.map(expRow).join(''):
     `<div class="empty-state"><div class="empty-text">Sin gastos en este filtro</div></div>`;
+  renderGastosCompare();
 }
 
 function renderIngresos(){
@@ -1818,6 +1816,7 @@ function renderIngresos(){
       }).join('');
     }
   }
+  renderIngresosCompare();
 }
 
 function renderCatBarsHtml(){
@@ -1889,7 +1888,7 @@ function renderConfig(){
 }
 
 // SCREENS
-const titles={home:'Inicio',gastos:'Gastos',ingresos:'Ingresos',comparativa:'Comparativa',metas:'Metas',ahorro:'Ahorro',simulacion:'Simulación',compartido:'Compartido',config:'Configuración'};
+const titles={home:'Inicio',gastos:'Gastos',ingresos:'Ingresos',metas:'Metas',ahorro:'Ahorro',simulacion:'Simulación',compartido:'Compartido',config:'Configuración'};
 function showScreen(id,el,type){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   if(type==='d')document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
@@ -1924,60 +1923,52 @@ function compRowHtml(label,cur,prev){
   </div>`;
 }
 
-function renderComparativa(){
+// Comparación de Gastos vs. el mes anterior: individuales de cada uno + compartidos (o total simple sin modo compartido)
+function renderGastosCompare(){
+  const gcc=$('gastosCompareCard');if(!gcc)return;
   const prevM=prevMonthStr(state.activeMonth);
-  const [py,pmo]=prevM.split('-');
-  const prevLabel=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][parseInt(pmo)-1]+' '+py;
   const curExps=monthExps(),prevExps=monthExpsOf(prevM);
-  const curByCat={},prevByCat={};
-  curExps.forEach(e=>{curByCat[e.cat]=(curByCat[e.cat]||0)+toArs(e);});
-  prevExps.forEach(e=>{prevByCat[e.cat]=(prevByCat[e.cat]||0)+toArs(e);});
-  const totalCur=curExps.reduce((s,e)=>s+toArs(e),0);
-  const totalPrev=prevExps.reduce((s,e)=>s+toArs(e),0);
-  const diff=totalCur-totalPrev;
-  const pctTotal=totalPrev>0?Math.round(totalCur/totalPrev*100):(totalCur>0?null:0);
-  const overColor=diff>0?'var(--error)':diff<0?'var(--success)':'var(--text3)';
-  const overLabel=diff>0?`Gastaste $${Math.round(Math.abs(diff)).toLocaleString('es-AR')} más que el mes anterior`:diff<0?`Gastaste $${Math.round(Math.abs(diff)).toLocaleString('es-AR')} menos que el mes anterior`:'Igual que el mes anterior';
-  const ctc=$('compTypeCard'),ctt=$('compTypeTitle');
-  if(!totalCur&&!totalPrev){
-    $('compSummary').innerHTML=`<div class="empty-state" style="padding:20px"><div class="empty-icon">⚖️</div><div class="empty-text">No hay gastos para comparar con ${prevLabel}.</div></div>`;
-    $('compByCat').innerHTML='';
-    if(ctt)ctt.style.display='none';if(ctc){ctc.style.display='none';ctc.innerHTML='';}
+  if(!curExps.length&&!prevExps.length){
+    gcc.innerHTML=`<div class="empty-state" style="padding:20px"><div class="empty-icon">⚖️</div><div class="empty-text">No hay gastos para comparar con ${monthLabelOf(prevM)}.</div></div>`;
     return;
   }
-  $('compSummary').innerHTML=`
-    <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Total — ${monthLabel()} vs ${prevLabel}</div>
-    <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:10px">
-      <div><div style="font-size:11px;color:var(--text3)">Este mes</div><div style="font-family:'Space Grotesk',serif;font-size:22px;color:var(--text)">${fmt(totalCur)}</div></div>
-      <div><div style="font-size:11px;color:var(--text3)">Mes anterior</div><div style="font-family:'Space Grotesk',serif;font-size:22px;color:var(--text)">${fmt(totalPrev)}</div></div>
-      <div><div style="font-size:11px;color:var(--text3)">Diferencia</div><div style="font-family:'Space Grotesk',serif;font-size:22px;color:${overColor}">${diff>=0?'+':'-'}${fmt(Math.abs(diff))}</div></div>
-    </div>
-    <div style="font-size:12px;color:${overColor};font-weight:600">${overLabel}${pctTotal!==null?` · ${pctTotal}% del mes anterior`:''}</div>`;
-
-  // Individuales vs compartidos (solo modo compartido)
-  if(state.partnerMode&&ctc&&ctt){
-    ctt.style.display='';ctc.style.display='';
+  if(state.partnerMode){
     const curMe=curExps.filter(e=>ownerOf(e)==='me'&&!isShared(e)).reduce((s,e)=>s+toArs(e),0);
     const prevMe=prevExps.filter(e=>ownerOf(e)==='me'&&!isShared(e)).reduce((s,e)=>s+toArs(e),0);
     const curPartner=curExps.filter(e=>ownerOf(e)==='partner'&&!isShared(e)).reduce((s,e)=>s+toArs(e),0);
     const prevPartner=prevExps.filter(e=>ownerOf(e)==='partner'&&!isShared(e)).reduce((s,e)=>s+toArs(e),0);
     const curShared=curExps.filter(isShared).reduce((s,e)=>s+toArs(e),0);
     const prevShared=prevExps.filter(isShared).reduce((s,e)=>s+toArs(e),0);
-    ctc.innerHTML=compRowHtml('Mis gastos individuales',curMe,prevMe)+
+    gcc.innerHTML=compRowHtml('Mis gastos individuales',curMe,prevMe)+
       compRowHtml(`Gastos individuales de ${partnerLabel()}`,curPartner,prevPartner)+
       compRowHtml('Gastos compartidos',curShared,prevShared);
-  } else if(ctc&&ctt){
-    ctt.style.display='none';ctc.style.display='none';ctc.innerHTML='';
+  } else {
+    const curTotal=curExps.reduce((s,e)=>s+toArs(e),0);
+    const prevTotal=prevExps.reduce((s,e)=>s+toArs(e),0);
+    gcc.innerHTML=compRowHtml('Gastos',curTotal,prevTotal);
   }
-
-  // Por categoría
-  const allCatIds=new Set([...Object.keys(curByCat),...Object.keys(prevByCat)].map(Number));
-  const rows=[...allCatIds].map(catId=>{
-    const cat=getCat(catId);
-    return {cat,cur:curByCat[catId]||0,prev:prevByCat[catId]||0};
-  }).sort((a,b)=>(b.cur+b.prev)-(a.cur+a.prev));
-  $('compByCat').innerHTML=rows.length?rows.map(r=>compRowHtml(r.cat.label+(r.cat.parentId?` <span style="font-weight:400;color:var(--text3)">· ${getCat(r.cat.parentId).label}</span>`:''),r.cur,r.prev)).join(''):
-    `<div class="empty-state" style="padding:20px"><div class="empty-text">Sin categorías para comparar</div></div>`;
+}
+// Comparación de Ingresos vs. el mes anterior: de cada uno (o total simple sin modo compartido)
+function renderIngresosCompare(){
+  const icc=$('incomeCompareCard');if(!icc)return;
+  const prevM=prevMonthStr(state.activeMonth);
+  const curIncs=monthIncEntries(),prevIncs=state.incomeEntries[prevM]||[];
+  if(!curIncs.length&&!prevIncs.length){
+    icc.innerHTML=`<div class="empty-state" style="padding:20px"><div class="empty-icon">⚖️</div><div class="empty-text">No hay ingresos para comparar con ${monthLabelOf(prevM)}.</div></div>`;
+    return;
+  }
+  if(state.partnerMode){
+    const curMe=curIncs.filter(i=>(i.owner||'me')==='me').reduce((s,i)=>s+Number(i.amt),0);
+    const prevMe=prevIncs.filter(i=>(i.owner||'me')==='me').reduce((s,i)=>s+Number(i.amt),0);
+    const curPartner=curIncs.filter(i=>(i.owner||'me')==='partner').reduce((s,i)=>s+Number(i.amt),0);
+    const prevPartner=prevIncs.filter(i=>(i.owner||'me')==='partner').reduce((s,i)=>s+Number(i.amt),0);
+    icc.innerHTML=compRowHtml('Mis ingresos',curMe,prevMe)+
+      compRowHtml(`Ingresos de ${partnerLabel()}`,curPartner,prevPartner);
+  } else {
+    const curTotal=curIncs.reduce((s,i)=>s+Number(i.amt),0);
+    const prevTotal=prevIncs.reduce((s,i)=>s+Number(i.amt),0);
+    icc.innerHTML=compRowHtml('Ingresos',curTotal,prevTotal);
+  }
 }
 // Theme picker / custom colors removidos en CoPocket — paleta fija
 function applyTheme(){/* noop, paleta fija */}
@@ -2385,6 +2376,13 @@ function savingsEntriesFor(scope,owner){
 }
 function savingsBalance(scope,owner,excludeId){
   return savingsEntriesFor(scope,owner).filter(e=>e.id!==excludeId).reduce((s,e)=>s+(e.type==='deposit'?Number(e.amount):-Number(e.amount)),0);
+}
+// Movimiento neto de ahorro en un mes dado (depósitos - retiros, incluye retiros automáticos por gastos pagados con "Ahorro")
+function savingsMonthMovement(month){
+  const entries=(state.savingsEntries||[]).filter(x=>(x.date||'').slice(0,7)===month);
+  const dep=entries.filter(x=>x.type==='deposit').reduce((s,x)=>s+Number(x.amount),0);
+  const wd=entries.filter(x=>x.type==='withdraw').reduce((s,x)=>s+Number(x.amount),0);
+  return dep-wd;
 }
 // Si un gasto se paga con el medio fijo "Ahorro", mantiene sincronizado un retiro automático en ese pozo
 function syncSavingsLinkForExpense(e){
