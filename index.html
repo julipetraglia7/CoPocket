@@ -471,7 +471,6 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="nav-link active" onclick="showScreen('home',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Inicio</div>
     <div class="nav-link" onclick="showScreen('gastos',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span> Gastos</div>
     <div class="nav-link" onclick="showScreen('ingresos',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z"/></svg></span> Ingresos</div>
-    <div class="nav-link" onclick="showScreen('metas',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> Metas</div>
     <div class="nav-link" onclick="showScreen('ahorro',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Ahorro</div>
     <div class="nav-link" onclick="showScreen('simulacion',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> Simulación</div>
     <div class="nav-link" data-compartido-nav style="display:none" onclick="showScreen('compartido',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Compartido</div>
@@ -605,30 +604,23 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="card" id="compExpensesCard" style="padding:0"></div>
   </div>
 
-  <!-- METAS -->
-  <div id="screen-metas" class="screen">
-    <div class="section-title flush" id="goalsMeTitle">Mis metas</div>
-    <div class="card" style="padding:0">
-      <div class="card-header"><div class="card-title" style="margin-bottom:0">Personales</div><button class="btn-sm" onclick="openGoalModal()">+ Nueva meta</button></div>
-      <div id="goalsListMe"></div>
-    </div>
-    <div data-partner-goals style="display:none">
-      <div class="section-title flush" id="goalsPartnerTitle" style="margin-top:8px">Metas de tu pareja</div>
-      <div class="card" style="padding:0"><div id="goalsListPartner"></div></div>
-    </div>
-    <div data-shared-goals style="display:none">
-      <div class="section-title flush" style="margin-top:8px">Metas compartidas</div>
-      <div class="card" style="padding:0"><div id="goalsListShared"></div></div>
-    </div>
-  </div>
-
-  <!-- AHORRO -->
+  <!-- AHORRO + METAS -->
   <div id="screen-ahorro" class="screen">
     <div class="section-title flush">Ahorro</div>
     <div style="font-size:12px;color:var(--text3);padding:0 16px 12px;line-height:1.5">Este monto es aparte: no se cuenta en tus ingresos, gastos ni balances. Solo cambia cuando vos decidís depositar o retirar.</div>
     <div id="ahorroMeCard"></div>
-    <div data-partner-savings style="display:none"><div id="ahorroPartnerCard"></div></div>
-    <div data-shared-savings style="display:none"><div id="ahorroSharedCard"></div></div>
+    <div class="card-header" style="padding:0 16px;margin-bottom:8px"><div class="card-title" style="margin-bottom:0" id="goalsMeTitle">Mis metas</div><button class="btn-sm" onclick="openGoalModal()">+ Nueva meta</button></div>
+    <div class="card" style="padding:0;margin-bottom:12px"><div id="goalsListMe"></div></div>
+    <div data-partner-savings style="display:none">
+      <div id="ahorroPartnerCard"></div>
+      <div class="section-title flush" id="goalsPartnerTitle" style="margin-top:8px">Metas de tu pareja</div>
+      <div class="card" style="padding:0;margin-bottom:12px"><div id="goalsListPartner"></div></div>
+    </div>
+    <div data-shared-savings style="display:none">
+      <div id="ahorroSharedCard"></div>
+      <div class="section-title flush" style="margin-top:8px">Metas compartidas</div>
+      <div class="card" style="padding:0"><div id="goalsListShared"></div></div>
+    </div>
   </div>
 
   <!-- SIMULACION -->
@@ -771,7 +763,6 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <div class="mn-item active" onclick="showScreen('home',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><span>Inicio</span></div>
   <div class="mn-item" onclick="showScreen('gastos',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></div><span>Gastos</span></div>
   <div class="mn-item" onclick="showScreen('ingresos',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z"/></svg></div><span>Ingresos</span></div>
-  <div class="mn-item" onclick="showScreen('metas',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><span>Metas</span></div>
   <div class="mn-item" onclick="showScreen('ahorro',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><span>Ahorro</span></div>
   <div class="mn-item" onclick="showScreen('simulacion',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><span>Simular</span></div>
   <div class="mn-item" data-compartido-nav style="display:none" onclick="showScreen('compartido',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span>2x</span></div>
@@ -1856,7 +1847,7 @@ function renderConfig(){
 }
 
 // SCREENS
-const titles={home:'Inicio',gastos:'Gastos',ingresos:'Ingresos',metas:'Metas',ahorro:'Ahorro',simulacion:'Simulación',compartido:'Compartido',config:'Configuración'};
+const titles={home:'Inicio',gastos:'Gastos',ingresos:'Ingresos',ahorro:'Ahorro',simulacion:'Simulación',compartido:'Compartido',config:'Configuración'};
 function showScreen(id,el,type){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   if(type==='d')document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
@@ -2212,9 +2203,6 @@ function renderGoalsScreen(){
   const shared=pm?goals.filter(g=>(g.scope||'shared')==='shared'):[];
   $('goalsMeTitle').textContent=pm?'Mis metas':'Mis metas';
   $('goalsListMe').innerHTML=me.length?me.map(goalCardHtml).join(''):`<div class="empty-state"><div class="empty-text">Sin metas personales aún.<br>Tocá "+ Nueva meta" para empezar a ahorrar.</div></div>`;
-  const pg=document.querySelector('[data-partner-goals]'),sg=document.querySelector('[data-shared-goals]');
-  if(pg)pg.style.display=pm?'':'none';
-  if(sg)sg.style.display=pm?'':'none';
   if(pm){
     $('goalsPartnerTitle').textContent=`Metas de ${partnerLabel()}`;
     $('goalsListPartner').innerHTML=partner.length?partner.map(goalCardHtml).join(''):`<div class="empty-state"><div class="empty-text">${partnerLabel()} todavía no tiene metas personales.</div></div>`;
