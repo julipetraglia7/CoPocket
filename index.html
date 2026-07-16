@@ -1565,13 +1565,11 @@ function updateHeader(){
 
 function renderHome(){
   const{total,ingresos,margen}=calcT();
-  const ahorroMov=savingsMonthMovement(state.activeMonth);
   let metricsHtml=`
     <div class="metric-card"><div class="metric-lbl">Ingresos</div><div class="metric-val emerald">${fmt(ingresos)}</div><div class="metric-note">del mes</div></div>
     <div class="metric-card"><div class="metric-lbl">Gastos</div><div class="metric-val amber">${fmt(total)}</div><div class="metric-note">pagados con ingresos</div></div>
     <div class="metric-card"><div class="metric-lbl">Pagado</div><div class="metric-val">${fmt(monthExps().filter(e=>e.paid).reduce((s,e)=>s+toArs(e),0))}</div><div class="metric-note">confirmado</div></div>
-    <div class="metric-card"><div class="metric-lbl">${margen>=0?'Superávit ingresos':'Déficit ingresos'}</div><div class="metric-val ${margen>=0?'green':'red'}">${fmt(Math.abs(margen))}</div><div class="metric-note">${margen>=0?'disponible este mes':'en rojo este mes'}</div></div>
-    <div class="metric-card"><div class="metric-lbl">${ahorroMov>=0?'Superávit ahorro':'Uso de ahorro'}</div><div class="metric-val ${ahorroMov>=0?'green':'red'}">${fmt(Math.abs(ahorroMov))}</div><div class="metric-note">${ahorroMov>=0?'ahorraste este mes':'usaste de tus ahorros'}</div></div>`;
+    <div class="metric-card"><div class="metric-lbl">${margen>=0?'Superávit ingresos':'Déficit ingresos'}</div><div class="metric-val ${margen>=0?'green':'red'}">${fmt(Math.abs(margen))}</div><div class="metric-note">${margen>=0?'disponible este mes':'en rojo este mes'}</div></div>`;
   if(state.partnerMode){
     const misGastos=monthExpsIndividual('me').reduce((s,e)=>s+toArs(e),0);
     const gastosPareja=monthExpsIndividual('partner').reduce((s,e)=>s+toArs(e),0);
@@ -2332,13 +2330,6 @@ function savingsEntriesFor(scope,owner){
 }
 function savingsBalance(scope,owner,excludeId){
   return savingsEntriesFor(scope,owner).filter(e=>e.id!==excludeId).reduce((s,e)=>s+(e.type==='deposit'?Number(e.amount):-Number(e.amount)),0);
-}
-// Movimiento neto de ahorro en un mes dado (depósitos - retiros, incluye retiros automáticos por gastos pagados con "Ahorro")
-function savingsMonthMovement(month){
-  const entries=(state.savingsEntries||[]).filter(x=>(x.date||'').slice(0,7)===month);
-  const dep=entries.filter(x=>x.type==='deposit').reduce((s,x)=>s+Number(x.amount),0);
-  const wd=entries.filter(x=>x.type==='withdraw').reduce((s,x)=>s+Number(x.amount),0);
-  return dep-wd;
 }
 // Si un gasto se paga con el medio fijo "Ahorro", mantiene sincronizado un retiro automático en ese pozo
 function syncSavingsLinkForExpense(e){
