@@ -841,13 +841,6 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       </div>
     </div>
     <div class="form-group"><label class="form-label">Categoría</label><div id="catSelectExp" style="display:flex;gap:8px;flex-wrap:wrap;"></div></div>
-    <div class="form-group">
-      <label class="form-label">Estado</label>
-      <div class="status-select">
-        <button class="status-btn selected paid" id="btnPaid" onclick="selectStatus('paid')">Pagado</button>
-        <button class="status-btn" id="btnPending" onclick="selectStatus('pending')">Pendiente</button>
-      </div>
-    </div>
     <button class="btn-primary" id="btnSave" onclick="saveExpense()">Guardar gasto</button>
     <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
   </div>
@@ -1118,7 +1111,7 @@ const INCOME_TYPES=[
 const getIncomeType=id=>INCOME_TYPES.find(t=>t.id===id)||INCOME_TYPES[2];
 let selectedIncomeType='variable';
 
-let selectedCatId=null,selectedMedioId=null,selectedStatus='paid',editingId=null,detailId=null;
+let selectedCatId=null,selectedMedioId=null,editingId=null,detailId=null;
 let activeFilter='all',sortBy='amount',cuotasMode=false,recurringMode=false,coverMonthMode=false,editingCatId=null,editingMedioId=null,selectedColor=COLORS[0],selectedCurrency='ARS',selectedOwner='me',selectedShared=false,selectedIncomeOwner='me',editingGoalId=null;
 let editingIncomeId=null,incomeDetailId=null,recurringIncomeMode=false,selectedMedioOwner='me';
 
@@ -2037,8 +2030,8 @@ function openModal(){
   $('toggleCoverMonth').classList.remove('on');$('coverMonthField').style.display='none';$('inputCoverMonth').value='';
   selectedCatId=state.categories.length?state.categories[0].id:null;
   selectedMedioId=state.medios.length?state.medios[0].id:null;
-  selectedStatus='paid';selectedCurrency='ARS';selectedOwner='me';selectedShared=false;
-  renderCatSelectExp();renderMedioSelectExp();updateStatusBtns();updateCurrencyBtns();updateAmtPreview();
+  selectedCurrency='ARS';selectedOwner='me';selectedShared=false;
+  renderCatSelectExp();renderMedioSelectExp();updateCurrencyBtns();updateAmtPreview();
   updateOwnerUILabels();selectOwner('me');
   $('toggleShared').classList.remove('on');
   $('ownerFieldExp').style.display=state.partnerMode?'block':'none';
@@ -2104,11 +2097,6 @@ function renderMedioSelectExp(){
 }
 function selectMedioExp(id){selectedMedioId=id;renderMedioSelectExp();}
 
-function selectStatus(s){selectedStatus=s;updateStatusBtns();}
-function updateStatusBtns(){
-  $('btnPaid').className='status-btn'+(selectedStatus==='paid'?' selected paid':'');
-  $('btnPending').className='status-btn'+(selectedStatus==='pending'?' selected pending':'');
-}
 function selectCurrency(c){selectedCurrency=c;updateCurrencyBtns();updateAmtPreview();}
 function updateCurrencyBtns(){
   $('btnCurArs').className='status-btn'+(selectedCurrency==='ARS'?' selected paid':'');
@@ -2835,7 +2823,7 @@ function saveExpense(){
     const e=state.expenses.find(x=>x.id===editingId);
     if(e){
       e.amt=amt;e.desc=desc;e.date=date;e.cat=selectedCatId;e.medio=selectedMedioId;
-      e.paid=selectedStatus==='paid';e.cuota=cuota;e.currency=selectedCurrency;e.notes=notes;
+      e.cuota=cuota;e.currency=selectedCurrency;e.notes=notes;
       e.owner=selectedOwner;e.shared=selectedShared;delete e.mode;
       e.coverMonth=coverMonth;
       e.recurring=recurringMode;
@@ -2851,7 +2839,9 @@ function saveExpense(){
     else{alert('No se encontró el gasto a editar. Cerrá y volvé a abrir.');return;}
   } else {
     const newId=state.nextId++;
-    savedExpense={id:newId,desc,amt,cat:selectedCatId,medio:selectedMedioId,paid:selectedStatus==='paid',date,cuota,currency:selectedCurrency,notes,owner:selectedOwner,shared:selectedShared,coverMonth,recurring:recurringMode,...(recurringMode?{recurringOrigin:newId}:{})};
+    // Si la fecha ya es hoy o pasada, se considera pagada; si es futura, queda pendiente hasta que la fecha llegue (autoUpdatePaidStatus)
+    const paid=date<=new Date().toISOString().split('T')[0];
+    savedExpense={id:newId,desc,amt,cat:selectedCatId,medio:selectedMedioId,paid,date,cuota,currency:selectedCurrency,notes,owner:selectedOwner,shared:selectedShared,coverMonth,recurring:recurringMode,...(recurringMode?{recurringOrigin:newId}:{})};
     state.expenses.push(savedExpense);
   }
   syncSavingsLinkForExpense(savedExpense);
@@ -2899,7 +2889,7 @@ function deleteExpense(){
 }
 function openEditFromDetail(){
   const e=state.expenses.find(x=>x.id===detailId);if(!e)return;closeDetail();
-  editingId=e.id;selectedCatId=e.cat;selectedMedioId=e.medio??null;selectedStatus=e.paid?'paid':'pending';selectedCurrency=e.currency||'ARS';selectedOwner=e.owner||'me';selectedShared=!!e.shared;
+  editingId=e.id;selectedCatId=e.cat;selectedMedioId=e.medio??null;selectedCurrency=e.currency||'ARS';selectedOwner=e.owner||'me';selectedShared=!!e.shared;
   $('inputAmt').value=e.amt;$('inputDesc').value=e.desc;$('inputNotes').value=e.notes||'';
   $('inputDate').value=e.date||new Date().toISOString().split('T')[0];
   $('modalTitle').textContent='Editar gasto';$('btnSave').textContent='Guardar cambios';
@@ -2907,7 +2897,7 @@ function openEditFromDetail(){
   if(e.cuota){$('inputCuotaActual').value=e.cuota.actual;$('inputCuotaTotal').value=e.cuota.total;$('inputCuotaMonto').value=e.cuota.monto||'';}
   recurringMode=!!e.recurring;$('toggleRecurring').classList.toggle('on',recurringMode);
   coverMonthMode=!!e.coverMonth;$('toggleCoverMonth').classList.toggle('on',coverMonthMode);$('coverMonthField').style.display=coverMonthMode?'block':'none';$('inputCoverMonth').value=e.coverMonth||'';
-  renderCatSelectExp();renderMedioSelectExp();updateStatusBtns();updateCurrencyBtns();updateAmtPreview();
+  renderCatSelectExp();renderMedioSelectExp();updateCurrencyBtns();updateAmtPreview();
   updateOwnerUILabels();selectOwner(selectedOwner);
   $('toggleShared').classList.toggle('on',selectedShared);
   $('ownerFieldExp').style.display=state.partnerMode?'block':'none';
