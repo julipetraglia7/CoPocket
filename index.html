@@ -139,6 +139,8 @@ body.dark .exp-status.pending{background:var(--accent-soft);color:var(--accent);
 .modal-overlay.open{display:flex;}
 .form-group{margin-bottom:16px;}.form-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;display:block;}
 .form-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-size:15px;color:var(--text);font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
+/* El popup nativo del <select> suele renderizar con fondo claro sin importar el tema de la página, así que las options se fuerzan a texto oscuro legible */
+select.form-input option{color:#1a1a1a;background:#fff;}
 .form-input:focus{border-color:var(--accent);}.form-input.big{font-size:22px;font-family:'Space Grotesk',serif;}
 .form-input.error{border-color:#BE185D;background:#FCE4F0;}
 body.dark .form-input.error{background:#3D1928;border-color:#F472B6;}
