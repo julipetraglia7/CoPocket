@@ -537,19 +537,20 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <div id="screen-home" class="screen active">
     <div class="metric-grid" id="metricGrid"></div>
     <div id="alertHome" style="margin-top:12px"></div>
-    <div class="two-col" style="margin-top:16px">
+    <div class="three-col" style="margin-top:16px">
       <div>
         <div class="section-title flush">Últimos gastos</div>
-        <div class="card" style="padding:0"><div id="recentList"></div></div>
+        <div class="card" style="padding:0;height:420px;overflow-y:auto"><div id="recentList"></div></div>
       </div>
       <div>
         <div class="section-title flush">Gastos por categoría</div>
-        <div class="card" style="padding:0"><div id="homeCatList"></div></div>
+        <div class="card" style="padding:0;height:420px;overflow-y:auto"><div id="homeCatList"></div></div>
+      </div>
+      <div>
+        <div class="section-title flush">Por medio de pago</div>
+        <div class="card" style="padding:0;height:420px;overflow-y:auto"><div id="mediosSummary"></div></div>
       </div>
     </div>
-    <!-- Medios de pago summary -->
-    <div class="section-title flush" style="margin-top:8px">Por medio de pago</div>
-    <div class="card" style="padding:0"><div id="mediosSummary"></div></div>
   </div>
 
   <!-- GASTOS -->
