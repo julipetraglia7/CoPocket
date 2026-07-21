@@ -2343,8 +2343,10 @@ function saveGoalContribution(){
 }
 
 // AHORRO — aparte de ingresos/gastos/balances, solo cambia por depósito/retiro explícito
+// Solo cuenta movimientos hasta el mes activo (inclusive) — si estás viendo julio, un depósito fechado en agosto todavía no "pasó"
 function savingsEntriesFor(scope,owner){
-  return (state.savingsEntries||[]).filter(e=>e.scope===scope&&(scope==='shared'||e.owner===owner));
+  const cutoff=state.activeMonth+'-31';
+  return (state.savingsEntries||[]).filter(e=>e.scope===scope&&(scope==='shared'||e.owner===owner)&&(e.date||'')<=cutoff);
 }
 function savingsBalance(scope,owner,excludeId){
   return savingsEntriesFor(scope,owner).filter(e=>e.id!==excludeId).reduce((s,e)=>s+(e.type==='deposit'?Number(e.amount):-Number(e.amount)),0);
