@@ -1663,8 +1663,14 @@ function renderHome(){
     `<div class="empty-state" style="padding:20px"><div class="empty-text">Sin gastos con medio de pago asignado</div></div>`;
 }
 
+function fmtDateShort(d){
+  if(!d)return'';
+  const[y,m,day]=d.split('-');
+  return`${day}/${m}`;
+}
 function expRow(e){
   const cat=getCat(e.cat),med=getMedio(e.medio);
+  const dl=e.date?` · ${fmtDateShort(e.date)}`:'';
   const cl=e.cuota?` · cuota ${e.cuota.actual}/${e.cuota.total}`:'';
   const rl=e.recurring?' · recurrente':'';
   const ml=med?` · ${med.label}`:'';
@@ -1675,7 +1681,7 @@ function expRow(e){
   }
   return`<div class="exp-row" onclick="openDetail(${e.id})">
     <div class="exp-icon" style="background:${cat.color}33;border:1.5px solid ${cat.color}55;color:${cat.color};font-weight:700">${(cat.label||'•').charAt(0).toUpperCase()}</div>
-    <div class="exp-info"><div class="exp-name">${e.desc}</div><div class="exp-cat"><span style="color:${cat.color};font-weight:600">${cat.label}</span>${cl}${rl}${ol}${ml}</div></div>
+    <div class="exp-info"><div class="exp-name">${e.desc}</div><div class="exp-cat"><span style="color:${cat.color};font-weight:600">${cat.label}</span>${dl}${cl}${rl}${ol}${ml}</div></div>
     <div class="exp-right"><div class="exp-amt ${e.paid?'paid':''}">${fmtCur(e.amt,e.currency)}</div><div class="exp-status ${e.paid?'done':'pending'}">${e.paid?'Pagado':'Pendiente'}</div></div>
   </div>`;
 }
