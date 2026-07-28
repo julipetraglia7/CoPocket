@@ -18,39 +18,39 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 :root{
-  /* CoPocket — Light theme */
-  --primary:#5FAF8D;--primary-hover:#4C9A79;--primary-pressed:#3C8464;--primary-soft:#DDF5EA;
+  /* CoPocket — Light theme: verde agua/turquesa sobre blanco */
+  --primary:#14B8A6;--primary-hover:#0D9488;--primary-pressed:#0F766E;--primary-soft:#CCFBF1;
   --secondary:#F08A6C;--secondary-soft:#FDE4DB;
-  --bg:#FAF9F7;--surface:#FFFFFF;--surface-2:#F3F2EF;--card:#FFFFFF;--bg2:#F3F2EF;
-  --text:#2B2A28;--text2:#6B6A68;--text3:#9A9895;--text-disabled:#C8C5C2;--text-inverse:#FFFFFF;
-  --accent:#5FAF8D;--accent-strong:#3C8464;--accent-soft:#DDF5EA;--border:#E8E5E1;
-  --success:#5FAF8D;--warning:#E6A23C;--error:#E76F6A;--info:#8F7CF8;
-  --chart-income:#5FAF8D;--chart-expense:#E76F6A;--chart-savings:#77C8B0;
+  --bg:#FAFAF9;--surface:#FFFFFF;--surface-2:#F3F2EF;--card:#FFFFFF;--bg2:#F3F2EF;
+  --text:#1F2A28;--text2:#5B6764;--text3:#8C9895;--text-disabled:#C8C5C2;--text-inverse:#FFFFFF;
+  --accent:#14B8A6;--accent-strong:#0F766E;--accent-soft:#CCFBF1;--border:#E7E5E4;
+  --success:#14B8A6;--warning:#E6A23C;--error:#E76F6A;--info:#8F7CF8;
+  --chart-income:#14B8A6;--chart-expense:#E76F6A;--chart-savings:#2DD4BF;
   --chart-investment:#9B8AFB;--chart-shopping:#F08A6C;--chart-food:#E6A23C;
   --chart-home:#C7A76B;--chart-transport:#4FB7C5;
-  --color-gastos:#E76F6A;--color-ingresos:#5FAF8D;--color-balance:#5FAF8D;
+  --color-gastos:#E76F6A;--color-ingresos:#14B8A6;--color-balance:#14B8A6;
   --shadow:0 1px 3px rgba(0,0,0,0.04);
   --shadow-lg:0 8px 32px rgba(0,0,0,0.08);
   --r-sm:8px;--r-md:12px;--r-lg:20px;
   --r:var(--r-md);--sidebar:260px;
-  --grad:linear-gradient(135deg,#5FAF8D,#77C8B0);
-  --green:#5FAF8D;--green-bg:#DDF5EA;--green-border:#77C8B0;
+  --grad:var(--primary);
+  --green:#14B8A6;--green-bg:#CCFBF1;--green-border:#2DD4BF;
 }
 body.dark{
-  /* CoPocket — Dark theme */
-  --primary:#77C8B0;--primary-hover:#5FAF8D;--primary-pressed:#47946F;--primary-soft:#203C33;
+  /* CoPocket — Dark theme: mismo verde agua, en versión oscura (no gris ni violeta) */
+  --primary:#0D9488;--primary-hover:#14B8A6;--primary-pressed:#0F766E;--primary-soft:#134E4A;
   --secondary:#F59A80;--secondary-soft:#4A2E28;
-  --bg:#181A1B;--surface:#222527;--surface-2:#2E3235;--card:#222527;--bg2:#2E3235;
-  --text:#F6F5F3;--text2:#C5C3BF;--text3:#8E8B87;--text-disabled:#66635F;
-  --accent:#77C8B0;--accent-strong:#5FAF8D;--accent-soft:#203C33;--border:#383C3F;
-  --success:#77C8B0;--warning:#F0B44D;--error:#F18781;--info:#A99BFF;
-  --chart-income:#77C8B0;--chart-expense:#F18781;--chart-savings:#9DE2CF;
+  --bg:#14201E;--surface:#1B2926;--surface-2:#22322E;--card:#1B2926;--bg2:#22322E;
+  --text:#F6F5F3;--text2:#C5C3BF;--text3:#8E9C98;--text-disabled:#526460;
+  --accent:#2DD4BF;--accent-strong:#5EEAD4;--accent-soft:#134E4A;--border:#2C3E3A;
+  --success:#2DD4BF;--warning:#F0B44D;--error:#F18781;--info:#A99BFF;
+  --chart-income:#2DD4BF;--chart-expense:#F18781;--chart-savings:#5EEAD4;
   --chart-investment:#B7ACFF;--chart-shopping:#F59A80;--chart-food:#F0B44D;
   --chart-home:#DFC27A;--chart-transport:#65D2DD;
-  --color-gastos:#F18781;--color-ingresos:#77C8B0;--color-balance:#77C8B0;
+  --color-gastos:#F18781;--color-ingresos:#2DD4BF;--color-balance:#2DD4BF;
   --shadow:0 1px 3px rgba(0,0,0,0.3);
   --shadow-lg:0 8px 32px rgba(0,0,0,0.5);
-  --grad:linear-gradient(135deg,#5FAF8D,#77C8B0);
+  --grad:var(--primary);
 }
 body.dark .alert-green{background:var(--primary-soft);color:var(--primary);border-color:transparent;}
 body.dark .alert-red{background:var(--secondary-soft);color:var(--secondary);border-color:transparent;}
@@ -141,7 +141,7 @@ body.dark .exp-status.pending{background:var(--accent-soft);color:var(--accent);
 .form-group{margin-bottom:16px;}.form-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;display:block;}
 .form-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-size:15px;color:var(--text);font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
 /* El popup nativo del <select> suele renderizar con fondo claro sin importar el tema de la página, así que las options se fuerzan a texto oscuro legible */
-select.form-input option{color:#1a1a1a;background:#fff;}
+select.form-input option,select.filter-select option{color:#1a1a1a;background:#fff;}
 .form-input:focus{border-color:var(--accent);}.form-input.big{font-size:22px;font-family:'Space Grotesk',serif;}
 .form-input.error{border-color:#BE185D;background:#FCE4F0;}
 body.dark .form-input.error{background:#3D1928;border-color:#F472B6;}
@@ -190,6 +190,11 @@ body.dark .form-error{color:#F9A8D4;}
 .comp-bar-fill{height:6px;border-radius:99px;transition:width 0.4s ease;}
 .filter-btn{padding:6px 12px;border-radius:99px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);font-size:11px;font-family:'Inter',sans-serif;cursor:pointer;}
 .filter-btn.active{border-color:var(--accent);background:var(--bg2);color:var(--accent-strong);font-weight:600;}
+.filter-select{padding:8px 14px;border-radius:99px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238C9895' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 10px center;background-size:14px;padding-right:32px;}
+.filter-select:focus{border-color:var(--accent);outline:none;}
+body.dark .filter-select{background-color:var(--bg2);}
+.btn-sim{width:100%;background:var(--primary-soft);color:var(--primary-pressed);border:1.5px solid var(--primary);border-radius:99px;padding:11px 16px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-bottom:12px;text-align:center;}
+body.dark .btn-sim{color:var(--accent-strong);}
 .medio-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:99px;background:var(--bg2);color:var(--text2);margin-top:2px;}
 .income-summary-card,.income-summary-card.card{background:linear-gradient(135deg,var(--primary),var(--chart-savings))!important;border-radius:var(--r);padding:20px;color:var(--text-inverse);margin-bottom:0;border:none;}
 .income-total{font-family:'Space Grotesk',serif;font-size:32px;color:#fff;}
@@ -264,9 +269,7 @@ body.dark .form-error{color:#F9A8D4;}
   body{display:block;max-width:430px;margin:0 auto;padding-bottom:calc(90px + env(safe-area-inset-bottom));overflow-x:hidden;}
   .sidebar,.topbar,.btn-add{display:none!important;}
   .main{padding:0;}
-  .mobile-header{background:var(--grad);padding:52px 20px 0;position:relative;overflow:hidden;}
-  .mobile-header::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.06);}
-  .mobile-header::after{content:'';position:absolute;bottom:-40px;left:-20px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.04);}
+  .mobile-header{background:var(--primary);padding:52px 20px 0;position:relative;overflow:hidden;}
   .mh-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;position:relative;z-index:1;}
   .mh-greeting{font-size:13px;color:rgba(255,255,255,0.65);margin-bottom:2px;}
   .mh-title{font-family:'Space Grotesk',serif;font-size:22px;color:#fff;}
@@ -523,21 +526,19 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <!-- GASTOS -->
   <div id="screen-gastos" class="screen">
     <div class="section-title flush">Gastos del mes</div>
-    <div class="sort-row" style="justify-content:flex-start">
-      <button class="btn-sm" onclick="openBuybyeModal()" id="btnSimular">🧮 ¿Vale la pena esta compra?</button>
-    </div>
+    <button class="btn-sim" onclick="openBuybyeModal()" id="btnSimular">🧮 ¿Vale la pena esta compra?</button>
     <div class="sort-row">
-      <select class="form-input" id="sortSelect" style="width:auto;padding:6px 10px;font-size:12px" onchange="setSortBy(this.value)">
+      <select class="filter-select" id="sortSelect" onchange="setSortBy(this.value)">
         <option value="amount">Ordenar: Monto (mayor a menor)</option>
         <option value="date">Ordenar: Fecha (más reciente)</option>
         <option value="alpha">Ordenar: Alfabético (A-Z)</option>
       </select>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <select class="form-input" id="filterMedioSel" style="font-size:12px;padding:8px 10px" onchange="setFilterMedio(this.value)"></select>
-      <select class="form-input" id="filterCatSel" style="font-size:12px;padding:8px 10px" onchange="setFilterCat(this.value)"></select>
-      <select class="form-input" id="filterQuienSel" style="font-size:12px;padding:8px 10px" onchange="setFilterQuien(this.value)"></select>
-      <select class="form-input" id="filterCuotasSel" style="font-size:12px;padding:8px 10px" onchange="setFilterCuotas(this.value)"></select>
+    <div class="filters" style="margin-bottom:12px">
+      <select class="filter-select" id="filterMedioSel" onchange="setFilterMedio(this.value)"></select>
+      <select class="filter-select" id="filterCatSel" onchange="setFilterCat(this.value)"></select>
+      <select class="filter-select" id="filterQuienSel" onchange="setFilterQuien(this.value)"></select>
+      <select class="filter-select" id="filterCuotasSel" onchange="setFilterCuotas(this.value)"></select>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px" id="gastosFilterMetrics"></div>
     <div class="card" style="padding:0"><div id="allExpensesList"></div></div>
