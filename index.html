@@ -637,7 +637,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div id="buybyeStep1">
       <div class="section-title flush">¿Vale la pena esta compra?</div>
       <div class="card" style="padding:18px;margin-bottom:12px">
-        <div class="form-group"><label class="form-label">Monto del gasto</label><input class="form-input big" type="number" id="simAmt" placeholder="0" inputmode="decimal"><div class="form-error" id="simAmtError"></div></div>
+        <div class="form-group"><label class="form-label">Monto del gasto</label><input class="form-input big" type="number" id="simAmt" placeholder="0" inputmode="decimal" min="0" oninput="sanitizeAmountInput(this)"><div class="form-error" id="simAmtError"></div></div>
         <div class="form-group"><label class="form-label">¿Qué es? (opcional)</label><input class="form-input" type="text" id="simDesc" placeholder="Ej: Zapatillas nuevas"></div>
         <button class="btn-primary" onclick="runBuybyeCalc()">Calcular</button>
       </div>
@@ -793,7 +793,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     </div>
     <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="inputDate"></div>
     <div class="form-group"><label class="form-label">Descripción</label><input class="form-input" type="text" id="inputDesc" placeholder="Ej: Supermercado Carrefour"><div class="form-error" id="inputDescError"></div></div>
-    <div class="form-group"><label class="form-label" id="lblAmt">Monto ($)</label><input class="form-input big" type="number" id="inputAmt" placeholder="0" inputmode="decimal" oninput="updateAmtPreview()"><div class="form-error" id="inputAmtError"></div><div id="amtConvert" style="font-size:11px;color:var(--text3);margin-top:4px;display:none"></div></div>
+    <div class="form-group"><label class="form-label" id="lblAmt">Monto ($)</label><input class="form-input big" type="number" id="inputAmt" placeholder="0" inputmode="decimal" min="0" oninput="sanitizeAmountInput(this);updateAmtPreview()"><div class="form-error" id="inputAmtError"></div><div id="amtConvert" style="font-size:11px;color:var(--text3);margin-top:4px;display:none"></div></div>
     <div class="form-group">
       <label class="form-label">Moneda</label>
       <div class="status-select">
@@ -817,7 +817,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
         <div class="form-row-3">
           <div><label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Cuota actual</label><input class="form-input" type="number" id="inputCuotaActual" placeholder="3" inputmode="numeric"></div>
           <div><label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Total cuotas</label><input class="form-input" type="number" id="inputCuotaTotal" placeholder="12" inputmode="numeric"></div>
-          <div><label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Monto/cuota</label><input class="form-input" type="number" id="inputCuotaMonto" placeholder="Auto" inputmode="decimal"></div>
+          <div><label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Monto/cuota</label><input class="form-input" type="number" id="inputCuotaMonto" placeholder="Auto" inputmode="decimal" min="0" oninput="sanitizeAmountInput(this)"></div>
         </div>
       </div>
     </div>
@@ -900,7 +900,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     </div>
     <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="incomeDate"></div>
     <div class="form-group"><label class="form-label">Descripción</label><input class="form-input" type="text" id="incomeDesc" placeholder="Ej: Sueldo, freelance, viáticos..."><div class="form-error" id="incomeDescError"></div></div>
-    <div class="form-group"><label class="form-label">Monto ($)</label><input class="form-input big" type="number" id="incomeAmt" placeholder="0" inputmode="decimal"><div class="form-error" id="incomeAmtError"></div></div>
+    <div class="form-group"><label class="form-label">Monto ($)</label><input class="form-input big" type="number" id="incomeAmt" placeholder="0" inputmode="decimal" min="0" oninput="sanitizeAmountInput(this)"><div class="form-error" id="incomeAmtError"></div></div>
     <div class="form-group"><label class="form-label">Tipo de ingreso</label><div id="incomeTypeSelect" style="display:flex;gap:8px;flex-wrap:wrap;"></div></div>
     <div class="form-group">
       <label class="form-label">¿Es recurrente?</label>
@@ -989,11 +989,11 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       </div>
     </div>
     <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" type="text" id="goalName" placeholder="Ej: Viaje a Brasil, Auto nuevo..."><div class="form-error" id="goalNameError"></div></div>
-    <div class="form-group"><label class="form-label">Monto objetivo ($)</label><input class="form-input big" type="number" id="goalTarget" placeholder="500000" inputmode="decimal"><div class="form-error" id="goalTargetError"></div></div>
+    <div class="form-group"><label class="form-label">Monto objetivo ($)</label><input class="form-input big" type="number" id="goalTarget" placeholder="500000" inputmode="decimal" min="0" oninput="sanitizeAmountInput(this)"><div class="form-error" id="goalTargetError"></div></div>
     <div class="form-group">
       <label class="form-label">¿Cuánto pensás aportar? (opcional)</label>
       <div style="display:flex;gap:8px">
-        <input class="form-input" type="number" id="goalPaceAmt" placeholder="Ej: 20000" inputmode="decimal" style="flex:1">
+        <input class="form-input" type="number" id="goalPaceAmt" placeholder="Ej: 20000" inputmode="decimal" style="flex:1" min="0" oninput="sanitizeAmountInput(this)">
         <div class="status-select" style="flex:1">
           <button class="status-btn selected paid" id="btnPaceMonthly" onclick="selectGoalPaceType('monthly')">Por mes</button>
           <button class="status-btn" id="btnPaceDaily" onclick="selectGoalPaceType('daily')">Por día</button>
@@ -1001,7 +1001,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       </div>
       <div style="font-size:11px;color:var(--text3);margin-top:4px">Te calculamos cuándo van a llegar según tu plan y según tu ritmo real de aportes.</div>
     </div>
-    <div class="form-group"><label class="form-label">Ya tienen ahorrado</label><input class="form-input" type="number" id="goalSaved" placeholder="0" inputmode="decimal"></div>
+    <div class="form-group"><label class="form-label">Ya tienen ahorrado</label><input class="form-input" type="number" id="goalSaved" placeholder="0" inputmode="decimal" min="0" oninput="sanitizeAmountInput(this)"></div>
     <button class="btn-primary" onclick="saveGoal()">Guardar meta</button>
     <button class="btn-secondary" onclick="closeGoalModal()">Cancelar</button>
     <button class="btn-secondary btn-delete" id="btnDeleteGoal" onclick="deleteGoal()" style="display:none;margin-top:4px">Eliminar meta</button>
@@ -1014,7 +1014,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="modal-handle"></div>
     <div class="modal-title">Sumar aporte</div>
     <div id="goalContribTitle" style="font-size:13px;color:var(--text2);margin-bottom:14px"></div>
-    <div class="form-group"><label class="form-label">Monto del aporte ($)</label><input class="form-input big" type="number" id="contribAmt" placeholder="0" inputmode="decimal"><div class="form-error" id="contribAmtError"></div></div>
+    <div class="form-group"><label class="form-label">Monto del aporte ($)</label><input class="form-input big" type="number" id="contribAmt" placeholder="0" inputmode="decimal" min="0" oninput="sanitizeAmountInput(this)"><div class="form-error" id="contribAmtError"></div></div>
     <div class="form-group" id="contribOwnerField">
       <label class="form-label">¿Quién aporta?</label>
       <div class="status-select">
@@ -1032,7 +1032,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="savingsModalTitle">Depositar en ahorro</div>
-    <div class="form-group"><label class="form-label">Monto ($)</label><input class="form-input big" type="number" id="savingsAmt" placeholder="0" inputmode="decimal"><div class="form-error" id="savingsAmtError"></div></div>
+    <div class="form-group"><label class="form-label">Monto ($)</label><input class="form-input big" type="number" id="savingsAmt" placeholder="0" inputmode="decimal" min="0" oninput="sanitizeAmountInput(this)"><div class="form-error" id="savingsAmtError"></div></div>
     <div class="form-group"><label class="form-label">Nota (opcional)</label><input class="form-input" type="text" id="savingsNote" placeholder="Ej: aguinaldo, changa extra..."></div>
     <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="savingsDate"></div>
     <button class="btn-primary" id="savingsBtn" onclick="saveSavingsEntry()">Depositar</button>
@@ -1077,6 +1077,13 @@ const $=id=>document.getElementById(id);
 const fmt=n=>'$'+Math.round(n).toLocaleString('es-AR');
 function showFieldError(inputId,message){const i=$(inputId);if(i)i.classList.add('error');const e=$(inputId+'Error');if(e){e.textContent=message;e.classList.add('visible');}}
 function clearFieldErrors(){document.querySelectorAll('.form-input.error').forEach(el=>el.classList.remove('error'));document.querySelectorAll('.form-error.visible').forEach(el=>el.classList.remove('visible'));}
+// Filtra en vivo lo que se escribe en un campo de monto: solo dígitos y un único punto decimal (nada de letras, signos ni notación científica)
+function sanitizeAmountInput(el){
+  let v=el.value.replace(/[^0-9.]/g,'');
+  const firstDot=v.indexOf('.');
+  if(firstDot!==-1)v=v.slice(0,firstDot+1)+v.slice(firstDot+1).replace(/\./g,'');
+  if(v!==el.value)el.value=v;
+}
 const fmtCur=(n,cur)=>(cur==='USD'?'U$D ':'$')+Math.round(n).toLocaleString('es-AR');
 const toArs=e=>(e.currency==='USD'?Number(e.amt)*(state.usdRate||1000):Number(e.amt));
 const isMob=()=>window.innerWidth<768;
@@ -2901,7 +2908,7 @@ function saveExpense(){
   const notes=notesMode?($('inputNotes').value.trim()||null):null;
   const date=$('inputDate').value||new Date().toISOString().split('T')[0];
   let hasErr=false;
-  if(!amt){showFieldError('inputAmt','Ingresá un monto válido');hasErr=true;}
+  if(!amt||amt<=0){showFieldError('inputAmt','Ingresá un monto válido mayor a 0');hasErr=true;}
   if(!desc){showFieldError('inputDesc','Ingresá una descripción');hasErr=true;}
   if(hasErr)return;
   let cuota=null;
@@ -3021,7 +3028,7 @@ function saveIncomeEntry(){
   clearFieldErrors();
   const amt=parseFloat($('incomeAmt').value),desc=$('incomeDesc').value.trim(),date=$('incomeDate').value;
   let hasErr=false;
-  if(!amt){showFieldError('incomeAmt','Ingresá un monto válido');hasErr=true;}
+  if(!amt||amt<=0){showFieldError('incomeAmt','Ingresá un monto válido mayor a 0');hasErr=true;}
   if(!desc){showFieldError('incomeDesc','Ingresá una descripción');hasErr=true;}
   if(hasErr)return;
   const month=date.slice(0,7);
