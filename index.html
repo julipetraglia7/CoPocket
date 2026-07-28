@@ -193,7 +193,7 @@ body.dark .form-error{color:#F9A8D4;}
 .filter-select{padding:8px 14px;border-radius:99px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238C9895' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 10px center;background-size:14px;padding-right:32px;}
 .filter-select:focus{border-color:var(--accent);outline:none;}
 body.dark .filter-select{background-color:var(--bg2);}
-.btn-sim{width:100%;background:var(--primary-soft);color:var(--primary-pressed);border:1.5px solid var(--primary);border-radius:99px;padding:11px 16px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-bottom:12px;text-align:center;}
+.btn-sim{display:inline-block;background:var(--primary-soft);color:var(--primary-pressed);border:1.5px solid var(--primary);border-radius:99px;padding:8px 14px;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-bottom:12px;text-align:center;}
 body.dark .btn-sim{color:var(--accent-strong);}
 .medio-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:99px;background:var(--bg2);color:var(--text2);margin-top:2px;}
 .income-summary-card,.income-summary-card.card{background:linear-gradient(135deg,var(--primary),var(--chart-savings))!important;border-radius:var(--r);padding:20px;color:var(--text-inverse);margin-bottom:0;border:none;}
@@ -273,7 +273,7 @@ body.dark .btn-sim{color:var(--accent-strong);}
   .mh-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;position:relative;z-index:1;}
   .mh-greeting{font-size:13px;color:rgba(255,255,255,0.65);margin-bottom:2px;}
   .mh-title{font-family:'Space Grotesk',serif;font-size:22px;color:#fff;}
-  .mh-config{font-size:11px;color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.12);padding:4px 10px;border-radius:99px;cursor:pointer;border:none;font-family:'Inter',sans-serif;}
+  .mh-config{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(255,255,255,0.16);border-radius:50%;cursor:pointer;border:none;padding:0;}
   .mh-balance{position:relative;z-index:1;}
   .mh-bal-label{font-size:11px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
   .mh-bal-amount{font-family:'Space Grotesk',serif;font-size:38px;color:#fff;line-height:1;margin-bottom:8px;}.mh-bal-amount.red{color:#FFB3B3;}
@@ -301,6 +301,10 @@ body.dark .btn-sim{color:var(--accent-strong);}
   .card-header{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 12px;margin-bottom:0;}
   .card-header .card-title{padding:0;margin-bottom:0;}
   .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 4px;}
+  .filter-selects{padding:0 16px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  #sortSelect{margin-left:16px;margin-right:16px;display:block;}
+  .btn-sim{margin-left:16px;margin-right:16px;}
+  #gastosSearch,#compSearch{width:calc(100% - 32px);margin-left:16px;margin-right:16px;}
   .metric-card{background:var(--card);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);border:1px solid var(--border);}
   .metric-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;}
   .metric-val{font-family:'Space Grotesk',serif;font-size:20px;color:var(--text);}.metric-note{font-size:10px;color:var(--text3);margin-top:2px;}
@@ -350,10 +354,10 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   .card{border-radius:18px;margin:0 16px 12px;}
   .metric-card{border-radius:16px;margin:0;}
   .metric-grid{grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 4px;}
-  .mobile-header{width:auto;max-width:none;margin:0;padding:48px 20px 22px;border-radius:0 0 26px 26px;}
+  .mobile-header{width:auto;max-width:none;margin:0;padding:48px 20px 22px;border-radius:0;}
   .mh-bal-amount{font-family:'Inter',sans-serif;font-weight:800;font-size:34px;}
-  .mh-prog{margin:0 0 14px;border-radius:0;padding:14px 20px 16px;}
-  .mh-prog.mobile-header{border-radius:0;margin:0 0 14px;padding:14px 20px 16px;}
+  .mh-prog{margin:0 0 14px;border-radius:0 0 26px 26px;padding:14px 20px 16px;}
+  .mh-prog.mobile-header{border-radius:0 0 26px 26px;margin:0 0 14px;padding:14px 20px 16px;}
   .mobile-nav{left:50%;right:auto;width:min(100%,430px);border-radius:24px 24px 0 0;}
   .mobile-fab{right:calc((100vw - min(100vw,430px))/2 + 64px);}
   .mobile-fab-inc{right:calc((100vw - min(100vw,430px))/2 + 12px);}
@@ -446,7 +450,6 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="nav-link" onclick="showScreen('ahorro',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Ahorro</div>
     <div class="nav-link" data-compartido-nav style="display:none" onclick="showScreen('compartido',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Compartido</div>
     <div class="nav-link" onclick="showScreen('estadisticas',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg></span> Estadísticas</div>
-    <div class="nav-link" onclick="showScreen('config',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Configuración</div>
   </nav>
   <div class="sidebar-footer">
     <div class="sidebar-pill" style="display:flex;align-items:center;gap:10px;padding:10px 12px;">
@@ -460,9 +463,9 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
 <!-- MOBILE HEADER -->
 <div class="mobile-header">
   <div class="mh-top">
-    <div><div class="mh-greeting" id="mhGreeting">Hola</div><div class="mh-title">CoPocket</div></div>
+    <div><div class="mh-greeting" id="mhGreeting">Hola</div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-      <button class="mh-config" onclick="showScreen('config',null,'m')">Ajustes</button>
+      <button class="mh-config" onclick="showScreen('config',null,'m')" title="Configuración" aria-label="Configuración"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       <div style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,0.12);border-radius:99px;padding:3px 4px">
         <button onclick="changeMonthBy(-1)" title="Mes anterior" style="background:none;border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;padding:2px 6px;line-height:1">‹</button>
         <span id="mhMonth" style="font-size:11px;color:#fff;font-weight:600;white-space:nowrap">—</span>
@@ -500,6 +503,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       </div>
       <button class="btn-add green-add" id="btnAddInc" style="display:none" onclick="openIncomeEntryModal()">+ Ingreso</button>
       <button class="btn-add" id="btnAddExp" onclick="openModal()">+ Gasto</button>
+      <button onclick="showScreen('config',null,'d')" title="Configuración" aria-label="Configuración" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:50%;cursor:pointer;padding:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
   </div>
 
@@ -527,20 +531,19 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <div id="screen-gastos" class="screen">
     <div class="section-title flush">Gastos del mes</div>
     <button class="btn-sim" onclick="openBuybyeModal()" id="btnSimular">🧮 ¿Vale la pena esta compra?</button>
-    <div class="sort-row">
-      <select class="filter-select" id="sortSelect" onchange="setSortBy(this.value)">
-        <option value="amount">Ordenar: Monto (mayor a menor)</option>
-        <option value="date">Ordenar: Fecha (más reciente)</option>
-        <option value="alpha">Ordenar: Alfabético (A-Z)</option>
-      </select>
-    </div>
-    <div class="filters" style="margin-bottom:12px">
+    <input class="form-input" id="gastosSearch" type="text" placeholder="🔎 Buscar gasto..." oninput="setGastosSearch(this.value)" style="margin-bottom:10px">
+    <select class="filter-select" id="sortSelect" onchange="setSortBy(this.value)" style="margin-bottom:10px">
+      <option value="amount">Ordenar: Monto (mayor a menor)</option>
+      <option value="date">Ordenar: Fecha (más reciente)</option>
+      <option value="alpha">Ordenar: Alfabético (A-Z)</option>
+    </select>
+    <div class="filter-selects">
       <select class="filter-select" id="filterMedioSel" onchange="setFilterMedio(this.value)"></select>
       <select class="filter-select" id="filterCatSel" onchange="setFilterCat(this.value)"></select>
       <select class="filter-select" id="filterQuienSel" onchange="setFilterQuien(this.value)"></select>
       <select class="filter-select" id="filterCuotasSel" onchange="setFilterCuotas(this.value)"></select>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px" id="gastosFilterMetrics"></div>
+    <div class="metric-grid" id="gastosFilterMetrics"></div>
     <div class="card" style="padding:0"><div id="allExpensesList"></div></div>
   </div>
 
@@ -576,13 +579,20 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="section-title flush" style="margin-top:8px">Cómo se divide el mes</div>
     <div class="card" id="compSplitCard" style="padding:18px"></div>
     <div class="section-title flush" style="margin-top:8px">Aporte por gasto compartido</div>
+    <input class="form-input" id="compSearch" type="text" placeholder="🔎 Buscar gasto..." oninput="setCompSearch(this.value)" style="margin-bottom:10px">
     <div class="card" id="compExpensesCard" style="padding:0"></div>
   </div>
 
   <!-- ESTADÍSTICAS -->
   <div id="screen-estadisticas" class="screen">
-    <div class="section-title flush">Conclusiones</div>
+    <div class="section-title flush">Resumen inteligente</div>
     <div class="card" id="statsConclusions" style="padding:18px;margin-bottom:12px"></div>
+    <div class="section-title flush">Tendencia (últimos 6 meses)</div>
+    <div class="card" id="statsTrend" style="padding:18px;margin-bottom:12px"></div>
+    <div class="section-title flush">Top categorías del mes</div>
+    <div class="card" id="statsTopCats" style="padding:0;margin-bottom:12px"></div>
+    <div class="section-title flush" id="statsBudgetsTitle" style="display:none">Presupuestos</div>
+    <div class="card" id="statsBudgets" style="padding:0;margin-bottom:12px;display:none"></div>
     <div class="section-title flush">Gastos vs. mes anterior</div>
     <div class="card" style="padding:0;margin-bottom:12px" id="gastosCompareCard"></div>
     <div class="section-title flush">Ingresos vs. mes anterior</div>
@@ -644,6 +654,11 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="three-col">
       <div>
         <div class="card">
+          <div class="card-title">Perfil</div>
+          <label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block">Tu nombre</label>
+          <input class="form-input" type="text" id="myNameInput" placeholder="Ej: Julieta" onchange="changeMyName()">
+        </div>
+        <div class="card" style="margin-top:16px">
           <div class="card-title">Mes activo</div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg2);border-radius:12px;padding:10px 14px">
             <button onclick="changeMonthBy(-1)" title="Mes anterior" style="background:none;border:none;color:var(--accent-strong);font-size:18px;font-weight:700;cursor:pointer;padding:2px 8px;line-height:1">‹</button>
@@ -749,7 +764,6 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <div class="mn-item" onclick="showScreen('ahorro',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><span>Ahorro</span></div>
   <div class="mn-item" data-compartido-nav style="display:none" onclick="showScreen('compartido',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span>2x</span></div>
   <div class="mn-item" onclick="showScreen('estadisticas',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg></div><span>Stats</span></div>
-  <div class="mn-item" onclick="showScreen('config',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><span>Config</span></div>
 </nav>
 <button class="mobile-fab" onclick="openModal()" title="Nuevo gasto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 2-1.58l1.65-7.42H5.12"/></svg></button>
 <button class="mobile-fab-inc" onclick="openIncomeEntryModal()" title="Nuevo ingreso"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 7 22 7 22 13"/><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></button>
@@ -1684,11 +1698,14 @@ function expRow(e){
   </div>`;
 }
 
-let filterMedio='all',filterCat='all',filterQuien='all',filterCuotas='all';
+let filterMedio='all',filterCat='all',filterQuien='all',filterCuotas='all',gastosSearch='';
 function setFilterMedio(v){filterMedio=v;renderGastos();}
 function setFilterCat(v){filterCat=v;renderGastos();}
 function setFilterQuien(v){filterQuien=v;renderGastos();}
 function setFilterCuotas(v){filterCuotas=v;renderGastos();}
+function setGastosSearch(v){gastosSearch=v;renderGastos();}
+let compSearch='';
+function setCompSearch(v){compSearch=v;renderCompartido();}
 function renderGastos(){
   const exps=monthExps();
   const pm=state.partnerMode;
@@ -1712,6 +1729,7 @@ function renderGastos(){
   }
   if(filterCuotas==='yes')fl=fl.filter(e=>!!e.cuota);
   else if(filterCuotas==='no')fl=fl.filter(e=>!e.cuota);
+  if(gastosSearch.trim())fl=fl.filter(e=>(e.desc||'').toLowerCase().includes(gastosSearch.trim().toLowerCase()));
   if(sortBy==='date')fl.sort((a,b)=>new Date(b.date)-new Date(a.date));
   else if(sortBy==='alpha')fl.sort((a,b)=>(a.desc||'').localeCompare(b.desc||'','es'));
   else fl.sort((a,b)=>toArs(b)-toArs(a));
@@ -1820,6 +1838,7 @@ function renderCatBarsHtml(){
 }
 
 function renderConfig(){
+  const mni=$('myNameInput');if(mni&&document.activeElement!==mni)mni.value=state.name||'';
   const caml=$('configActiveMonthLabel');if(caml)caml.textContent=monthLabel();
   const td=$('toggleDark');if(td)td.classList.toggle('on',!!state.darkMode);
   const ur=$('usdRateInput');if(ur)ur.value=state.usdRate||1000;
@@ -1945,18 +1964,27 @@ function renderIngresosCompare(){
 function renderEstadisticas(){
   renderGastosCompare();
   renderIngresosCompare();
+  renderStatsConclusions();
+  renderStatsTrend();
+  renderStatsTopCats();
+  renderStatsBudgets();
+}
+// Resumen inteligente: varias conclusiones calculadas (sin IA real, todo heurística local)
+function renderStatsConclusions(){
   const el=$('statsConclusions');if(!el)return;
   const prevM=prevMonthStr(state.activeMonth);
-  const curExps=monthExps(),prevExps=monthExpsOf(prevM);
-  const curByCat={},prevByCat={};
+  const prevPrevM=prevMonthStr(prevM);
+  const curExps=monthExps(),prevExps=monthExpsOf(prevM),prevPrevExps=monthExpsOf(prevPrevM);
+  const curByCat={},prevByCat={},prevPrevByCat={};
   curExps.forEach(e=>{curByCat[e.cat]=(curByCat[e.cat]||0)+toArs(e);});
   prevExps.forEach(e=>{prevByCat[e.cat]=(prevByCat[e.cat]||0)+toArs(e);});
+  prevPrevExps.forEach(e=>{prevPrevByCat[e.cat]=(prevPrevByCat[e.cat]||0)+toArs(e);});
   const lines=[];
   const catIds=Object.keys(curByCat);
+  const totalCur=Object.values(curByCat).reduce((s,v)=>s+v,0);
   if(catIds.length){
     const topCatId=catIds.reduce((a,b)=>curByCat[a]>curByCat[b]?a:b);
     const topCat=getCat(Number(topCatId));
-    const totalCur=Object.values(curByCat).reduce((s,v)=>s+v,0);
     const pct=totalCur>0?Math.round((curByCat[topCatId]/totalCur)*100):0;
     lines.push(`Tu categoría con más gasto este mes es <strong>${topCat.label}</strong>, con ${fmt(curByCat[topCatId])} (${pct}% del total).`);
   }
@@ -1970,12 +1998,100 @@ function renderEstadisticas(){
     const cat=getCat(Number(maxIncreaseCat));
     lines.push(`Lo que más aumentó vs. ${monthLabelOf(prevM)} fue <strong>${cat.label}</strong>: +${fmt(maxIncrease)}.`);
   }
+  // Racha: categoría que viene subiendo 3 meses seguidos
+  let streakCat=null;
+  allCatIds.forEach(id=>{
+    const c0=prevPrevByCat[id]||0,c1=prevByCat[id]||0,c2=curByCat[id]||0;
+    if(c2>c1&&c1>c0&&c0>0)streakCat=id;
+  });
+  if(streakCat){
+    const cat=getCat(Number(streakCat));
+    lines.push(`<strong>${cat.label}</strong> viene subiendo hace 3 meses seguidos — vale la pena mirarlo de cerca.`);
+  }
   const{margen}=calcT();
   const totalIncomeMonth=totalIngs();
   const ratio=totalIncomeMonth>0?(totalGastos()/totalIncomeMonth*100):null;
   if(ratio!==null)lines.push(`Llevás gastado el <strong>${ratio.toFixed(0)}%</strong> de tus ingresos de este mes.`);
   lines.push(margen>=0?`Vas con <strong>superávit de ${fmt(margen)}</strong> este mes.`:`Vas con <strong>déficit de ${fmt(Math.abs(margen))}</strong> este mes.`);
+  // Gastos hormiga: compras chicas y sueltas (ni recurrentes ni en cuotas), bajo el 1% del ingreso del mes
+  if(totalIncomeMonth>0){
+    const threshold=totalIncomeMonth*0.01;
+    const hormiga=curExps.filter(e=>!e.recurring&&!e.cuota&&toArs(e)<=threshold);
+    if(hormiga.length>=3){
+      const hormigaTotal=hormiga.reduce((s,e)=>s+toArs(e),0);
+      lines.push(`Tenés <strong>${hormiga.length} gastos hormiga</strong> este mes (compras chicas y sueltas) que ya suman <strong>${fmt(hormigaTotal)}</strong>.`);
+    }
+  }
+  // Proyección de cierre — solo tiene sentido si estás mirando el mes real en curso
+  const today=new Date();
+  const realMonth=today.toISOString().slice(0,7);
+  if(state.activeMonth===realMonth){
+    const day=today.getDate();
+    const daysInMonth=new Date(today.getFullYear(),today.getMonth()+1,0).getDate();
+    if(day>=3&&totalCur>0){
+      const projected=totalCur/day*daysInMonth;
+      lines.push(`Al ritmo actual, vas a terminar el mes con unos <strong>${fmt(projected)}</strong> gastados en total.`);
+    }
+  }
   el.innerHTML=lines.length?lines.map(l=>`<div style="font-size:13px;color:var(--text2);padding:8px 0;border-bottom:1px solid var(--border)">${l}</div>`).join(''):`<div class="empty-state"><div class="empty-text">Todavía no hay datos suficientes para sacar conclusiones.</div></div>`;
+}
+// Tendencia de gasto total de los últimos 6 meses (incluye el activo)
+function renderStatsTrend(){
+  const el=$('statsTrend');if(!el)return;
+  const months=[];
+  let m=state.activeMonth;
+  for(let i=0;i<6;i++){months.unshift(m);m=prevMonthStr(m);}
+  const totals=months.map(mo=>monthExpsOf(mo).reduce((s,e)=>s+toArs(e),0));
+  const max=Math.max(1,...totals);
+  el.innerHTML=months.map((mo,i)=>{
+    const w=Math.round((totals[i]/max)*100);
+    const isCur=mo===state.activeMonth;
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:3px"><span>${monthLabelOf(mo)}</span><span style="color:var(--text2);font-weight:${isCur?700:400}">${fmt(totals[i])}</span></div>
+      <div class="comp-bar-bg"><div class="comp-bar-fill" style="width:${w}%;background:${isCur?'var(--primary)':'var(--border)'}"></div></div>
+    </div>`;
+  }).join('');
+}
+// Top 5 categorías con más gasto este mes
+function renderStatsTopCats(){
+  const el=$('statsTopCats');if(!el)return;
+  const ct=catT();
+  const total=Object.values(ct).reduce((s,v)=>s+v,0);
+  const entries=state.categories.map(c=>({...c,amt:ct[c.id]||0})).filter(c=>c.amt>0).sort((a,b)=>b.amt-a.amt).slice(0,5);
+  el.innerHTML=entries.length?entries.map(c=>{
+    const pct=total>0?Math.round((c.amt/total)*100):0;
+    return `<div class="comp-row">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${c.parentId?catChipLabel(c):c.label}</span>
+        <span style="font-size:13px;color:var(--text);font-weight:700">${fmt(c.amt)} · ${pct}%</span>
+      </div>
+      <div class="comp-bar-bg"><div class="comp-bar-fill" style="width:${pct}%;background:${c.color||'var(--primary)'}"></div></div>
+    </div>`;
+  }).join(''):`<div class="empty-state" style="padding:24px"><div class="empty-text">Sin gastos categorizados este mes.</div></div>`;
+}
+// Cumplimiento de presupuesto por categoría (solo si hay presupuestos cargados)
+function renderStatsBudgets(){
+  const el=$('statsBudgets'),title=$('statsBudgetsTitle');if(!el||!title)return;
+  const ct=catT(),budgets=state.budgets||{};
+  const catIdsWithBudget=Object.keys(budgets).filter(id=>budgets[id]>0);
+  if(!catIdsWithBudget.length){title.style.display='none';el.style.display='none';return;}
+  title.style.display='';el.style.display='';
+  el.innerHTML=catIdsWithBudget.map(id=>{
+    const cat=getCat(Number(id));
+    const spent=ct[id]||0;
+    const budget=budgets[id];
+    const pct=Math.min(100,Math.round((spent/budget)*100));
+    const over=spent>budget;
+    const color=over?'var(--error)':pct>=80?'var(--warning)':'var(--primary)';
+    return `<div class="comp-row">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${cat.label}</span>
+        <span style="font-size:12px;color:${color};font-weight:700">${fmt(spent)} / ${fmt(budget)}</span>
+      </div>
+      <div class="comp-bar-bg"><div class="comp-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      ${over?`<div style="font-size:11px;color:var(--error);margin-top:4px">Te pasaste por ${fmt(spent-budget)}</div>`:''}
+    </div>`;
+  }).join('');
 }
 // Theme picker / custom colors removidos en CoPocket — paleta fija
 function applyTheme(){/* noop, paleta fija */}
@@ -2151,11 +2267,14 @@ function renderCompartido(){
     </div>
     <div style="font-size:11px;color:var(--text3);margin-top:12px;text-align:center;line-height:1.5">${splitMode==='proportional'?'Cada uno aporta al pozo común en proporción a su ingreso del mes.':'Cada uno aporta al pozo común la mitad exacta, sin importar el ingreso.'}</div>`;
 
-  // LISTA DE GASTOS COMPARTIDOS — aporte por cada uno
+  // LISTA DE GASTOS COMPARTIDOS — aporte por cada uno (la búsqueda solo filtra esta lista, no los totales de arriba)
+  const listExps=compSearch.trim()?sharedExps.filter(e=>(e.desc||'').toLowerCase().includes(compSearch.trim().toLowerCase())):sharedExps;
   if(!sharedExps.length){
     $('compExpensesCard').innerHTML=`<div class="empty-state" style="padding:30px 20px"><div class="empty-text">Sin gastos compartidos este mes.<br>Marcá un gasto como compartido para verlo acá.</div></div>`;
+  } else if(!listExps.length){
+    $('compExpensesCard').innerHTML=`<div class="empty-state" style="padding:30px 20px"><div class="empty-text">Sin resultados para "${compSearch}".</div></div>`;
   } else {
-    const rows=sharedExps.sort((a,b)=>toArs(b)-toArs(a)).map(e=>{
+    const rows=listExps.sort((a,b)=>toArs(b)-toArs(a)).map(e=>{
       const cat=getCat(e.cat);
       const amt=toArs(e);
       const aporteMe=amt*ratios.me;
@@ -2835,6 +2954,10 @@ function changeUsdRate(){
 function changeWorkHours(){
   const v=parseFloat($('workHoursInput').value);
   state.workHoursPerWeek=v>0?v:null;save();renderAll();
+}
+function changeMyName(){
+  state.name=$('myNameInput').value.trim();
+  save();renderAll();
 }
 async function fetchUsdRate(){
   try{
