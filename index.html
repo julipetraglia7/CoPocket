@@ -2607,6 +2607,20 @@ function logBuybyeSkip(desc,amt,hours){
   state.buybyeHistory.unshift({id:state.nextId++,date:new Date().toISOString().split('T')[0],desc:desc||'Gasto sin nombre',amt,hours});
   save();
 }
+// Saca una entrada de "lo que no compraste" y le resta lo suyo al acumulado (por si se cargó mal o al final sí lo compraste)
+function deleteBuybyeHistoryEntry(id){
+  const idx=(state.buybyeHistory||[]).findIndex(h=>h.id===id);
+  if(idx<0)return;
+  const h=state.buybyeHistory[idx];
+  if(!confirm(`¿Sacar "${h.desc}" de lo que no compraste?`))return;
+  state.buybyeHistory.splice(idx,1);
+  if(state.buybyeStats){
+    state.buybyeStats.savedAmount=Math.max(0,state.buybyeStats.savedAmount-Number(h.amt||0));
+    if(h.hours!=null)state.buybyeStats.savedHours=Math.max(0,state.buybyeStats.savedHours-Number(h.hours||0));
+  }
+  save();
+  renderSimulacion();
+}
 // "Insegur@" — mini-form: nombre, categoría, timer de espera
 let selectedUnsureCatId=null,selectedUnsureHours=null,pendingUnsureAmt=0;
 function openUnsureForm(desc,amt){
@@ -2726,7 +2740,7 @@ function renderSimulacion(){
       stc.innerHTML=`<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:${hist.length?'14px':'0'}">
         <div><div style="font-size:11px;color:var(--text3)">Plata ahorrada</div><div style="font-family:'Space Grotesk',serif;font-size:22px;color:var(--primary-pressed)">${fmt(stats.savedAmount)}</div></div>
         <div><div style="font-size:11px;color:var(--text3)">Horas de trabajo evitadas</div><div style="font-family:'Space Grotesk',serif;font-size:22px;color:var(--primary-pressed)">${fmtHoursLabel(stats.savedHours)}</div></div>
-      </div>`+hist.map(h=>`<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);padding:6px 0;border-top:1px solid var(--border)"><span>${h.desc}</span><span>${fmt(h.amt)} · ${h.date}</span></div>`).join('');
+      </div>`+hist.map(h=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-top:1px solid var(--border)"><span>${h.desc}</span><span style="display:flex;align-items:center;gap:8px"><span>${fmt(h.amt)} · ${h.date}</span><button onclick="deleteBuybyeHistoryEntry(${h.id})" title="Sacar de la lista" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;line-height:1;padding:2px 4px">×</button></span></div>`).join('');
     } else {
       stt.style.display='none';stc.style.display='none';stc.innerHTML='';
     }
