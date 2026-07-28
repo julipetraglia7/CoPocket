@@ -50,6 +50,7 @@ body.dark{
   --color-gastos:#F18781;--color-ingresos:#77C8B0;--color-balance:#77C8B0;
   --shadow:0 1px 3px rgba(0,0,0,0.3);
   --shadow-lg:0 8px 32px rgba(0,0,0,0.5);
+  --grad:linear-gradient(135deg,#5FAF8D,#77C8B0);
 }
 body.dark .alert-green{background:var(--primary-soft);color:var(--primary);border-color:transparent;}
 body.dark .alert-red{background:var(--secondary-soft);color:var(--secondary);border-color:transparent;}
@@ -57,14 +58,14 @@ body.dark .alert-amber{background:var(--accent-soft);color:var(--accent);border-
 body.dark .status-btn{background:var(--bg2);color:var(--text2);border-color:var(--border);}
 body.dark .status-btn.selected.paid{background:var(--primary-soft);color:var(--primary);border-color:var(--primary);}
 body.dark .status-btn.selected.pending{background:var(--accent-soft);color:var(--accent);border-color:var(--accent);}
-body.dark .exp-amt.paid{color:#C4B5FD;}
-body.dark .exp-amt.income{color:#86EFAC;}
-body.dark .exp-status.done{color:#C4B5FD;}
-body.dark .exp-status.pending{color:#C084FC;}
-body.dark .metric-val.green{color:#C4B5FD;}
-body.dark .metric-val.red{color:#F9A8D4;}
-body.dark .metric-val.amber{color:#C084FC;}
-body.dark .metric-val.emerald{color:#86EFAC;}
+body.dark .exp-amt.paid{color:var(--primary);}
+body.dark .exp-amt.income{color:var(--color-ingresos);}
+body.dark .exp-status.done{color:var(--primary);}
+body.dark .exp-status.pending{color:var(--warning);}
+body.dark .metric-val.green{color:var(--color-balance);}
+body.dark .metric-val.red{color:var(--error);}
+body.dark .metric-val.amber{color:var(--warning);}
+body.dark .metric-val.emerald{color:var(--color-ingresos);}
 body.dark .filter-btn{background:var(--bg2);color:var(--text2);}
 body.dark .filter-btn.active{background:var(--primary-soft);color:var(--primary);border-color:var(--primary);}
 body.dark .btn-sm{background:var(--bg2);color:var(--text2);}
@@ -325,42 +326,8 @@ body,button,input,select,textarea{font-family:'Inter',system-ui,-apple-system,Bl
 .card-title,.section-title,.metric-lbl{letter-spacing:0.06em;}
 .exp-icon,.manage-icon,.detail-icon{border-radius:16px;}
 
-/* PREMIUM DARK SKIN — solo cuando body.dark */
-body.dark{
-  --primary:#A855F7;--primary-hover:#C084FC;--primary-pressed:#7E22CE;--primary-soft:#2B1744;
-  --secondary:#F472D0;--secondary-soft:#3A1732;
-  --bg:#0E0D14;--surface:#171522;--surface-2:#211D30;--card:#171522;--bg2:#211D30;
-  --text:#F8F5FF;--text2:#C9C1D9;--text3:#8F86A3;--text-disabled:#5F5870;--text-inverse:#FFFFFF;
-  --accent:#E879F9;--accent-strong:#F0ABFC;--accent-soft:#30133A;--border:rgba(255,255,255,0.10);
-  --success:#67E8B9;--warning:#FBBF24;--error:#FB7185;--info:#93C5FD;
-  --chart-income:#67E8B9;--chart-expense:#F472B6;--chart-savings:#A78BFA;--chart-investment:#C084FC;--chart-shopping:#FB7185;--chart-food:#FBBF24;--chart-home:#818CF8;--chart-transport:#22D3EE;
-  --color-gastos:#F472B6;--color-ingresos:#67E8B9;--color-balance:#C084FC;
-  --shadow:0 18px 55px rgba(0,0,0,0.22);--shadow-lg:0 28px 90px rgba(0,0,0,0.55);
-  --grad:linear-gradient(135deg,#6D28D9 0%,#A855F7 48%,#F472D0 100%);
-  background:radial-gradient(circle at 18% 0%,rgba(168,85,247,0.24),transparent 30%),radial-gradient(circle at 85% 12%,rgba(244,114,208,0.18),transparent 28%),var(--bg);
-}
-body.dark::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.045),transparent 36%);pointer-events:none;z-index:-1;}
-body.dark .sidebar{background:rgba(13,12,20,0.72)!important;border-right:1px solid var(--border);backdrop-filter:blur(24px);}
-body.dark .sidebar::before,body.dark .sidebar::after,body.dark .mobile-header::before,body.dark .mobile-header::after{display:none;}
-body.dark .sidebar-balance,body.dark .sidebar-pill,body.dark .metric-card,body.dark .card,body.dark .modal,body.dark .income-summary-card{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.045))!important;border:1px solid rgba(255,255,255,0.11)!important;box-shadow:var(--shadow);backdrop-filter:blur(18px);}
-body.dark .nav-link{border:1px solid transparent;border-radius:16px;}
-body.dark .nav-link.active,body.dark .nav-link:hover{background:rgba(168,85,247,0.18);border-color:rgba(232,121,249,0.20);}
-body.dark .topbar-month,body.dark .filter-btn,body.dark .btn-sm,body.dark .status-btn,body.dark .form-input,body.dark .btn-secondary{background:rgba(255,255,255,0.065);border-color:rgba(255,255,255,0.10);color:var(--text);}
-body.dark .form-input:focus{border-color:rgba(232,121,249,0.75);box-shadow:0 0 0 4px rgba(168,85,247,0.13);}
-body.dark .btn-primary,body.dark .btn-add,body.dark .toggle.on{background:var(--grad);box-shadow:0 12px 34px rgba(168,85,247,0.30);}
-body.dark .btn-delete{background:rgba(244,63,94,0.14)!important;color:#FDA4AF!important;border:1px solid rgba(244,63,94,0.22)!important;}
-body.dark .alert-green,body.dark .alert-amber{background:rgba(168,85,247,0.16);color:#F5D0FE;border-color:rgba(232,121,249,0.22);}
-body.dark .alert-red{background:rgba(244,63,94,0.14);color:#FDA4AF;border-color:rgba(244,63,94,0.22);}
-body.dark .card-title,body.dark .section-title,body.dark .metric-lbl{color:var(--accent-strong);}
-body.dark .exp-row,body.dark .inc-row,body.dark .cat-row,body.dark .manage-row,body.dark .comp-row{border-color:rgba(255,255,255,0.08);}
-body.dark .exp-row:hover,body.dark .exp-row:active,body.dark .inc-row:hover,body.dark .inc-row:active{background:rgba(255,255,255,0.055);}
-body.dark .exp-icon,body.dark .manage-icon,body.dark .detail-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255,0.10);}
-body.dark .modal-overlay{background:rgba(6,5,10,0.72);backdrop-filter:blur(12px);}
-body.dark .mobile-header{background:linear-gradient(165deg,#151220 0%,#24173B 58%,#391949 100%);border-bottom:1px solid rgba(255,255,255,0.08);}
-body.dark .mh-prog{background:linear-gradient(165deg,#1c1430 0%,#2a1844 58%,#3f1c52 100%);border-top:1px solid rgba(255,255,255,0.06);}
-body.dark .mobile-nav{background:rgba(13,12,20,0.86)!important;border:1px solid rgba(255,255,255,0.10)!important;border-radius:28px 28px 0 0;backdrop-filter:blur(22px);box-shadow:0 -18px 60px rgba(0,0,0,0.36);}
-body.dark .mobile-fab{background:var(--secondary);box-shadow:0 16px 38px rgba(244,114,208,0.35);}
-body.dark .mobile-fab-inc{background:var(--primary);box-shadow:0 16px 38px rgba(168,85,247,0.40);}
+/* DARK — ajustes finos, sin gradientes propios ni fondos distintos por sección */
+body.dark .modal-overlay{background:rgba(0,0,0,0.55);}
 body.dark .topbar-title{font-family:'Inter',sans-serif;font-weight:800;}
 
 /* LIGHT SKIN — ajustes finos sobre la paleta original */
@@ -374,8 +341,8 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
 @media(max-width:767px){
   html{background:var(--bg);}
   body{width:100%;max-width:430px;margin-left:auto;margin-right:auto;background:var(--bg);box-shadow:none;padding-bottom:calc(100px + env(safe-area-inset-bottom));}
-  body.dark{background-color:#0E0D14;}
-  html:has(body.dark){background:#0E0D14;}
+  body.dark{background-color:var(--bg);}
+  html:has(body.dark){background:#181A1B;}
   .main,.screen{width:100%;}
   .card{border-radius:18px;margin:0 16px 12px;}
   .metric-card{border-radius:16px;margin:0;}
@@ -474,8 +441,8 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="nav-link" onclick="showScreen('gastos',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span> Gastos</div>
     <div class="nav-link" onclick="showScreen('ingresos',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z"/></svg></span> Ingresos</div>
     <div class="nav-link" onclick="showScreen('ahorro',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Ahorro</div>
-    <div class="nav-link" onclick="showScreen('simulacion',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> Simulación</div>
     <div class="nav-link" data-compartido-nav style="display:none" onclick="showScreen('compartido',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Compartido</div>
+    <div class="nav-link" onclick="showScreen('estadisticas',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg></span> Estadísticas</div>
     <div class="nav-link" onclick="showScreen('config',this,'d')"><span class="nav-link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Configuración</div>
   </nav>
   <div class="sidebar-footer">
@@ -556,6 +523,9 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <!-- GASTOS -->
   <div id="screen-gastos" class="screen">
     <div class="section-title flush">Gastos del mes</div>
+    <div class="sort-row" style="justify-content:flex-start">
+      <button class="btn-sm" onclick="openBuybyeModal()" id="btnSimular">🧮 ¿Vale la pena esta compra?</button>
+    </div>
     <div class="sort-row">
       <select class="form-input" id="sortSelect" style="width:auto;padding:6px 10px;font-size:12px" onchange="setSortBy(this.value)">
         <option value="amount">Ordenar: Monto (mayor a menor)</option>
@@ -570,9 +540,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       <select class="form-input" id="filterCuotasSel" style="font-size:12px;padding:8px 10px" onchange="setFilterCuotas(this.value)"></select>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px" id="gastosFilterMetrics"></div>
-    <div class="card" style="padding:0;margin-bottom:12px"><div id="allExpensesList"></div></div>
-    <div class="section-title flush">Vs. mes anterior</div>
-    <div class="card" style="padding:0" id="gastosCompareCard"></div>
+    <div class="card" style="padding:0"><div id="allExpensesList"></div></div>
   </div>
 
   <!-- INGRESOS -->
@@ -583,8 +551,6 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       <div class="income-total" id="incomeTotalBig">$0</div>
       <div class="income-sub" id="incomeSubLabel">—</div>
     </div>
-    <div class="section-title flush">Vs. mes anterior</div>
-    <div class="card" style="padding:0;margin-bottom:12px" id="incomeCompareCard"></div>
     <div class="card" id="incomeAvailCard" style="padding:18px;margin-bottom:12px;display:none">
       <div class="card-title" style="margin-bottom:12px">¿Cuánto tiene cada uno para gastar?</div>
       <div id="incomeAvailBody" style="display:grid;grid-template-columns:1fr 1fr;gap:14px"></div>
@@ -612,60 +578,64 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div class="card" id="compExpensesCard" style="padding:0"></div>
   </div>
 
+  <!-- ESTADÍSTICAS -->
+  <div id="screen-estadisticas" class="screen">
+    <div class="section-title flush">Conclusiones</div>
+    <div class="card" id="statsConclusions" style="padding:18px;margin-bottom:12px"></div>
+    <div class="section-title flush">Gastos vs. mes anterior</div>
+    <div class="card" style="padding:0;margin-bottom:12px" id="gastosCompareCard"></div>
+    <div class="section-title flush">Ingresos vs. mes anterior</div>
+    <div class="card" style="padding:0" id="incomeCompareCard"></div>
+  </div>
+
   <!-- AHORRO + METAS -->
   <div id="screen-ahorro" class="screen">
     <div class="section-title flush">Ahorro</div>
     <div style="font-size:12px;color:var(--text3);padding:0 16px 12px;line-height:1.5">Este monto es aparte: no se cuenta en tus ingresos, gastos ni balances. Solo cambia cuando vos decidís depositar o retirar.</div>
-    <div id="ahorroMeCard"></div>
-    <div class="card-header" style="padding:0 16px;margin-bottom:8px"><div class="card-title" style="margin-bottom:0" id="goalsMeTitle">Mis metas</div><button class="btn-sm" onclick="openGoalModal()">+ Nueva meta</button></div>
-    <div class="card" style="padding:0;margin-bottom:12px"><div id="goalsListMe"></div></div>
-    <div data-partner-savings style="display:none">
-      <div id="ahorroPartnerCard"></div>
-      <div class="section-title flush" id="goalsPartnerTitle" style="margin-top:8px">Metas de tu pareja</div>
-      <div class="card" style="padding:0;margin-bottom:12px"><div id="goalsListPartner"></div></div>
-    </div>
-    <div data-shared-savings style="display:none">
-      <div id="ahorroSharedCard"></div>
-      <div class="section-title flush" style="margin-top:8px">Metas compartidas</div>
-      <div class="card" style="padding:0"><div id="goalsListShared"></div></div>
-    </div>
+    <div id="ahorroCard"></div>
+    <div class="card-header" style="padding:0 16px;margin-bottom:8px"><div class="card-title" style="margin-bottom:0">Metas</div><button class="btn-sm" onclick="openGoalModal()">+ Nueva meta</button></div>
+    <div class="card" style="padding:0"><div id="goalsList"></div></div>
   </div>
 
-  <!-- SIMULACION -->
-  <div id="screen-simulacion" class="screen">
-    <div id="buybyePendingBanner"></div>
-    <div id="buybyeStep1">
-      <div class="section-title flush">¿Vale la pena esta compra?</div>
-      <div class="card" style="padding:18px;margin-bottom:12px">
-        <div class="form-group"><label class="form-label">Monto del gasto</label><input class="form-input big" type="number" id="simAmt" placeholder="0" inputmode="decimal" min="0" oninput="sanitizeAmountInput(this)"><div class="form-error" id="simAmtError"></div></div>
-        <div class="form-group"><label class="form-label">¿Qué es? (opcional)</label><input class="form-input" type="text" id="simDesc" placeholder="Ej: Zapatillas nuevas"></div>
-        <button class="btn-primary" onclick="runBuybyeCalc()">Calcular</button>
-      </div>
-    </div>
-    <div id="buybyeResult"></div>
-    <div id="buybyeUnsureForm" style="display:none">
-      <div class="section-title flush">Pensalo un poco más</div>
-      <div class="card" style="padding:18px">
-        <div class="form-group"><label class="form-label">Nombre del gasto</label><input class="form-input" id="unsureDesc" placeholder="Ej: Zapatillas nuevas"></div>
-        <div class="form-group"><label class="form-label">Categoría</label><div id="unsureCatSelect" style="display:flex;gap:8px;flex-wrap:wrap;"></div></div>
-        <div class="form-group">
-          <label class="form-label">¿Cuánto querés esperar?</label>
-          <div class="filters" id="unsureTimerSelect">
-            <button class="filter-btn" data-h="1" onclick="selectUnsureTimer(1)">1 hora</button>
-            <button class="filter-btn" data-h="3" onclick="selectUnsureTimer(3)">3 horas</button>
-            <button class="filter-btn" data-h="24" onclick="selectUnsureTimer(24)">24 horas</button>
-            <button class="filter-btn" data-h="48" onclick="selectUnsureTimer(48)">48 horas</button>
-            <button class="filter-btn" data-h="72" onclick="selectUnsureTimer(72)">72 horas</button>
-          </div>
+  <!-- MODAL SIMULACIÓN (BUYBYE) -->
+  <div class="modal-overlay" id="modalBuybye">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">¿Vale la pena esta compra?</div>
+      <div id="buybyePendingBanner"></div>
+      <div id="buybyeStep1">
+        <div class="card" style="padding:18px;margin-bottom:12px">
+          <div class="form-group"><label class="form-label">Monto del gasto</label><input class="form-input big" type="number" id="simAmt" placeholder="0" inputmode="decimal" min="0" oninput="sanitizeAmountInput(this)"><div class="form-error" id="simAmtError"></div></div>
+          <div class="form-group"><label class="form-label">¿Qué es? (opcional)</label><input class="form-input" type="text" id="simDesc" placeholder="Ej: Zapatillas nuevas"></div>
+          <button class="btn-primary" onclick="runBuybyeCalc()">Calcular</button>
         </div>
-        <button class="btn-primary" onclick="confirmUnsureTimer()">Guardar y esperar</button>
-        <button class="btn-secondary" onclick="cancelUnsureForm()">Cancelar</button>
       </div>
+      <div id="buybyeResult"></div>
+      <div id="buybyeUnsureForm" style="display:none">
+        <div class="section-title flush">Pensalo un poco más</div>
+        <div class="card" style="padding:18px">
+          <div class="form-group"><label class="form-label">Nombre del gasto</label><input class="form-input" id="unsureDesc" placeholder="Ej: Zapatillas nuevas"></div>
+          <div class="form-group"><label class="form-label">Categoría</label><div id="unsureCatSelect" style="display:flex;gap:8px;flex-wrap:wrap;"></div></div>
+          <div class="form-group">
+            <label class="form-label">¿Cuánto querés esperar?</label>
+            <div class="filters" id="unsureTimerSelect">
+              <button class="filter-btn" data-h="1" onclick="selectUnsureTimer(1)">1 hora</button>
+              <button class="filter-btn" data-h="3" onclick="selectUnsureTimer(3)">3 horas</button>
+              <button class="filter-btn" data-h="24" onclick="selectUnsureTimer(24)">24 horas</button>
+              <button class="filter-btn" data-h="48" onclick="selectUnsureTimer(48)">48 horas</button>
+              <button class="filter-btn" data-h="72" onclick="selectUnsureTimer(72)">72 horas</button>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="confirmUnsureTimer()">Guardar y esperar</button>
+          <button class="btn-secondary" onclick="cancelUnsureForm()">Cancelar</button>
+        </div>
+      </div>
+      <div class="section-title flush" id="buybyeStatsTitle" style="display:none">Lo que no compraste</div>
+      <div class="card" id="buybyeStatsCard" style="padding:18px;margin-bottom:12px;display:none"></div>
+      <div class="section-title flush" id="buybyePendingTitle" style="display:none">Pendientes de decidir</div>
+      <div class="card" id="buybyePendingList" style="padding:0;margin-bottom:12px;display:none"></div>
+      <button class="btn-secondary" onclick="closeBuybyeModal()">Cerrar</button>
     </div>
-    <div class="section-title flush" id="buybyeStatsTitle" style="display:none">Lo que no compraste</div>
-    <div class="card" id="buybyeStatsCard" style="padding:18px;margin-bottom:12px;display:none"></div>
-    <div class="section-title flush" id="buybyePendingTitle" style="display:none">Pendientes de decidir</div>
-    <div class="card" id="buybyePendingList" style="padding:0;display:none"></div>
   </div>
 
   <!-- CONFIG -->
@@ -674,7 +644,11 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       <div>
         <div class="card">
           <div class="card-title">Mes activo</div>
-          <input class="form-input" type="month" id="activeMonth" onchange="changeMonth()">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg2);border-radius:12px;padding:10px 14px">
+            <button onclick="changeMonthBy(-1)" title="Mes anterior" style="background:none;border:none;color:var(--accent-strong);font-size:18px;font-weight:700;cursor:pointer;padding:2px 8px;line-height:1">‹</button>
+            <span id="configActiveMonthLabel" style="font-size:14px;font-weight:700;color:var(--text)">—</span>
+            <button onclick="changeMonthBy(1)" title="Mes siguiente" style="background:none;border:none;color:var(--accent-strong);font-size:18px;font-weight:700;cursor:pointer;padding:2px 8px;line-height:1">›</button>
+          </div>
         </div>
         <div class="card" style="margin-top:16px">
           <div class="card-title">Cotización dólar</div>
@@ -744,7 +718,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
         <button class="btn-secondary" onclick="exportExpensesCSV()">⬇ Descargar CSV de gastos</button>
         <button class="btn-secondary" onclick="document.getElementById('csvImportInput').click()" style="margin-top:8px">⬆ Importar CSV de gastos</button>
         <input type="file" id="csvImportInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvImportChange(event)">
-        <div id="csvImportStatus" style="font-size:11px;color:var(--text3);margin-top:8px">El CSV descarga <strong>todos</strong> tus gastos, de todos los meses (no solo el activo) — si sumás la columna Monto entera vas a ver el total histórico, no el de un mes. Para comparar con "Gastos" de Inicio, filtrá por la columna Mes. Al importar, debe tener las columnas: Monto, Descripcion, Medio de Pago, Categoria, Quien Pago, Fecha, Cuotas, Dividido, Moneda, Recurrente, Estado. Las categorías y medios de pago que no existan se crean automáticamente. Para subcategorías, escribí "Categoría > Subcategoría" en la columna Categoria.</div>
+        <div id="csvImportStatus" style="font-size:11px;color:var(--text3);margin-top:8px">Descarga todos los meses. Al importar, usá las columnas Monto, Descripcion, Fecha (mínimo).</div>
       </div>
     </div>
     <div style="margin-top:16px">
@@ -772,8 +746,8 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <div class="mn-item" onclick="showScreen('gastos',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></div><span>Gastos</span></div>
   <div class="mn-item" onclick="showScreen('ingresos',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z"/></svg></div><span>Ingresos</span></div>
   <div class="mn-item" onclick="showScreen('ahorro',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><span>Ahorro</span></div>
-  <div class="mn-item" onclick="showScreen('simulacion',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><span>Simular</span></div>
   <div class="mn-item" data-compartido-nav style="display:none" onclick="showScreen('compartido',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span>2x</span></div>
+  <div class="mn-item" onclick="showScreen('estadisticas',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg></div><span>Stats</span></div>
   <div class="mn-item" onclick="showScreen('config',this,'m')"><div class="mn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><span>Config</span></div>
 </nav>
 <button class="mobile-fab" onclick="openModal()" title="Nuevo gasto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 2-1.58l1.65-7.42H5.12"/></svg></button>
@@ -803,9 +777,14 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     </div>
     <div class="form-group">
       <label class="form-label">Medio de pago</label>
-      <div id="medioSelectExp" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      <div id="medioSelectExp" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>
+      <button class="btn-sm" style="margin-top:8px" onclick="openMedioModal()">+ Nuevo medio de pago</button>
     </div>
-    <div class="form-group"><label class="form-label">Categoría</label><select class="form-input" id="catSelectExp" onchange="selectCatExp(this.value)"></select></div>
+    <div class="form-group">
+      <label class="form-label">Categoría</label>
+      <select class="form-input" id="catSelectExp" onchange="selectCatExp(this.value)"></select>
+      <button class="btn-sm" style="margin-top:8px" onclick="openCatModal()">+ Nueva categoría</button>
+    </div>
     <div class="form-group">
       <label class="form-label">¿Es en cuotas?</label>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
@@ -1564,13 +1543,13 @@ function drawD(id,sz,entries,tot){
 }
 
 // RENDER ALL
-function renderAll(){updateHeader();renderHome();renderGastos();renderIngresos();renderGoalsScreen();renderAhorro();renderSimulacion();renderConfig();renderCompartido();updateNavCompartido();}
+function renderAll(){updateHeader();renderHome();renderGastos();renderIngresos();renderGoalsScreen();renderAhorro();renderSimulacion();renderConfig();renderCompartido();renderEstadisticas();updateNavCompartido();}
 
 function updateHeader(){
   const{total,ingresos,margen}=calcT();
   const pct=ingresos>0?Math.min(100,Math.round((total/ingresos)*100)):0;
   const ml=monthLabel(),gr=state.name?`Hola, ${state.name}`:'Hola';
-  const sb=$('sbBalance');if(sb){sb.textContent=fmt(Math.abs(margen));sb.className='sb-val'+(margen<0?' red':'');}
+  const sb=$('sbBalance');if(sb){sb.textContent=(margen<0?'-':'')+fmt(Math.abs(margen));sb.className='sb-val'+(margen<0?' red':'');}
   const sbs=$('sbBalanceSub');if(sbs)sbs.textContent=margen>=0?'superávit de ingresos':'déficit de ingresos';
   const sp=$('sbProg');if(sp)sp.style.width=pct+'%';
   const spl=$('sbProgLabel');if(spl)spl.textContent=pct+'% de ingresos gastado';
@@ -1580,7 +1559,7 @@ function updateHeader(){
   const tm=$('topMonth');if(tm)tm.textContent=ml;
   const mhm=$('mhMonth');if(mhm)mhm.textContent=ml;
   const mg=$('mhGreeting');if(mg)mg.textContent=gr;
-  const mb=$('mhBalance');if(mb){mb.textContent=fmt(Math.abs(margen));mb.className='mh-bal-amount'+(margen<0?' red':'');}
+  const mb=$('mhBalance');if(mb){mb.textContent=(margen<0?'-':'')+fmt(Math.abs(margen));mb.className='mh-bal-amount'+(margen<0?' red':'');}
   const mbs=$('mhBalanceSub');if(mbs)mbs.textContent=margen>=0?'superávit de ingresos':'déficit de ingresos';
   const mi=$('mhIngresos');if(mi)mi.textContent=fmt(ingresos);
   const mg2=$('mhGastos');if(mg2)mg2.textContent=fmt(total);
@@ -1595,7 +1574,7 @@ function renderHome(){
     <div class="metric-card"><div class="metric-lbl">Ingresos</div><div class="metric-val emerald">${fmt(ingresos)}</div><div class="metric-note">del mes</div></div>
     <div class="metric-card"><div class="metric-lbl">Gastos</div><div class="metric-val amber">${fmt(total)}</div><div class="metric-note">pagados con ingresos</div></div>
     <div class="metric-card"><div class="metric-lbl">Pagado</div><div class="metric-val">${fmt(monthExps().filter(e=>e.paid).reduce((s,e)=>s+toArs(e),0))}</div><div class="metric-note">confirmado</div></div>
-    <div class="metric-card"><div class="metric-lbl">${margen>=0?'Superávit ingresos':'Déficit ingresos'}</div><div class="metric-val ${margen>=0?'green':'red'}">${fmt(Math.abs(margen))}</div><div class="metric-note">${margen>=0?'disponible este mes':'en rojo este mes'}</div></div>`;
+    <div class="metric-card"><div class="metric-lbl">${margen>=0?'Superávit ingresos':'Déficit ingresos'}</div><div class="metric-val ${margen>=0?'green':'red'}">${margen<0?'-':''}${fmt(Math.abs(margen))}</div><div class="metric-note">${margen>=0?'disponible este mes':'en rojo este mes'}</div></div>`;
   if(state.partnerMode){
     const misGastos=monthExpsIndividual('me').reduce((s,e)=>s+toArs(e),0);
     const gastosPareja=monthExpsIndividual('partner').reduce((s,e)=>s+toArs(e),0);
@@ -1605,7 +1584,7 @@ function renderHome(){
     <div class="metric-card"><div class="metric-lbl">Gastos de ${partnerLabel()}</div><div class="metric-val" style="color:var(--secondary)">${fmt(gastosPareja)}</div><div class="metric-note">individuales</div></div>
     <div class="metric-card"><div class="metric-lbl">Compartidos</div><div class="metric-val" style="color:var(--info)">${fmt(gastosCompartidos)}</div><div class="metric-note">entre los dos</div></div>`;
   }
-  const ahorroTotal=savingsBalance('personal','me')+(state.partnerMode?savingsBalance('personal','partner')+savingsBalance('shared',null):0);
+  const ahorroTotal=savingsBalanceAll();
   metricsHtml+=`
     <div class="metric-card"><div class="metric-lbl">Ahorro</div><div class="metric-val" style="color:var(--warning)">${fmt(ahorroTotal)}</div><div class="metric-note">${state.partnerMode?'entre los dos':'tuyo'}</div></div>`;
   $('metricGrid').innerHTML=metricsHtml;
@@ -1744,7 +1723,6 @@ function renderGastos(){
     <div class="metric-card"><div class="metric-lbl">% de tus ingresos</div><div class="metric-val" style="color:var(--info)">${filterPct===null?'—':filterPct.toFixed(1)+'%'}</div><div class="metric-note">del total del mes</div></div>`;
   $('allExpensesList').innerHTML=fl.length?fl.map(expRow).join(''):
     `<div class="empty-state"><div class="empty-text">Sin gastos en este filtro</div></div>`;
-  renderGastosCompare();
 }
 
 function renderIngresos(){
@@ -1806,7 +1784,6 @@ function renderIngresos(){
       }).join('');
     }
   }
-  renderIngresosCompare();
 }
 
 function renderCatBarsHtml(){
@@ -1842,7 +1819,7 @@ function renderCatBarsHtml(){
 }
 
 function renderConfig(){
-  $('activeMonth').value=state.activeMonth;
+  const caml=$('configActiveMonthLabel');if(caml)caml.textContent=monthLabel();
   const td=$('toggleDark');if(td)td.classList.toggle('on',!!state.darkMode);
   const ur=$('usdRateInput');if(ur)ur.value=state.usdRate||1000;
   const whi=$('workHoursInput');if(whi)whi.value=state.workHoursPerWeek||'';
@@ -1879,7 +1856,7 @@ function renderConfig(){
 }
 
 // SCREENS
-const titles={home:'Inicio',gastos:'Gastos',ingresos:'Ingresos',ahorro:'Ahorro',simulacion:'Simulación',compartido:'Compartido',config:'Configuración'};
+const titles={home:'Inicio',gastos:'Gastos',ingresos:'Ingresos',ahorro:'Ahorro',compartido:'Compartido',estadisticas:'Estadísticas',config:'Configuración'};
 function showScreen(id,el,type){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   if(type==='d')document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
@@ -1963,6 +1940,42 @@ function renderIngresosCompare(){
     icc.innerHTML=compRowHtml('Ingresos',curTotal,prevTotal);
   }
 }
+// Estadísticas: junta las comparativas de Gastos e Ingresos + un resumen de conclusiones en texto
+function renderEstadisticas(){
+  renderGastosCompare();
+  renderIngresosCompare();
+  const el=$('statsConclusions');if(!el)return;
+  const prevM=prevMonthStr(state.activeMonth);
+  const curExps=monthExps(),prevExps=monthExpsOf(prevM);
+  const curByCat={},prevByCat={};
+  curExps.forEach(e=>{curByCat[e.cat]=(curByCat[e.cat]||0)+toArs(e);});
+  prevExps.forEach(e=>{prevByCat[e.cat]=(prevByCat[e.cat]||0)+toArs(e);});
+  const lines=[];
+  const catIds=Object.keys(curByCat);
+  if(catIds.length){
+    const topCatId=catIds.reduce((a,b)=>curByCat[a]>curByCat[b]?a:b);
+    const topCat=getCat(Number(topCatId));
+    const totalCur=Object.values(curByCat).reduce((s,v)=>s+v,0);
+    const pct=totalCur>0?Math.round((curByCat[topCatId]/totalCur)*100):0;
+    lines.push(`Tu categoría con más gasto este mes es <strong>${topCat.label}</strong>, con ${fmt(curByCat[topCatId])} (${pct}% del total).`);
+  }
+  const allCatIds=new Set([...Object.keys(curByCat),...Object.keys(prevByCat)]);
+  let maxIncreaseCat=null,maxIncrease=0;
+  allCatIds.forEach(id=>{
+    const diff=(curByCat[id]||0)-(prevByCat[id]||0);
+    if(diff>maxIncrease){maxIncrease=diff;maxIncreaseCat=id;}
+  });
+  if(maxIncreaseCat){
+    const cat=getCat(Number(maxIncreaseCat));
+    lines.push(`Lo que más aumentó vs. ${monthLabelOf(prevM)} fue <strong>${cat.label}</strong>: +${fmt(maxIncrease)}.`);
+  }
+  const{margen}=calcT();
+  const totalIncomeMonth=totalIngs();
+  const ratio=totalIncomeMonth>0?(totalGastos()/totalIncomeMonth*100):null;
+  if(ratio!==null)lines.push(`Llevás gastado el <strong>${ratio.toFixed(0)}%</strong> de tus ingresos de este mes.`);
+  lines.push(margen>=0?`Vas con <strong>superávit de ${fmt(margen)}</strong> este mes.`:`Vas con <strong>déficit de ${fmt(Math.abs(margen))}</strong> este mes.`);
+  el.innerHTML=lines.length?lines.map(l=>`<div style="font-size:13px;color:var(--text2);padding:8px 0;border-bottom:1px solid var(--border)">${l}</div>`).join(''):`<div class="empty-state"><div class="empty-text">Todavía no hay datos suficientes para sacar conclusiones.</div></div>`;
+}
 // Theme picker / custom colors removidos en CoPocket — paleta fija
 function applyTheme(){/* noop, paleta fija */}
 function applyUserColors(){/* noop, paleta fija */}
@@ -2001,7 +2014,6 @@ function setActiveMonth(newMonth){
   }
   renderAll();
 }
-function changeMonth(){setActiveMonth($('activeMonth').value);}
 function changeMonthBy(delta){setActiveMonth(delta<0?prevMonthStr(state.activeMonth):nextMonthStr(state.activeMonth));}
 
 // MODAL GASTO
@@ -2026,6 +2038,14 @@ function openModal(){
   $('modalAdd').classList.add('open');
 }
 function closeModal(){$('modalAdd').classList.remove('open');editingId=null;}
+// Abre el modal de nuevo gasto ya cargado con lo que se venía simulando (viene de "Comprarlo" en el simulador)
+function openModalPrefilled(amt,desc,catId){
+  openModal();
+  if(desc)$('inputDesc').value=desc;
+  if(amt)$('inputAmt').value=amt;
+  if(catId)selectCatExp(catId);
+  updateAmtPreview();
+}
 function toggleCuotasMode(){
   cuotasMode=!cuotasMode;
   $('toggleCuotas').classList.toggle('on',cuotasMode);
@@ -2214,11 +2234,13 @@ function goalCardHtml(g){
     const cPartner=(g.contributions||[]).filter(c=>c.owner==='partner').reduce((s,c)=>s+Number(c.amount||0),0);
     contribBreakdown=`<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px"><span>${myLabel()} aportó ${fmt(cMe)}</span><span>${partnerLabel()} aportó ${fmt(cPartner)}</span></div>`;
   }
+  const ownerTag=state.partnerMode?(scope==='shared'?' · Compartida':(g.owner==='partner'?` · ${partnerLabel()}`:` · ${myLabel()}`)):'';
   return `<div style="padding:16px;border-bottom:1px solid var(--border)">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">
       <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;color:var(--text)">${g.name}</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:2px">${fmt(p.saved)} de ${fmt(g.target)} · ${p.pct}%${p.missing>0?` · Falta ${fmt(p.missing)}`:''}</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text)">${g.name}${ownerTag}</div>
+        <div style="font-family:'Space Grotesk',serif;font-size:22px;color:var(--text);margin-top:4px">${fmt(p.saved)}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">de ${fmt(g.target)} · ${p.pct}%${p.missing>0?` · Falta ${fmt(p.missing)}`:''}</div>
       </div>
       <button class="btn-sm" onclick="openGoalContribModal(${g.id})">+ Aporte</button>
       <button class="btn-sm" onclick="editGoal(${g.id})">Editar</button>
@@ -2231,17 +2253,8 @@ function goalCardHtml(g){
 
 function renderGoalsScreen(){
   const goals=state.goals||[];
-  const pm=state.partnerMode;
-  const me=goals.filter(g=>(g.scope||'shared')==='personal'&&(g.owner||'me')==='me');
-  const partner=pm?goals.filter(g=>(g.scope||'shared')==='personal'&&g.owner==='partner'):[];
-  const shared=pm?goals.filter(g=>(g.scope||'shared')==='shared'):[];
-  $('goalsMeTitle').textContent=pm?'Mis metas':'Mis metas';
-  $('goalsListMe').innerHTML=me.length?me.map(goalCardHtml).join(''):`<div class="empty-state"><div class="empty-text">Sin metas personales aún.<br>Tocá "+ Nueva meta" para empezar a ahorrar.</div></div>`;
-  if(pm){
-    $('goalsPartnerTitle').textContent=`Metas de ${partnerLabel()}`;
-    $('goalsListPartner').innerHTML=partner.length?partner.map(goalCardHtml).join(''):`<div class="empty-state"><div class="empty-text">${partnerLabel()} todavía no tiene metas personales.</div></div>`;
-    $('goalsListShared').innerHTML=shared.length?shared.map(goalCardHtml).join(''):`<div class="empty-state"><div class="empty-text">Sin metas compartidas aún.<br>Tocá "+ Nueva meta" y elegí "Compartida".</div></div>`;
-  }
+  const list=$('goalsList');if(!list)return;
+  list.innerHTML=goals.length?goals.map(goalCardHtml).join(''):`<div class="empty-state"><div class="empty-text">Sin metas aún.<br>Tocá "+ Nueva meta" para empezar a ahorrar.</div></div>`;
 }
 
 // METAS — modals y funciones
@@ -2392,6 +2405,14 @@ function syncSavingsLinkForExpense(e){
 function removeSavingsLinkForExpense(expenseId){
   state.savingsEntries=(state.savingsEntries||[]).filter(x=>x.linkedExpenseId!==expenseId);
 }
+// Ahorro unificado: no se separa por persona, es un solo pozo con un solo saldo
+function savingsEntriesAll(){
+  const cutoff=state.activeMonth+'-31';
+  return (state.savingsEntries||[]).filter(e=>(e.date||'')<=cutoff);
+}
+function savingsBalanceAll(excludeId){
+  return savingsEntriesAll().filter(e=>e.id!==excludeId).reduce((s,e)=>s+(e.type==='deposit'?Number(e.amount):-Number(e.amount)),0);
+}
 function savingsCardHtml(scope,owner,label){
   const bal=savingsBalance(scope,owner);
   const entries=savingsEntriesFor(scope,owner).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -2415,15 +2436,25 @@ function savingsCardHtml(scope,owner,label){
 }
 function renderAhorro(){
   const el=$('screen-ahorro');if(!el)return;
-  $('ahorroMeCard').innerHTML=savingsCardHtml('personal','me',myLabel());
-  const pm=state.partnerMode;
-  const pc=document.querySelector('[data-partner-savings]'),sc=document.querySelector('[data-shared-savings]');
-  if(pc)pc.style.display=pm?'':'none';
-  if(sc)sc.style.display=pm?'':'none';
-  if(pm){
-    $('ahorroPartnerCard').innerHTML=savingsCardHtml('personal','partner',partnerLabel());
-    $('ahorroSharedCard').innerHTML=savingsCardHtml('shared',null,'Ahorro compartido');
-  }
+  const bal=savingsBalanceAll();
+  const entries=savingsEntriesAll().slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const rows=entries.length?entries.slice(0,10).map(e=>`
+    <div class="exp-row" onclick="openSavingsEntryDetail(${e.id})">
+      <div class="exp-icon" style="background:${e.type==='deposit'?'var(--primary-soft)':'var(--secondary-soft)'};color:${e.type==='deposit'?'var(--primary)':'var(--secondary)'};font-weight:700">${e.type==='deposit'?'+':'－'}</div>
+      <div class="exp-info"><div class="exp-name">${e.note||(e.type==='deposit'?'Depósito':'Retiro')}</div><div class="exp-cat">${e.date||''}</div></div>
+      <div class="exp-right"><div class="exp-amt" style="color:${e.type==='deposit'?'var(--primary)':'var(--secondary)'}">${e.type==='deposit'?'+':'－'}${fmt(e.amount)}</div></div>
+    </div>`).join(''):`<div class="empty-state" style="padding:20px"><div class="empty-text">Sin movimientos todavía</div></div>`;
+  $('ahorroCard').innerHTML=`<div class="card" style="padding:0;margin-bottom:16px">
+    <div style="padding:18px 16px 14px;border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Ahorro</div>
+      <div style="font-family:'Space Grotesk',serif;font-size:30px;color:${bal<0?'var(--error)':'var(--text)'};margin-top:4px">${bal<0?'-':''}${fmt(Math.abs(bal))}</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn-sm" onclick="openSavingsModal('shared','','deposit')">+ Depositar</button>
+        <button class="btn-sm" onclick="openSavingsModal('shared','','withdraw')">－ Retirar</button>
+      </div>
+    </div>
+    ${rows}
+  </div>`;
 }
 let savingsModalScope='personal',savingsModalOwner='me',savingsModalType='deposit',editingSavingsId=null;
 function openSavingsModal(scope,owner,type){
@@ -2506,7 +2537,7 @@ function fmtHoursLabel(h){
 // Veredicto: ¿entra en el sobrante de ingresos de este mes, en el ahorro, o en ninguno?
 function buybyeVerdict(amt){
   const margen=calcT().margen;
-  const ahorro=savingsBalance('personal','me')+(state.partnerMode?savingsBalance('personal','partner')+savingsBalance('shared',null):0);
+  const ahorro=savingsBalanceAll();
   if(amt<=margen)return{tone:'green',title:'Te alcanza cómodo',msg:'Entra en lo que te sobra de ingresos este mes.'};
   if(amt<=margen+ahorro)return{tone:'amber',title:'Te alcanza, pero de tu ahorro',msg:'No entra en el sobrante de ingresos de este mes — usarías parte de tu ahorro.'};
   return{tone:'red',title:'No te alcanza',msg:'Supera lo que te sobra este mes y tu ahorro actual.'};
@@ -2551,8 +2582,23 @@ function buybyeDecide(action){
   $('buybyeResult').innerHTML='';
   $('simAmt').value='';$('simDesc').value='';
   lastBuybyeCalc=null;
+  if(action==='bought'){
+    closeBuybyeModal();
+    openModalPrefilled(amt,desc);
+    return;
+  }
   renderSimulacion();
 }
+function openBuybyeModal(){
+  clearFieldErrors();
+  $('simAmt').value='';$('simDesc').value='';
+  $('buybyeResult').innerHTML='';
+  $('buybyeUnsureForm').style.display='none';
+  lastBuybyeCalc=null;
+  renderSimulacion();
+  $('modalBuybye').classList.add('open');
+}
+function closeBuybyeModal(){$('modalBuybye').classList.remove('open');}
 function logBuybyeSkip(desc,amt,hours){
   if(!state.buybyeStats)state.buybyeStats={savedAmount:0,savedHours:0};
   if(!state.buybyeHistory)state.buybyeHistory=[];
@@ -2611,7 +2657,33 @@ function resolvePendingBuybye(id,action){
     logBuybyeSkip(entry.desc,entry.amt,w>0?entry.amt/w:null);
   }
   save();
+  if(action==='bought'){
+    closeBuybyeModal();
+    openModalPrefilled(entry.amt,entry.desc,entry.cat);
+    return;
+  }
   renderSimulacion();
+}
+// Cancela una decisión pendiente en cualquier momento, sin esperar a que se cumpla el timer
+function cancelPendingBuybye(id){
+  const idx=(state.buybyePending||[]).findIndex(x=>x.id===id);
+  if(idx<0)return;
+  state.buybyePending.splice(idx,1);
+  if(buybyeTimers[id]){clearTimeout(buybyeTimers[id]);delete buybyeTimers[id];}
+  save();
+  renderSimulacion();
+}
+// Si quedó vencida sin que decidieras nada durante 2 días, se descarta sola
+function purgeExpiredBuybyePending(){
+  const now=Date.now();
+  const maxAge=2*24*3600*1000;
+  const before=(state.buybyePending||[]).length;
+  state.buybyePending=(state.buybyePending||[]).filter(p=>{
+    const expired=(now-p.resolveAt)>maxAge;
+    if(expired&&buybyeTimers[p.id]){clearTimeout(buybyeTimers[p.id]);delete buybyeTimers[p.id];}
+    return !expired;
+  });
+  if(state.buybyePending.length!==before)save();
 }
 // Notificación real solo funciona con la pestaña abierta (app sin backend); igual se muestra al reabrir la app
 function requestBuybyeNotificationPermission(){
@@ -2633,12 +2705,16 @@ function notifyBuybyePending(entry){
   renderSimulacion();
 }
 function checkBuybyePendingOnLoad(){
+  purgeExpiredBuybyePending();
   (state.buybyePending||[]).forEach(entry=>{if(entry.resolveAt>Date.now())scheduleBuybyeTimer(entry);});
 }
 function renderSimulacion(){
+  purgeExpiredBuybyePending();
   const now=Date.now();
   const pending=state.buybyePending||[];
   const due=pending.filter(p=>p.resolveAt<=now);
+  const simBtn=$('btnSimular');
+  if(simBtn)simBtn.textContent='🧮 ¿Vale la pena esta compra?'+(pending.length?` (${pending.length})`:'');
   const banner=$('buybyePendingBanner');
   if(banner)banner.innerHTML=due.length?`<div class="alert-box alert-amber" style="margin-bottom:12px"><strong>Tenés ${due.length} decisión${due.length>1?'es':''} pendiente${due.length>1?'s':''}</strong>Ya pasó el tiempo que pediste para pensarlo — decidí más abajo.</div>`:'';
   const stats=state.buybyeStats||{savedAmount:0,savedHours:0};
@@ -2662,12 +2738,15 @@ function renderSimulacion(){
       pl.innerHTML=pending.slice().sort((a,b)=>a.resolveAt-b.resolveAt).map(p=>{
         const isDue=p.resolveAt<=now;
         const cat=getCat(p.cat);
-        const remainLabel=isDue?'Ya podés decidir':`Faltan ${fmtHoursLabel((p.resolveAt-now)/3600000)}`;
+        const remainLabel=isDue?'Ya podés decidir · se descarta sola en 2 días si no elegís':`Faltan ${fmtHoursLabel((p.resolveAt-now)/3600000)}`;
         return `<div class="exp-row" style="cursor:default">
           <div class="exp-icon" style="background:${(cat.color||'#999')+'22'};color:${cat.color||'#666'}">${(cat.label||'•').charAt(0).toUpperCase()}</div>
           <div class="exp-info"><div class="exp-name">${p.desc}</div><div class="exp-cat">${remainLabel}</div></div>
           <div class="exp-right"><div class="exp-amt">${fmt(p.amt)}</div>
-            ${isDue?`<div style="display:flex;gap:4px;margin-top:4px"><button class="btn-sm" onclick="resolvePendingBuybye(${p.id},'bought')">Comprar</button><button class="btn-sm danger" onclick="resolvePendingBuybye(${p.id},'skip')">No</button></div>`:''}
+            <div style="display:flex;gap:4px;margin-top:4px">
+              ${isDue?`<button class="btn-sm" onclick="resolvePendingBuybye(${p.id},'bought')">Comprar</button><button class="btn-sm danger" onclick="resolvePendingBuybye(${p.id},'skip')">No</button>`:''}
+              <button class="btn-sm" onclick="cancelPendingBuybye(${p.id})">Cancelar</button>
+            </div>
           </div>
         </div>`;
       }).join('');
@@ -3142,6 +3221,8 @@ function saveCat(){
   if(budget&&budget>0)state.budgets[catId]=budget;
   else delete state.budgets[catId];
   save();closeCatModal();renderAll();
+  // Si la venías creando desde el modal de gasto (alta rápida), la dejamos seleccionada ahí
+  if($('modalAdd').classList.contains('open')){selectedCatId=catId;renderCatSelectExp();}
 }
 function deleteCat(id){
   const hasChildren=state.categories.some(c=>c.parentId===id);
@@ -3175,9 +3256,12 @@ function saveMedio(){
   clearFieldErrors();
   const label=$('medioName').value.trim();
   if(!label){showFieldError('medioName','Ingresá un nombre');return;}
-  if(editingMedioId!==null){const m=state.medios.find(x=>x.id===editingMedioId);if(m){m.label=label;m.icon='•';m.owner=selectedMedioOwner;}}
-  else state.medios.push({id:state.nextId++,label,icon:'•',owner:selectedMedioOwner});
+  let medioId;
+  if(editingMedioId!==null){const m=state.medios.find(x=>x.id===editingMedioId);if(m){m.label=label;m.icon='•';m.owner=selectedMedioOwner;}medioId=editingMedioId;}
+  else{medioId=state.nextId++;state.medios.push({id:medioId,label,icon:'•',owner:selectedMedioOwner});}
   save();closeMedioModal();renderAll();
+  // Si lo venías creando desde el modal de gasto (alta rápida), lo dejamos seleccionado ahí
+  if($('modalAdd').classList.contains('open')){selectedMedioId=medioId;renderMedioSelectExp();}
 }
 function deleteMedio(id){
   const m=state.medios.find(x=>x.id===id);
@@ -3186,7 +3270,7 @@ function deleteMedio(id){
   state.medios=state.medios.filter(x=>x.id!==id);save();renderAll();
 }
 
-const _modalClosers={modalAdd:closeModal,modalDetail:closeDetail,modalCat:closeCatModal,modalMedio:closeMedioModal,modalIncome:closeIncomeModal,modalIncomeDetail:closeIncomeDetail,modalGoal:closeGoalModal,modalGoalContribution:closeGoalContribModal,modalSavings:closeSavingsModal};
+const _modalClosers={modalAdd:closeModal,modalDetail:closeDetail,modalCat:closeCatModal,modalMedio:closeMedioModal,modalIncome:closeIncomeModal,modalIncomeDetail:closeIncomeDetail,modalGoal:closeGoalModal,modalGoalContribution:closeGoalContribModal,modalSavings:closeSavingsModal,modalBuybye:closeBuybyeModal};
 Object.entries(_modalClosers).forEach(([id,fn])=>{
   $(id).addEventListener('click',function(e){if(e.target===this)fn();});
 });
