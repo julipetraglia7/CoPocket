@@ -1381,7 +1381,7 @@ function autoGenerateRecurringIncomes(targetMonth){
     const piDesc=(pi.desc||'').toLowerCase().trim();
     const yaExiste=(state.incomeEntries[targetMonth]||[]).some(i=>
       (i.recurringOrigin||i.id)===originId ||
-      (i.recurring && (i.desc||'').toLowerCase().trim()===piDesc)
+      (i.recurring && (i.desc||'').toLowerCase().trim()===piDesc && (i.owner||'me')===(pi.owner||'me') && !!i.shared===!!pi.shared)
     );
     if(yaExiste)return;
     state.incomeEntries[targetMonth].push({
@@ -1423,7 +1423,7 @@ function autoGenerateRecurring(targetMonth){
       (e.date||'').startsWith(targetMonth) &&
       (
         (e.recurringOrigin||e.id)===originId ||
-        (e.recurring && (e.desc||'').toLowerCase().trim()===peDesc)
+        (e.recurring && (e.desc||'').toLowerCase().trim()===peDesc && (e.owner||'me')===(pe.owner||'me') && !!e.shared===!!pe.shared)
       )
     );
     if(yaExiste)return;
@@ -1467,7 +1467,7 @@ function autoGenerateCuotas(targetMonth){
       (e.date||'').startsWith(targetMonth)&&
       (
         e.cuotaOrigen===origin || e.id===origin ||
-        ((e.desc||'').toLowerCase().trim()===peDesc && e.cuota.total===pe.cuota.total)
+        ((e.desc||'').toLowerCase().trim()===peDesc && e.cuota.total===pe.cuota.total && (e.owner||'me')===(pe.owner||'me') && !!e.shared===!!pe.shared)
       )
     );
     if(yaExiste)return;
