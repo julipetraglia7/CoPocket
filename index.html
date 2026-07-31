@@ -1367,28 +1367,29 @@ function cleanupData(){
 }
 
 // AUTO-RECURRENTES INGRESOS
-function autoGenerateRecurringIncomes(){
-  const prev=prevMonthStr(state.activeMonth);
+function autoGenerateRecurringIncomes(targetMonth){
+  targetMonth=targetMonth||state.activeMonth;
+  const prev=prevMonthStr(targetMonth);
   const prevIncs=(state.incomeEntries[prev]||[]).filter(i=>i.recurring);
   if(!prevIncs.length)return 0;
-  if(!state.incomeEntries[state.activeMonth])state.incomeEntries[state.activeMonth]=[];
+  if(!state.incomeEntries[targetMonth])state.incomeEntries[targetMonth]=[];
   if(!state.cancelledRecurringIncomes)state.cancelledRecurringIncomes=[];
   let count=0;
   prevIncs.forEach(pi=>{
     const originId=pi.recurringOrigin||pi.id;
     if(state.cancelledRecurringIncomes.includes(originId))return;
     const piDesc=(pi.desc||'').toLowerCase().trim();
-    const yaExiste=(state.incomeEntries[state.activeMonth]||[]).some(i=>
+    const yaExiste=(state.incomeEntries[targetMonth]||[]).some(i=>
       (i.recurringOrigin||i.id)===originId ||
       (i.recurring && (i.desc||'').toLowerCase().trim()===piDesc)
     );
     if(yaExiste)return;
-    state.incomeEntries[state.activeMonth].push({
+    state.incomeEntries[targetMonth].push({
       id:state.nextId++,
       desc:pi.desc,
       amt:pi.amt,
       type:pi.type,
-      date:state.activeMonth+'-01',
+      date:targetMonth+'-01',
       owner:pi.owner||'me',
       shared:!!pi.shared,
       recurring:true,
@@ -1487,6 +1488,7 @@ function cascadeAutoGenerate(fromMonth){
   while(m<=maxVisited){
     autoGenerateRecurring(m);
     autoGenerateCuotas(m);
+    autoGenerateRecurringIncomes(m);
     m=nextMonthStr(m);
   }
 }
@@ -3385,6 +3387,7 @@ function saveIncomeEntry(){
     const newId=state.nextId++;
     state.incomeEntries[month].push({id:newId,desc,amt,date,type:selectedIncomeType,owner:selectedIncomeOwner,shared:selectedIncomeShared,recurring:recurringIncomeMode,...(recurringIncomeMode?{recurringOrigin:newId}:{})});
   }
+  if(recurringIncomeMode)cascadeAutoGenerate(month);
   save();closeIncomeModal();renderAll();
 }
 
