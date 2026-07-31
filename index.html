@@ -1492,6 +1492,22 @@ function cascadeAutoGenerate(fromMonth){
     m=nextMonthStr(m);
   }
 }
+// Repara huecos históricos: recorre todos los meses ya visitados en orden y vuelve a correr
+// la generación automática en cada uno. Esto arregla casos donde un mes quedó con un recurrente
+// faltante (ej: dos ingresos recurrentes con la misma descripción pero distinto dueño, generados
+// antes de que existiera el chequeo por dueño), sin que el usuario tenga que reeditar nada.
+function repairRecurringGaps(){
+  const visited=(state.visitedMonths||[]).slice().sort();
+  if(visited.length<2)return 0;
+  let total=0;
+  for(let i=1;i<visited.length;i++){
+    const m=visited[i];
+    total+=autoGenerateRecurring(m);
+    total+=autoGenerateCuotas(m);
+    total+=autoGenerateRecurringIncomes(m);
+  }
+  return total;
+}
 
 // Marca como pagados automáticamente los gastos cuya fecha ya pasó (según la fecha real de hoy). Siempre activo, sin configuración.
 function autoUpdatePaidStatus(){
@@ -3546,6 +3562,7 @@ function mostrarApp(){
     $('onboarding').classList.add('hidden');
     cleanupData();
     fetchUsdRate();
+    repairRecurringGaps();
     const c=autoGenerateCuotas(),r=autoGenerateRecurring(),i=autoGenerateRecurringIncomes(),s=autoGenerateSavingsFromSurplus();
     autoUpdatePaidStatus();
     checkBuybyePendingOnLoad();
