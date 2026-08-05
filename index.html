@@ -384,6 +384,12 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
   <div style="font-size:13px;color:var(--text2)">Cargando...</div>
 </div>
 
+<!-- CLOUD SYNC ERROR BANNER -->
+<div id="cloudSyncErrorBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#B4231F;color:#fff;padding:10px 14px;font-size:13px;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.2)">
+  <span>⚠️ No se pudo confirmar la sincronización con la nube. Por seguridad, no se están guardando cambios hasta reconectar.</span>
+  <button onclick="retryCloudSync()" style="background:#fff;color:#B4231F;border:none;border-radius:8px;padding:6px 12px;font-weight:600;font-size:12px;cursor:pointer">Reintentar</button>
+</div>
+
 <!-- LOGIN SCREEN -->
 <div class="login-screen hidden" id="loginScreen">
   <div class="brand-mark login-mark">CP</div>
@@ -1066,6 +1072,10 @@ const FIREBASE_CONFIG = {
 
 const FIREBASE_LISTO = FIREBASE_CONFIG.apiKey !== 'PEGAR_AQUI';
 let fbAuth, fbDb, currentUser=null, isSaving=false, modoLocal=false, syncRef=null;
+// Se pone en true recién cuando confirmamos que pudimos leer (o legítimamente no hay) datos en la nube.
+// Mientras esté en false, NUNCA escribimos en la nube: evita que un error de red/permisos pise datos reales
+// con un estado local vacío (ej: primera carga en un dispositivo/navegador nuevo).
+let cloudSyncOk=false;
 
 if(FIREBASE_LISTO){
   try{
@@ -1152,10 +1162,11 @@ function flushCloudSave(){
   if(saveTimer){clearTimeout(saveTimer);saveTimer=null;}
   if(!pendingCloudSave)return;
   if(modoLocal||!currentUser||!fbDb)return;
+  if(!cloudSyncOk)return; // nunca escribir en la nube si todavía no confirmamos una lectura exitosa
   pendingCloudSave=false;
   isSaving=true;
   fbDb.ref('users/'+currentUser.uid).set(state)
-    .catch(e=>console.error('Error guardando en la nube:',e))
+    .catch(e=>{console.error('Error guardando en la nube:',e);showCloudSyncError();})
     .finally(()=>{isSaving=false;});
 }
 // Flush al cerrar/ocultar la app para no perder cambios pendientes
@@ -1187,11 +1198,38 @@ async function loadFromCloud(){
       } else {
         // Sin datos en la nube — subir datos locales si existen
         loadLocal();
+        cloudSyncOk=true;
         if(state.expenses.length||state.categories.length) save();
       }
+      cloudSyncOk=true;
+      hideCloudSyncError();
       resolve();
-    },err=>{console.error('Error cargando nube:',err);loadLocal();resolve();});
+    },err=>{
+      // No pudimos confirmar qué hay en la nube: cargamos lo local SOLO para poder mostrar algo,
+      // pero dejamos cloudSyncOk=false para que ningún guardado posterior pise los datos reales.
+      console.error('Error cargando nube:',err);
+      loadLocal();
+      showCloudSyncError();
+      resolve();
+    });
   });
+}
+function showCloudSyncError(){
+  cloudSyncOk=false;
+  const b=$('cloudSyncErrorBanner');
+  if(b)b.style.display='flex';
+}
+function hideCloudSyncError(){
+  const b=$('cloudSyncErrorBanner');
+  if(b)b.style.display='none';
+}
+async function retryCloudSync(){
+  if(!currentUser||!fbDb)return;
+  await loadFromCloud();
+  if(cloudSyncOk){
+    renderAll();
+    if(pendingCloudSave)flushCloudSave();
+  }
 }
 
 function startSync(){
@@ -1207,6 +1245,11 @@ function startSync(){
       try{localStorage.setItem(SK,JSON.stringify(state));}catch(e){}
       renderAll();
     }
+  },err=>{
+    // Se cortó la suscripción en vivo (permisos/red): dejar de confiar en la nube hasta reconectar,
+    // para no arriesgarnos a guardar sobre datos que no pudimos verificar.
+    console.error('Error de sincronización en vivo:',err);
+    showCloudSyncError();
   });
 }
 
