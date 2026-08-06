@@ -739,10 +739,11 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div style="margin-top:16px">
       <div class="card">
         <div class="card-title">Exportar / Importar gastos</div>
-        <button class="btn-secondary" onclick="exportExpensesCSV()">⬇ Descargar CSV de gastos</button>
+        <button class="btn-secondary" onclick="downloadCSVTemplate()">📄 Descargar planilla de ejemplo</button>
+        <button class="btn-secondary" onclick="exportExpensesCSV()" style="margin-top:8px">⬇ Descargar CSV de gastos</button>
         <button class="btn-secondary" onclick="document.getElementById('csvImportInput').click()" style="margin-top:8px">⬆ Importar CSV de gastos</button>
         <input type="file" id="csvImportInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvImportChange(event)">
-        <div id="csvImportStatus" style="font-size:11px;color:var(--text3);margin-top:8px">Descarga todos los meses. Al importar, usá las columnas Monto, Descripcion, Fecha (mínimo).</div>
+        <div id="csvImportStatus" style="font-size:11px;color:var(--text3);margin-top:8px">Descargá la planilla de ejemplo, completala con tus gastos y después importala. Columnas mínimas: Monto, Descripcion, Fecha.</div>
       </div>
     </div>
     <div style="margin-top:16px">
@@ -3169,6 +3170,23 @@ function exportExpensesCSV(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;a.download=`copocket_gastos_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+// Planilla de ejemplo para que la persona la complete y después la importe con "Importar CSV de gastos".
+// Usa las mismas columnas/formato que exportExpensesCSV para garantizar que se pueda re-importar sin cambios.
+function downloadCSVTemplate(){
+  const today=new Date().toISOString().split('T')[0];
+  const exampleRows=[
+    [15000,'Supermercado','Débito','Alimentación',myLabel(),today,expMonth({date:today}),'','No','ARS','No','Pagado',''],
+    [50000,'Alquiler','Transferencia','Vivienda',myLabel(),today,expMonth({date:today}),'','No','ARS','Sí','Pagado',''],
+    [8000,'Netflix','Tarjeta de crédito','Entretenimiento',partnerLabel(),today,expMonth({date:today}),'','Sí','ARS','Sí','Pendiente','Ejemplo']
+  ];
+  const csv='﻿'+[CSV_HEADERS.join(','),...exampleRows.map(r=>r.map(csvEscape).join(','))].join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='copocket_plantilla_gastos.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
