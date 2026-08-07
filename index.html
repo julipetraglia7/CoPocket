@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CoPocket">
-<meta name="theme-color" content="#111018">
+<meta name="theme-color" content="#8B7FE8">
 <meta name="mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -18,38 +18,38 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 :root{
-  /* CoPocket — Light theme: verde agua/turquesa sobre blanco */
-  --primary:#14B8A6;--primary-hover:#0D9488;--primary-pressed:#0F766E;--primary-soft:#CCFBF1;
-  --secondary:#F08A6C;--secondary-soft:#FDE4DB;
-  --bg:#FAFAF9;--surface:#FFFFFF;--surface-2:#F3F2EF;--card:#FFFFFF;--bg2:#F3F2EF;
-  --text:#1F2A28;--text2:#5B6764;--text3:#8C9895;--text-disabled:#C8C5C2;--text-inverse:#FFFFFF;
-  --accent:#14B8A6;--accent-strong:#0F766E;--accent-soft:#CCFBF1;--border:#E7E5E4;
-  --success:#14B8A6;--warning:#E6A23C;--error:#E76F6A;--info:#8F7CF8;
-  --chart-income:#14B8A6;--chart-expense:#E76F6A;--chart-savings:#2DD4BF;
-  --chart-investment:#9B8AFB;--chart-shopping:#F08A6C;--chart-food:#E6A23C;
-  --chart-home:#C7A76B;--chart-transport:#4FB7C5;
-  --color-gastos:#E76F6A;--color-ingresos:#14B8A6;--color-balance:#14B8A6;
-  --shadow:0 1px 3px rgba(0,0,0,0.04);
-  --shadow-lg:0 8px 32px rgba(0,0,0,0.08);
-  --r-sm:8px;--r-md:12px;--r-lg:20px;
+  /* CoPocket — Light theme: pastel "clay" violeta/lavanda */
+  --primary:#8B7FE8;--primary-hover:#7A6DE0;--primary-pressed:#6C5CE0;--primary-soft:#EDE9FE;
+  --secondary:#F5A3B8;--secondary-soft:#FDE2E9;
+  --bg:#F3EFFB;--surface:#FFFFFF;--surface-2:#F6F1FC;--card:#FFFFFF;--bg2:#F6F1FC;
+  --text:#2D2A45;--text2:#645F7A;--text3:#9691AC;--text-disabled:#D8D2EC;--text-inverse:#FFFFFF;
+  --accent:#8B7FE8;--accent-strong:#6C5CE0;--accent-soft:#EDE9FE;--border:#E9E3F7;
+  --success:#4CAF7D;--warning:#F0B84D;--error:#F0748D;--info:#6FB1E8;
+  --chart-income:#4CAF7D;--chart-expense:#F0748D;--chart-savings:#F0B84D;
+  --chart-investment:#8B7FE8;--chart-shopping:#F5A3B8;--chart-food:#F0B84D;
+  --chart-home:#B98CE8;--chart-transport:#6FB1E8;
+  --color-gastos:#F0748D;--color-ingresos:#4CAF7D;--color-balance:#8B7FE8;
+  --shadow:0 6px 18px rgba(139,127,232,0.14);
+  --shadow-lg:0 20px 50px rgba(139,127,232,0.22);
+  --r-sm:10px;--r-md:14px;--r-lg:22px;
   --r:var(--r-md);--sidebar:260px;
   --grad:var(--primary);
-  --green:#14B8A6;--green-bg:#CCFBF1;--green-border:#2DD4BF;
+  --green:#4CAF7D;--green-bg:#D9F2E4;--green-border:#4CAF7D;
 }
 body.dark{
-  /* CoPocket — Dark theme: mismo verde agua, en versión oscura (no gris ni violeta) */
-  --primary:#0D9488;--primary-hover:#14B8A6;--primary-pressed:#0F766E;--primary-soft:#134E4A;
-  --secondary:#F59A80;--secondary-soft:#4A2E28;
-  --bg:#14201E;--surface:#1B2926;--surface-2:#22322E;--card:#1B2926;--bg2:#22322E;
-  --text:#F6F5F3;--text2:#C5C3BF;--text3:#8E9C98;--text-disabled:#526460;
-  --accent:#2DD4BF;--accent-strong:#5EEAD4;--accent-soft:#134E4A;--border:#2C3E3A;
-  --success:#2DD4BF;--warning:#F0B44D;--error:#F18781;--info:#A99BFF;
-  --chart-income:#2DD4BF;--chart-expense:#F18781;--chart-savings:#5EEAD4;
-  --chart-investment:#B7ACFF;--chart-shopping:#F59A80;--chart-food:#F0B44D;
-  --chart-home:#DFC27A;--chart-transport:#65D2DD;
-  --color-gastos:#F18781;--color-ingresos:#2DD4BF;--color-balance:#2DD4BF;
-  --shadow:0 1px 3px rgba(0,0,0,0.3);
-  --shadow-lg:0 8px 32px rgba(0,0,0,0.5);
+  /* CoPocket — Dark theme: misma familia violeta/lavanda, en versión oscura tipo "clay" */
+  --primary:#9B8FFA;--primary-hover:#AFA4FF;--primary-pressed:#7A6DE0;--primary-soft:#3A3363;
+  --secondary:#F5A3B8;--secondary-soft:#4A2E3A;
+  --bg:#211D33;--surface:#2A2440;--surface-2:#332C4D;--card:#2A2440;--bg2:#332C4D;
+  --text:#F1EEFA;--text2:#C7C1DE;--text3:#8D86AC;--text-disabled:#544C74;
+  --accent:#B0A6FF;--accent-strong:#C9C0FF;--accent-soft:#3A3363;--border:#3B3456;
+  --success:#6FD19E;--warning:#F5C36B;--error:#F5A0AF;--info:#8FC4F5;
+  --chart-income:#6FD19E;--chart-expense:#F5A0AF;--chart-savings:#F5C36B;
+  --chart-investment:#B0A6FF;--chart-shopping:#F5A3B8;--chart-food:#F5C36B;
+  --chart-home:#CBA6F5;--chart-transport:#8FC4F5;
+  --color-gastos:#F5A0AF;--color-ingresos:#6FD19E;--color-balance:#B0A6FF;
+  --shadow:0 8px 20px rgba(0,0,0,0.32);
+  --shadow-lg:0 20px 50px rgba(0,0,0,0.5);
   --grad:var(--primary);
 }
 body.dark .alert-green{background:var(--primary-soft);color:var(--primary);border-color:transparent;}
@@ -154,8 +154,9 @@ body.dark .form-error{color:#F9A8D4;}
 .status-btn{flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:13px;color:var(--text2);cursor:pointer;text-align:center;font-family:'Inter',sans-serif;}
 .status-btn.selected.paid{border-color:var(--accent);background:var(--bg2);color:var(--accent-strong);font-weight:600;}
 .status-btn.selected.pending{border-color:var(--accent);background:var(--accent-soft);color:#7A5A1A;font-weight:600;}
-.btn-primary{width:100%;background:var(--primary);color:var(--text-inverse);border:none;border-radius:var(--r);padding:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-top:8px;transition:background 0.15s;}
+.btn-primary{width:100%;background:var(--primary);color:var(--text-inverse);border:none;border-radius:99px;padding:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-top:8px;transition:background 0.15s,transform 0.15s;box-shadow:0 8px 20px rgba(139,127,232,0.35);}
 .btn-primary:hover{background:var(--primary-hover);}
+.btn-primary:active{transform:translateY(1px);}
 .btn-primary:hover{opacity:0.9;}
 .btn-primary.green-btn{background:var(--primary);}
 .btn-primary.green-btn:hover{background:var(--primary-hover);}
@@ -233,9 +234,9 @@ body.dark .btn-sim{color:var(--accent-strong);}
   .topbar-title{font-family:'Space Grotesk',serif;font-size:28px;color:var(--text);}
   .topbar-month{font-size:12px;font-weight:600;color:var(--accent-strong);background:var(--bg2);padding:6px 14px;border-radius:99px;border:1px solid var(--border);}
   .topbar-actions{display:flex;gap:10px;align-items:center;}
-  .btn-add{background:var(--secondary);color:var(--text-inverse);border:none;border-radius:var(--r);padding:10px 20px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(240,138,108,0.25);transition:background 0.15s,transform 0.15s;}
+  .btn-add{background:var(--secondary);color:var(--text-inverse);border:none;border-radius:99px;padding:10px 20px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;box-shadow:0 8px 18px rgba(245,163,184,0.4);transition:background 0.15s,transform 0.15s;}
   .btn-add:hover{opacity:0.92;}
-  .btn-add.green-add{background:var(--primary);box-shadow:0 2px 8px rgba(95,175,141,0.25);}
+  .btn-add.green-add{background:var(--primary);box-shadow:0 8px 18px rgba(139,127,232,0.4);}
   .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
   .metric-card{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);}
   .metric-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
@@ -331,10 +332,20 @@ body,button,input,select,textarea{font-family:'Inter',system-ui,-apple-system,Bl
 .card-title,.section-title,.metric-lbl,.form-label,.sb-lbl,.mh-bal-label{font-family:'Inter',system-ui,sans-serif;font-weight:800;letter-spacing:0.08em;}
 .google-btn{font-weight:700;}
 /* SHARED SKIN — light + dark, geometría/tipografía/forma */
-:root{--r-sm:10px;--r-md:18px;--r-lg:28px;}
+:root{--r-sm:12px;--r-md:20px;--r-lg:28px;}
 .metric-val,.income-total,.mh-bal-amount,.sb-val,.detail-info-val{font-family:'Inter',sans-serif;font-weight:800;letter-spacing:0;}
 .card-title,.section-title,.metric-lbl{letter-spacing:0.06em;}
 .exp-icon,.manage-icon,.detail-icon{border-radius:16px;}
+/* Tarjetas de resumen de Inicio con fondo pastel tipo "clay", una por indicador */
+#metricGrid .metric-card{border:none;}
+#metricGrid .metric-card:nth-child(1){background:#E9E4FB;}
+#metricGrid .metric-card:nth-child(2){background:#FCE1E7;}
+#metricGrid .metric-card:nth-child(3){background:#DFF4E8;}
+#metricGrid .metric-card:nth-child(4){background:#FDF0D5;}
+body.dark #metricGrid .metric-card:nth-child(1){background:#332C55;}
+body.dark #metricGrid .metric-card:nth-child(2){background:#4A2E3A;}
+body.dark #metricGrid .metric-card:nth-child(3){background:#254236;}
+body.dark #metricGrid .metric-card:nth-child(4){background:#4A3D22;}
 
 /* DARK — ajustes finos, sin gradientes propios ni fondos distintos por sección */
 body.dark .modal-overlay{background:rgba(0,0,0,0.55);}
@@ -1139,12 +1150,12 @@ let state={
   autoSavedMonths:[]
 };
 
-const COLORS=['#5FAF8D','#77C8B0','#F08A6C','#E6A23C','#9B8AFB','#4FB7C5','#C7A76B','#E76F6A','#8F7CF8','#F59A80','#5FAF8D','#DFC27A','#65D2DD','#B7ACFF','#F18781'];
+const COLORS=['#8B7FE8','#B98CE8','#F5A3B8','#F0B84D','#4CAF7D','#6FB1E8','#9B8FFA','#F0748D','#6FD19E','#C9A0F5','#F5C36B','#8FC4F5','#E8A3D8','#7ED9C4','#F5967A'];
 const INCOME_TYPES=[
-  {id:'fijo',label:'Fijo',icon:'F',color:'#5FAF8D'},
-  {id:'mensual',label:'Mensual',icon:'M',color:'#4FB7C5'},
-  {id:'variable',label:'Variable',icon:'V',color:'#9B8AFB'},
-  {id:'unica',label:'Única vez',icon:'U',color:'#F08A6C'}
+  {id:'fijo',label:'Fijo',icon:'F',color:'#4CAF7D'},
+  {id:'mensual',label:'Mensual',icon:'M',color:'#6FB1E8'},
+  {id:'variable',label:'Variable',icon:'V',color:'#8B7FE8'},
+  {id:'unica',label:'Única vez',icon:'U',color:'#F5A3B8'}
 ];
 const getIncomeType=id=>INCOME_TYPES.find(t=>t.id===id)||INCOME_TYPES[2];
 let selectedIncomeType='variable';
@@ -1370,6 +1381,25 @@ function migrateCategoryColors(){
   else{try{localStorage.setItem(SK,JSON.stringify(state));}catch(e){}}
 }
 
+// MIGRACIÓN DE COLORES v4 — de la paleta verde agua/turquesa a la nueva paleta pastel "clay" violeta
+function migrateCategoryColorsV4(){
+  if(state.categoryColorsMigratedV4)return;
+  const map={
+    '#5FAF8D':'#4CAF7D','#77C8B0':'#7ED9C4','#F08A6C':'#F5967A','#E6A23C':'#F0B84D',
+    '#9B8AFB':'#8B7FE8','#4FB7C5':'#6FB1E8','#C7A76B':'#F5C36B','#E76F6A':'#F0748D',
+    '#8F7CF8':'#9B8FFA','#F59A80':'#F5A3B8','#DFC27A':'#F5C36B','#65D2DD':'#8FC4F5',
+    '#B7ACFF':'#C9A0F5','#F18781':'#F0748D'
+  };
+  let changed=false;
+  (state.categories||[]).forEach(c=>{
+    const up=(c.color||'').toUpperCase();
+    if(map[up]){c.color=map[up];changed=true;}
+  });
+  state.categoryColorsMigratedV4=true;
+  if(changed)save();
+  else{try{localStorage.setItem(SK,JSON.stringify(state));}catch(e){}}
+}
+
 // MIGRACIÓN DE ICONOS — reemplaza emojis viejos por iniciales
 function migrateCategoryIcons(){
   if(state.iconsMigratedV4)return;
@@ -1396,6 +1426,7 @@ function ensureSavingsMedio(){
 function cleanupData(){
   ensureSavingsMedio();
   migrateCategoryColors();
+  migrateCategoryColorsV4();
   migrateCategoryIcons();
   if(!state.buybyeStats)state.buybyeStats={savedAmount:0,savedHours:0};
   if(!state.buybyeHistory)state.buybyeHistory=[];
@@ -2205,7 +2236,7 @@ function drawTrendChart(id,w,h,months,totals){
   const text2=cs.getPropertyValue('--text2').trim()||'#666';
   const text3=cs.getPropertyValue('--text3').trim()||'#999';
   const border=cs.getPropertyValue('--border').trim()||'#eee';
-  const primary=cs.getPropertyValue('--primary').trim()||'#14B8A6';
+  const primary=cs.getPropertyValue('--primary').trim()||'#8B7FE8';
   const max=Math.max(1,...totals);
   const n=months.length;
   const padTop=20,padBottom=28;
