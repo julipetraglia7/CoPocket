@@ -767,6 +767,16 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
       </div>
     </div>
     <div style="margin-top:16px">
+      <div class="card">
+        <div class="card-title">Exportar / Importar ingresos</div>
+        <button class="btn-secondary" onclick="downloadIncomeCSVTemplate()">📄 Descargar planilla de ejemplo</button>
+        <button class="btn-secondary" onclick="exportIncomesCSV()" style="margin-top:8px">⬇ Descargar CSV de ingresos</button>
+        <button class="btn-secondary" onclick="document.getElementById('csvImportIncomeInput').click()" style="margin-top:8px">⬆ Importar CSV de ingresos</button>
+        <input type="file" id="csvImportIncomeInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvImportIncomeChange(event)">
+        <div id="csvImportIncomeStatus" style="font-size:11px;color:var(--text3);margin-top:8px">Descargá la planilla de ejemplo, completala con tus ingresos y después importala. Columnas mínimas: Monto, Descripcion, Fecha. Tipo puede ser Fijo, Mensual, Variable, Única vez o Ahorro.</div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
       <div class="card" id="accountCard">
         <div class="card-title">Mi cuenta</div>
         <div id="accountInfo" style="font-size:13px;color:var(--text2);margin-bottom:8px">—</div>
@@ -3432,6 +3442,105 @@ function importExpensesCSV(text){
   renderAll();
   const status=$('csvImportStatus');
   const msg=`✓ Se importaron ${imported} gasto${imported===1?'':'s'}.${skipped?` Se omitieron ${skipped} fila${skipped===1?'':'s'} con datos inválidos.`:''}`;
+  if(status)status.textContent=msg;
+  alert(msg);
+}
+
+// EXPORTAR / IMPORTAR CSV DE INGRESOS
+const INCOME_CSV_HEADERS=['Monto','Descripcion','Tipo','Quien Cobra','Fecha','Mes','Compartido','Recurrente'];
+function exportIncomesCSV(){
+  const allEntries=[];
+  Object.keys(state.incomeEntries).forEach(m=>{(state.incomeEntries[m]||[]).forEach(i=>allEntries.push(i));});
+  if(!allEntries.length){alert('No tenés ingresos cargados para exportar.');return;}
+  const rows=allEntries.map(i=>{
+    const t=getIncomeType(i.type);
+    return[
+      i.amt,
+      i.desc||'',
+      t.label,
+      (i.owner||'me')==='partner'?partnerLabel():myLabel(),
+      i.date||'',
+      (i.date||'').slice(0,7),
+      i.shared?'Sí':'No',
+      i.recurring?'Sí':'No'
+    ];
+  });
+  const csv='﻿'+[INCOME_CSV_HEADERS.join(','),...rows.map(r=>r.map(csvEscape).join(','))].join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`copocket_ingresos_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function downloadIncomeCSVTemplate(){
+  const today=new Date().toISOString().split('T')[0];
+  const exampleRows=[
+    [500000,'Sueldo','Fijo',myLabel(),today,today.slice(0,7),'No','Sí'],
+    [50000,'Guardo para vacaciones','Ahorro',myLabel(),today,today.slice(0,7),'No','No'],
+    [30000,'Changa','Variable',partnerLabel(),today,today.slice(0,7),'Sí','No']
+  ];
+  const csv='﻿'+[INCOME_CSV_HEADERS.join(','),...exampleRows.map(r=>r.map(csvEscape).join(','))].join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='copocket_plantilla_ingresos.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+// Matchea el texto de la columna "Tipo" contra INCOME_TYPES (por label o por id), ignorando tildes/mayúsculas.
+// Si no matchea nada conocido, cae en "Variable" (mismo fallback que getIncomeType).
+function matchIncomeType(label){
+  const norm=normStr(label);
+  const found=INCOME_TYPES.find(t=>normStr(t.label)===norm||normStr(t.id)===norm);
+  return found?found.id:'variable';
+}
+function handleCsvImportIncomeChange(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>importIncomesCSV(ev.target.result);
+  reader.onerror=()=>alert('No se pudo leer el archivo.');
+  reader.readAsText(file,'utf-8');
+  event.target.value='';
+}
+function importIncomesCSV(text){
+  const rows=parseCSV(text);
+  if(!rows.length){alert('El archivo está vacío.');return;}
+  const header=rows[0].map(h=>h.trim().toLowerCase());
+  const idx=name=>header.indexOf(name.toLowerCase());
+  const iMonto=idx('monto'),iDesc=idx('descripcion'),iTipo=idx('tipo'),iQuien=idx('quien cobra'),
+        iFecha=idx('fecha'),iCompartido=idx('compartido'),iRecurrente=idx('recurrente');
+  if(iMonto<0||iDesc<0||iFecha<0){alert('El CSV debe tener al menos las columnas Monto, Descripcion y Fecha.');return;}
+  const partnerNorm=normStr(partnerLabel());
+  let imported=0,skipped=0;
+  for(let r=1;r<rows.length;r++){
+    const row=rows[r];
+    if(!row||!row.length||row.every(c=>!c.trim()))continue;
+    const amt=parseFloat((row[iMonto]||'').replace(',','.'));
+    const date=normalizeDateStr(row[iFecha]||'');
+    if(!amt||amt<=0||!date){skipped++;continue;}
+    const desc=(row[iDesc]||'').trim()||'Importado';
+    const tipoRaw=iTipo>=0?(row[iTipo]||'').trim():'';
+    const type=tipoRaw?matchIncomeType(tipoRaw):'variable';
+    const quien=iQuien>=0?normStr(row[iQuien]||''):'';
+    const owner=(quien&&quien===partnerNorm)?'partner':'me';
+    const compartidoRaw=iCompartido>=0?(row[iCompartido]||'').trim().toLowerCase():'';
+    const shared=['sí','si','yes','true','1'].includes(compartidoRaw);
+    const recurrenteRaw=iRecurrente>=0?(row[iRecurrente]||'').trim().toLowerCase():'';
+    const recurring=['sí','si','yes','true','1'].includes(recurrenteRaw);
+    const month=date.slice(0,7);
+    if(!state.incomeEntries[month])state.incomeEntries[month]=[];
+    const newId=state.nextId++;
+    const newInc={id:newId,desc,amt,date,type,owner,shared,recurring,...(recurring?{recurringOrigin:newId}:{})};
+    state.incomeEntries[month].push(newInc);
+    syncSavingsLinkForIncome(newInc);
+    imported++;
+  }
+  if(imported>0)save();
+  renderAll();
+  const status=$('csvImportIncomeStatus');
+  const msg=`✓ Se importaron ${imported} ingreso${imported===1?'':'s'}.${skipped?` Se omitieron ${skipped} fila${skipped===1?'':'s'} con datos inválidos.`:''}`;
   if(status)status.textContent=msg;
   alert(msg);
 }
