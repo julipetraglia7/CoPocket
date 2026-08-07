@@ -707,12 +707,20 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
           <div class="card-title" style="margin-bottom:0">Categorías</div>
           <button class="btn-sm" onclick="openCatModal()">+ Nueva</button>
         </div>
+        <div id="catBulkBar" style="display:none;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--border)">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)"><input type="checkbox" id="catSelectAll" onchange="toggleSelectAllCats(this.checked)"> Seleccionar todas</label>
+          <button class="btn-sm danger" style="margin-left:auto" onclick="bulkDeleteCats()">Borrar seleccionadas (<span id="catSelectedCount">0</span>)</button>
+        </div>
         <div id="catManageList"></div>
       </div>
       <div class="card" style="padding:0">
         <div class="card-header">
           <div class="card-title" style="margin-bottom:0">Medios de pago</div>
           <button class="btn-sm" onclick="openMedioModal()">+ Nuevo</button>
+        </div>
+        <div id="medioBulkBar" style="display:none;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--border)">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)"><input type="checkbox" id="medioSelectAll" onchange="toggleSelectAllMedios(this.checked)"> Seleccionar todos</label>
+          <button class="btn-sm danger" style="margin-left:auto" onclick="bulkDeleteMedios()">Borrar seleccionados (<span id="medioSelectedCount">0</span>)</button>
         </div>
         <div id="medioManageList"></div>
       </div>
@@ -955,6 +963,13 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     </div>
     <div id="catParentDisabledNote" style="display:none;font-size:11px;color:var(--text3);margin-bottom:16px">Esta categoría ya tiene subcategorías propias, así que no puede ser subcategoría de otra.</div>
     <div class="form-group"><label class="form-label">Presupuesto mensual (opcional)</label><input class="form-input" type="number" id="catBudget" placeholder="Ej: 50000 — dejá vacío para no fijar tope" inputmode="decimal"></div>
+    <div class="form-group" id="catSharedField" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+        <span style="font-size:13px;color:var(--text2)">Marcar como compartido por defecto</span>
+        <button class="toggle" id="toggleCatShared" onclick="toggleCatSharedDefault()"></button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Los gastos nuevos en esta categoría van a arrancar marcados como "compartido" automáticamente.</div>
+    </div>
 
     <button class="btn-primary" onclick="saveCat()">Guardar categoría</button>
     <button class="btn-secondary" onclick="closeCatModal()">Cancelar</button>
@@ -1135,7 +1150,8 @@ let selectedIncomeType='variable';
 
 let selectedCatId=null,selectedMedioId=null,editingId=null,detailId=null;
 let sortBy='amount',cuotasMode=false,recurringMode=false,notesMode=false,editingCatId=null,editingMedioId=null,selectedColor=COLORS[0],selectedCurrency='ARS',selectedOwner='me',selectedShared=false,selectedIncomeOwner='me',selectedIncomeShared=false,editingGoalId=null;
-let editingIncomeId=null,incomeDetailId=null,recurringIncomeMode=false,selectedMedioOwner='me';
+let editingIncomeId=null,incomeDetailId=null,recurringIncomeMode=false,selectedMedioOwner='me',selectedCatSharedDefault=false;
+let selectedCatIdsForDelete=new Set(),selectedMedioIdsForDelete=new Set();
 
 function migrateData(p){
   if(p.incomes&&!p.incomeEntries){
@@ -1927,24 +1943,38 @@ function renderConfig(){
   const smh=$('splitModeHint');if(smh)smh.textContent=sm==='proportional'?'El que más gana paga más, en proporción a los ingresos de ambos.':'Cada uno paga la mitad exacta, sin importar cuánto gana.';
   renderThemePicker();
   renderUserColorPickers();
+  // Limpia selecciones de items que ya no existen (por si se borraron desde otro lado)
+  selectedCatIdsForDelete.forEach(id=>{if(!state.categories.some(c=>c.id===id))selectedCatIdsForDelete.delete(id);});
+  selectedMedioIdsForDelete.forEach(id=>{if(!state.medios.some(m=>m.id===id))selectedMedioIdsForDelete.delete(id);});
   $('catManageList').innerHTML=state.categories.length?categoryChipList().map(c=>{
     const isSub=!!c.parentId;
     return `<div class="manage-row"${isSub?' style="padding-left:36px"':''}>
+      <input type="checkbox" style="margin-right:10px" ${selectedCatIdsForDelete.has(c.id)?'checked':''} onchange="toggleCatSelectForDelete(${c.id},this.checked)">
       <div class="manage-icon" style="background:${c.color}22;color:${c.color};font-weight:700">${(c.label||'•').charAt(0).toUpperCase()}</div>
-      <span style="flex:1;font-size:13px;color:var(--text)">${isSub?'↳ ':''}${c.label}</span>
+      <span style="flex:1;font-size:13px;color:var(--text)">${isSub?'↳ ':''}${c.label}${state.partnerMode&&c.sharedDefault?' <span class="medio-tag">Compartido</span>':''}</span>
       ${!isSub?`<button class="btn-sm" onclick="openCatModal(${c.id})" style="margin-right:6px">+ Sub</button>`:''}
       <button class="btn-sm" onclick="editCat(${c.id})" style="margin-right:6px">Editar</button>
       <button class="btn-sm danger" onclick="deleteCat(${c.id})">Borrar</button>
     </div>`;
   }).join(''):
     `<div class="empty-state" style="padding:20px"><div class="empty-text">Sin categorías. Tocá + Nueva.</div></div>`;
+  const catBar=$('catBulkBar');
+  if(catBar)catBar.style.display=state.categories.length?'flex':'none';
+  const csc=$('catSelectedCount');if(csc)csc.textContent=selectedCatIdsForDelete.size;
+  const csa=$('catSelectAll');if(csa)csa.checked=state.categories.length>0&&selectedCatIdsForDelete.size===state.categories.length;
   $('medioManageList').innerHTML=state.medios.length?state.medios.map(m=>`
     <div class="manage-row">
+      ${m.isSavingsMedio?'<span style="width:16px;margin-right:10px;display:inline-block"></span>':`<input type="checkbox" style="margin-right:10px" ${selectedMedioIdsForDelete.has(m.id)?'checked':''} onchange="toggleMedioSelectForDelete(${m.id},this.checked)">`}
       <div class="manage-icon" style="background:var(--bg2);color:var(--text2);font-weight:700">${(m.label||'•').charAt(0).toUpperCase()}</div>
       <span style="flex:1;font-size:13px;color:var(--text)">${m.label}${state.partnerMode&&!m.isSavingsMedio?` <span class="medio-tag">${(m.owner||'me')==='partner'?partnerLabel():myLabel()}</span>`:''}</span>
       ${m.isSavingsMedio?'<span style="font-size:11px;color:var(--text3)">Fijo</span>':`<button class="btn-sm" onclick="editMedio(${m.id})" style="margin-right:6px">Editar</button><button class="btn-sm danger" onclick="deleteMedio(${m.id})">Borrar</button>`}
     </div>`).join(''):
     `<div class="empty-state" style="padding:20px"><div class="empty-text">Sin medios de pago. Tocá + Nuevo.</div></div>`;
+  const medioBar=$('medioBulkBar');
+  const deletableMedios=state.medios.filter(m=>!m.isSavingsMedio);
+  if(medioBar)medioBar.style.display=deletableMedios.length?'flex':'none';
+  const msc=$('medioSelectedCount');if(msc)msc.textContent=selectedMedioIdsForDelete.size;
+  const msa=$('medioSelectAll');if(msa)msa.checked=deletableMedios.length>0&&selectedMedioIdsForDelete.size===deletableMedios.length;
 }
 
 // SCREENS
@@ -2369,7 +2399,16 @@ function renderCatSelectExp(){
   if(!state.categories.length){sel.innerHTML=`<option value="">Primero creá categorías en Configuración</option>`;return;}
   sel.innerHTML=categoryChipList().map(c=>`<option value="${c.id}" ${selectedCatId===c.id?'selected':''}>${catChipLabel(c)}</option>`).join('');
 }
-function selectCatExp(id){selectedCatId=Number(id);renderCatSelectExp();}
+function selectCatExp(id){
+  selectedCatId=Number(id);
+  const c=getCat(selectedCatId);
+  const sharedByDefault=!!(c&&(c.sharedDefault||(c.parentId&&getCat(c.parentId).sharedDefault)));
+  if(state.partnerMode&&sharedByDefault&&!selectedShared){
+    selectedShared=true;
+    const ts=$('toggleShared');if(ts)ts.classList.add('on');
+  }
+  renderCatSelectExp();
+}
 
 function renderMedioSelectExp(){
   if(!state.medios.length){$('medioSelectExp').innerHTML=`<span style="font-size:12px;color:var(--text3)">Sin medios de pago — creá uno en Configuración</span>`;return;}
@@ -3138,6 +3177,9 @@ async function fetchUsdRate(){
 }
 
 // EXPORTAR / IMPORTAR CSV DE GASTOS
+// Normaliza texto para comparar (sin mayúsculas, sin acentos, sin espacios extra) y así
+// matchear categorías/medios ya creados aunque el CSV los escriba con tildes distintas.
+function normStr(s){return(s||'').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
 function csvEscape(val){
   const s=val===null||val===undefined?'':String(val);
   if(/[",\n\r]/.test(s))return'"'+s.replace(/"/g,'""')+'"';
@@ -3246,11 +3288,13 @@ function importExpensesCSV(text){
     const date=normalizeDateStr(row[iFecha]||'');
     if(!amt||amt<=0||!date){skipped++;continue;}
     const desc=(row[iDesc]||'').trim()||'Importado';
+    const quien=iQuien>=0?(row[iQuien]||'').trim().toLowerCase():'';
+    const owner=(quien&&quien===partnerLower)?'partner':'me';
     const medioLabel=iMedio>=0?(row[iMedio]||'').trim():'';
     let medioId=null;
     if(medioLabel){
-      let m=state.medios.find(x=>x.label.toLowerCase()===medioLabel.toLowerCase());
-      if(!m){m={id:state.nextId++,label:medioLabel,icon:'•'};state.medios.push(m);}
+      let m=state.medios.find(x=>normStr(x.label)===normStr(medioLabel));
+      if(!m){m={id:state.nextId++,label:medioLabel,icon:'•',owner};state.medios.push(m);}
       medioId=m.id;
     }
     const catLabelRaw=iCat>=0?(row[iCat]||'').trim():'';
@@ -3258,24 +3302,28 @@ function importExpensesCSV(text){
     if(catLabelRaw){
       if(catLabelRaw.includes('>')){
         const[parentLabelRaw,subLabelRaw]=catLabelRaw.split('>').map(s=>s.trim());
-        let parent=state.categories.find(x=>!x.parentId&&x.label.toLowerCase()===parentLabelRaw.toLowerCase());
+        let parent=state.categories.find(x=>!x.parentId&&normStr(x.label)===normStr(parentLabelRaw));
         if(!parent){const newParentId=state.nextId++;parent={id:newParentId,label:parentLabelRaw,icon:defaultCategoryIcon(parentLabelRaw),color:defaultCategoryColor(newParentId)};state.categories.push(parent);}
-        let sub=subLabelRaw?state.categories.find(x=>x.parentId===parent.id&&x.label.toLowerCase()===subLabelRaw.toLowerCase()):null;
+        let sub=subLabelRaw?state.categories.find(x=>x.parentId===parent.id&&normStr(x.label)===normStr(subLabelRaw)):null;
         if(subLabelRaw&&!sub){const newSubId=state.nextId++;sub={id:newSubId,label:subLabelRaw,icon:defaultCategoryIcon(subLabelRaw),color:defaultCategoryColor(newSubId),parentId:parent.id};state.categories.push(sub);}
         catId=sub?sub.id:parent.id;
       } else {
-        let c=state.categories.find(x=>!x.parentId&&x.label.toLowerCase()===catLabelRaw.toLowerCase());
+        // Busca en TODAS las categorías (principales y subcategorías) para no crear duplicados
+        // cuando el CSV solo trae el nombre de una subcategoría sin el prefijo "Padre > ".
+        let c=state.categories.find(x=>normStr(x.label)===normStr(catLabelRaw));
         if(!c){const newCatId=state.nextId++;c={id:newCatId,label:catLabelRaw,icon:defaultCategoryIcon(catLabelRaw),color:defaultCategoryColor(newCatId)};state.categories.push(c);}
         catId=c.id;
       }
     }
-    const quien=iQuien>=0?(row[iQuien]||'').trim().toLowerCase():'';
-    const owner=(quien&&quien===partnerLower)?'partner':'me';
     const cuotasRaw=iCuotas>=0?(row[iCuotas]||'').trim():'';
     let cuota=null;
-    if(cuotasRaw&&cuotasRaw.includes('/')){
-      const[a,t]=cuotasRaw.split('/').map(x=>parseInt(x.trim()));
-      if(a&&t)cuota={actual:a,total:t,monto:amt};
+    if(cuotasRaw){
+      // Acepta cualquier formato con dos números: "4/12", "4-12", "cuota 4 de 12", "4° de 12", etc.
+      const nums=cuotasRaw.match(/\d+/g);
+      if(nums&&nums.length>=2){
+        const a=parseInt(nums[0]),t=parseInt(nums[1]);
+        if(a&&t&&a<=t)cuota={actual:a,total:t,monto:amt};
+      }
     }
     const dividido=iDividido>=0?(row[iDividido]||'').trim().toLowerCase():'';
     const shared=['sí','si','yes','true','1'].includes(dividido);
@@ -3513,12 +3561,19 @@ function renderCatParentSelect(excludeId){
   sel.innerHTML=`<option value="">Ninguna — es una categoría principal</option>`+
     options.map(c=>`<option value="${c.id}">${c.label}</option>`).join('');
 }
+function toggleCatSharedDefault(){
+  selectedCatSharedDefault=!selectedCatSharedDefault;
+  $('toggleCatShared').classList.toggle('on',selectedCatSharedDefault);
+}
 function openCatModal(presetParentId){
   clearFieldErrors();editingCatId=null;
   $('catModalTitle').textContent='Nueva categoría';$('catName').value='';$('catBudget').value='';
   renderCatParentSelect(null);
   $('catParentField').style.display='block';$('catParentDisabledNote').style.display='none';
   $('catParentSelect').value=presetParentId?String(presetParentId):'';
+  selectedCatSharedDefault=false;
+  $('catSharedField').style.display=state.partnerMode?'block':'none';
+  $('toggleCatShared').classList.remove('on');
   $('modalCat').classList.add('open');
 }
 function editCat(id){
@@ -3534,6 +3589,9 @@ function editCat(id){
     renderCatParentSelect(id);
     $('catParentSelect').value=c.parentId?String(c.parentId):'';
   }
+  selectedCatSharedDefault=!!c.sharedDefault;
+  $('catSharedField').style.display=state.partnerMode?'block':'none';
+  $('toggleCatShared').classList.toggle('on',selectedCatSharedDefault);
   $('modalCat').classList.add('open');
 }
 function closeCatModal(){$('modalCat').classList.remove('open');editingCatId=null;}
@@ -3551,8 +3609,8 @@ function saveCat(){
   const parentVal=$('catParentSelect').value;
   const parentId=(!hasChildren&&parentVal)?Number(parentVal):null;
   let catId;
-  if(editingCatId!==null){const c=state.categories.find(x=>x.id===editingCatId);if(c){c.label=label;c.icon=defaultCategoryIcon(label);if(!c.color)c.color=defaultCategoryColor(c.id);c.parentId=parentId;}catId=editingCatId;}
-  else {catId=state.nextId++;state.categories.push({id:catId,label,icon:defaultCategoryIcon(label),color:defaultCategoryColor(catId),parentId});}
+  if(editingCatId!==null){const c=state.categories.find(x=>x.id===editingCatId);if(c){c.label=label;c.icon=defaultCategoryIcon(label);if(!c.color)c.color=defaultCategoryColor(c.id);c.parentId=parentId;c.sharedDefault=selectedCatSharedDefault;}catId=editingCatId;}
+  else {catId=state.nextId++;state.categories.push({id:catId,label,icon:defaultCategoryIcon(label),color:defaultCategoryColor(catId),parentId,sharedDefault:selectedCatSharedDefault});}
   if(budget&&budget>0)state.budgets[catId]=budget;
   else delete state.budgets[catId];
   save();closeCatModal();renderAll();
@@ -3563,6 +3621,40 @@ function deleteCat(id){
   const hasChildren=state.categories.some(c=>c.parentId===id);
   if(!confirm(hasChildren?'¿Eliminar esta categoría? Sus subcategorías van a pasar a ser categorías principales.':'¿Eliminar esta categoría?'))return;
   state.categories=state.categories.filter(x=>x.id!==id);
+  save();renderAll();
+}
+function toggleCatSelectForDelete(id,checked){
+  if(checked)selectedCatIdsForDelete.add(id);else selectedCatIdsForDelete.delete(id);
+  renderConfig();
+}
+function toggleSelectAllCats(checked){
+  selectedCatIdsForDelete=checked?new Set(state.categories.map(c=>c.id)):new Set();
+  renderConfig();
+}
+function bulkDeleteCats(){
+  const n=selectedCatIdsForDelete.size;
+  if(!n)return;
+  if(!confirm(`¿Eliminar ${n} categoría${n>1?'s':''} seleccionada${n>1?'s':''}? Las subcategorías de las que borres van a pasar a ser categorías principales.`))return;
+  state.categories=state.categories.filter(c=>!selectedCatIdsForDelete.has(c.id));
+  // Las subcategorías que quedaron huérfanas (su padre fue borrado pero ellas no) pasan a ser principales
+  state.categories.forEach(c=>{if(c.parentId&&!state.categories.some(x=>x.id===c.parentId))c.parentId=null;});
+  selectedCatIdsForDelete=new Set();
+  save();renderAll();
+}
+function toggleMedioSelectForDelete(id,checked){
+  if(checked)selectedMedioIdsForDelete.add(id);else selectedMedioIdsForDelete.delete(id);
+  renderConfig();
+}
+function toggleSelectAllMedios(checked){
+  selectedMedioIdsForDelete=checked?new Set(state.medios.filter(m=>!m.isSavingsMedio).map(m=>m.id)):new Set();
+  renderConfig();
+}
+function bulkDeleteMedios(){
+  const n=selectedMedioIdsForDelete.size;
+  if(!n)return;
+  if(!confirm(`¿Eliminar ${n} medio${n>1?'s':''} de pago seleccionado${n>1?'s':''}?`))return;
+  state.medios=state.medios.filter(m=>m.isSavingsMedio||!selectedMedioIdsForDelete.has(m.id));
+  selectedMedioIdsForDelete=new Set();
   save();renderAll();
 }
 
