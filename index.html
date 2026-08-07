@@ -769,7 +769,8 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div style="margin-top:16px">
       <div class="card" id="accountCard">
         <div class="card-title">Mi cuenta</div>
-        <div id="accountInfo" style="font-size:13px;color:var(--text2);margin-bottom:14px">—</div>
+        <div id="accountInfo" style="font-size:13px;color:var(--text2);margin-bottom:8px">—</div>
+        <div id="lastSyncInfo" style="font-size:11px;color:var(--text3);margin-bottom:14px"></div>
         <button id="btnLogoutConfig" onclick="signOut()" style="display:none" class="btn-secondary">Cerrar sesión</button>
         <div id="localModeNotice" style="display:none;font-size:12px;color:var(--text3);background:var(--bg2);border-radius:10px;padding:10px 12px;">
           Estás usando la app en modo local (sin sincronización). Los datos solo se guardan en este dispositivo.
@@ -1104,6 +1105,7 @@ let fbAuth, fbDb, currentUser=null, isSaving=false, modoLocal=false, syncRef=nul
 // Mientras esté en false, NUNCA escribimos en la nube: evita que un error de red/permisos pise datos reales
 // con un estado local vacío (ej: primera carga en un dispositivo/navegador nuevo).
 let cloudSyncOk=false;
+let lastSyncedAt=null;
 
 if(FIREBASE_LISTO){
   try{
@@ -1192,15 +1194,28 @@ function flushCloudSave(){
   if(!pendingCloudSave)return;
   if(modoLocal||!currentUser||!fbDb)return;
   if(!cloudSyncOk)return; // nunca escribir en la nube si todavía no confirmamos una lectura exitosa
-  pendingCloudSave=false;
   isSaving=true;
+  // OJO: pendingCloudSave se limpia recién cuando el .set() confirma éxito, no antes.
+  // Si se limpiara al arrancar el pedido y la escritura se corta (red, pestaña cerrada), el
+  // cambio queda "perdido" para siempre porque nada vuelve a intentar guardarlo.
   fbDb.ref('users/'+currentUser.uid).set(state)
+    .then(()=>{pendingCloudSave=false;lastSyncedAt=Date.now();})
     .catch(e=>{console.error('Error guardando en la nube:',e);showCloudSyncError();})
     .finally(()=>{isSaving=false;});
 }
 // Flush al cerrar/ocultar la app para no perder cambios pendientes
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushCloudSave();});
-window.addEventListener('beforeunload',()=>{flushCloudSave();});
+window.addEventListener('beforeunload',(e)=>{
+  flushCloudSave();
+  // Si todavía hay un guardado sin confirmar por la nube, avisamos antes de cerrar en vez de
+  // dejar que se pierda silenciosamente (esto es lo que probablemente pasó: el navegador se
+  // cerró antes de que la escritura a Firebase terminara de confirmarse).
+  if(pendingCloudSave&&!modoLocal&&currentUser){
+    e.preventDefault();
+    e.returnValue='Todavía hay cambios sin confirmar en la nube. ¿Seguro que querés salir?';
+    return e.returnValue;
+  }
+});
 window.addEventListener('pagehide',()=>{flushCloudSave();});
 
 function loadLocal(){
@@ -1218,19 +1233,24 @@ async function loadFromCloud(){
         const p=migrateData(data);
         // Comparar por timestamp: el más reciente gana (más confiable que contar gastos)
         const local=(() => {try{const r=localStorage.getItem(SK);return r?JSON.parse(r):null;}catch(e){return null;}})();
-        if(local&&(local.lastModified||0)>(p.lastModified||0)){
+        const localIsNewer=local&&(local.lastModified||0)>(p.lastModified||0);
+        if(localIsNewer){
           state={...state,...local};
         } else {
           state={...state,...p};
         }
         try{localStorage.setItem(SK,JSON.stringify(state));}catch(e){}
+        cloudSyncOk=true;
+        // Si lo local es más nuevo que lo que había en la nube (ej: un guardado anterior que
+        // nunca llegó a confirmarse), lo re-subimos ahora para no dejar la nube desactualizada.
+        if(localIsNewer)save();
       } else {
         // Sin datos en la nube — subir datos locales si existen
         loadLocal();
         cloudSyncOk=true;
         if(state.expenses.length||state.categories.length) save();
       }
-      cloudSyncOk=true;
+      lastSyncedAt=Date.now();
       hideCloudSyncError();
       resolve();
     },err=>{
@@ -1959,6 +1979,14 @@ function renderCatBarsHtml(){
 }
 
 function renderConfig(){
+  const lsi=$('lastSyncInfo');
+  if(lsi){
+    if(modoLocal)lsi.textContent='';
+    else if(!cloudSyncOk)lsi.innerHTML='<span style="color:var(--error)">⚠ Sin confirmar con la nube ahora mismo</span>';
+    else if(pendingCloudSave)lsi.textContent='Guardando en la nube…';
+    else if(lastSyncedAt)lsi.textContent='Última sincronización: '+new Date(lastSyncedAt).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    else lsi.textContent='';
+  }
   const mni=$('myNameInput');if(mni&&document.activeElement!==mni)mni.value=state.name||'';
   const caml=$('configActiveMonthLabel');if(caml)caml.textContent=monthLabel();
   const td=$('toggleDark');if(td)td.classList.toggle('on',!!state.darkMode);
