@@ -1246,19 +1246,27 @@ async function loadFromCloud(){
       const data=snap.val();
       if(data){
         const p=migrateData(data);
-        // Comparar por timestamp: el más reciente gana (más confiable que contar gastos)
+        // Comparar por timestamp: el más reciente gana (más confiable que contar gastos)... salvo
+        // que la nube "gane" por timestamp pero esté vacía mientras lo local tiene datos reales.
+        // Eso pasa cuando otro dispositivo/navegador abrió la cuenta con la nube vacía y, sin
+        // querer, terminó confirmando ese vacío con un timestamp más nuevo — no significa que el
+        // usuario haya borrado nada. En ese caso NO le creemos al timestamp y nos quedamos con lo
+        // local, que es lo único que tiene datos reales.
         const local=(() => {try{const r=localStorage.getItem(SK);return r?JSON.parse(r):null;}catch(e){return null;}})();
         const localIsNewer=local&&(local.lastModified||0)>(p.lastModified||0);
-        if(localIsNewer){
+        const cloudLooksEmpty=!(p.expenses&&p.expenses.length)&&!(p.categories&&p.categories.length)&&!(p.incomeEntries&&Object.values(p.incomeEntries).some(arr=>arr&&arr.length));
+        const localHasRealData=local&&((local.expenses&&local.expenses.length)||(local.categories&&local.categories.length)||(local.incomeEntries&&Object.values(local.incomeEntries).some(arr=>arr&&arr.length)));
+        const preferLocal=localIsNewer||(cloudLooksEmpty&&localHasRealData);
+        if(preferLocal){
           state={...state,...local};
         } else {
           state={...state,...p};
         }
         try{localStorage.setItem(SK,JSON.stringify(state));}catch(e){}
         cloudSyncOk=true;
-        // Si lo local es más nuevo que lo que había en la nube (ej: un guardado anterior que
-        // nunca llegó a confirmarse), lo re-subimos ahora para no dejar la nube desactualizada.
-        if(localIsNewer)save();
+        // Si nos quedamos con lo local (porque era más nuevo, o porque la nube parecía vacía sin
+        // serlo de verdad), lo re-subimos ahora para no dejar la nube desactualizada/vacía.
+        if(preferLocal)save();
       } else {
         // Sin datos en la nube — subir datos locales si existen
         loadLocal();
@@ -1458,7 +1466,12 @@ function migrateCategoryIcons(){
 function ensureSavingsMedio(){
   if(!state.medios.some(m=>m.isSavingsMedio)){
     state.medios.push({id:state.nextId++,label:'Ahorro',icon:'🏦',isSavingsMedio:true});
-    save();
+    // OJO: guardar solo local acá, NUNCA forzar un push a la nube. Esto corre en CUALQUIER
+    // dispositivo/navegador que abra la app con medios vacío (ej: uno nuevo, o uno con la nube
+    // legítimamente vacía) — si empujara a la nube, generaría un lastModified "fresco" sobre un
+    // estado casi vacío, que después podía ganarle por timestamp a los datos reales de otro
+    // dispositivo y pisarlos. Esta fue la causa real de que "se borraran" los datos.
+    try{localStorage.setItem(SK,JSON.stringify(state));}catch(e){}
   }
 }
 function cleanupData(){
