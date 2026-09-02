@@ -3393,17 +3393,23 @@ function importExpensesCSV(text){
   const header=rows[0].map(h=>h.trim().toLowerCase());
   const idx=name=>header.indexOf(name.toLowerCase());
   const iMonto=idx('monto'),iDesc=idx('descripcion'),iMedio=idx('medio de pago'),iCat=idx('categoria'),
-        iQuien=idx('quien pago'),iFecha=idx('fecha'),iCuotas=idx('cuotas'),iDividido=idx('dividido'),
+        iQuien=idx('quien pago'),iFecha=idx('fecha'),iMes=idx('mes'),iCuotas=idx('cuotas'),iDividido=idx('dividido'),
         iMoneda=idx('moneda'),iRecurrente=idx('recurrente'),iEstado=idx('estado'),iNotas=idx('notas');
   if(iMonto<0||iDesc<0||iFecha<0){alert('El CSV debe tener al menos las columnas Monto, Descripcion y Fecha.');return;}
   const partnerLower=partnerLabel().toLowerCase();
-  let imported=0,skipped=0;
+  let imported=0,skipped=0,mismatched=0;
   for(let r=1;r<rows.length;r++){
     const row=rows[r];
     if(!row||!row.length||row.every(c=>!c.trim()))continue;
     const amt=parseFloat((row[iMonto]||'').replace(',','.'));
     const date=normalizeDateStr(row[iFecha]||'');
     if(!amt||amt<=0||!date){skipped++;continue;}
+    // Si la columna "Mes" viene cargada y no coincide con el mes real de la Fecha, es casi
+    // seguro un problema de formato de fecha (típico: Excel guarda "01/09" como si fuera
+    // enero 9 en vez de 1 de septiembre por el idioma/región configurado). En vez de archivar
+    // el gasto en el mes equivocado en silencio, se omite y se avisa para que se revise a mano.
+    const mesRaw=iMes>=0?(row[iMes]||'').trim():'';
+    if(mesRaw&&/^\d{4}-\d{2}$/.test(mesRaw)&&mesRaw!==date.slice(0,7)){mismatched++;continue;}
     const desc=(row[iDesc]||'').trim()||'Importado';
     const quien=iQuien>=0?(row[iQuien]||'').trim().toLowerCase():'';
     const owner=(quien&&quien===partnerLower)?'partner':'me';
@@ -3458,7 +3464,7 @@ function importExpensesCSV(text){
   if(imported>0)save();
   renderAll();
   const status=$('csvImportStatus');
-  const msg=`✓ Se importaron ${imported} gasto${imported===1?'':'s'}.${skipped?` Se omitieron ${skipped} fila${skipped===1?'':'s'} con datos inválidos.`:''}`;
+  const msg=`✓ Se importaron ${imported} gasto${imported===1?'':'s'}.${skipped?` Se omitieron ${skipped} fila${skipped===1?'':'s'} con datos inválidos.`:''}${mismatched?` Se omitieron ${mismatched} fila${mismatched===1?'':'s'} donde la Fecha no coincidía con el Mes indicado (revisá el formato de esas fechas).`:''}`;
   if(status)status.textContent=msg;
   alert(msg);
 }
@@ -3527,16 +3533,20 @@ function importIncomesCSV(text){
   const header=rows[0].map(h=>h.trim().toLowerCase());
   const idx=name=>header.indexOf(name.toLowerCase());
   const iMonto=idx('monto'),iDesc=idx('descripcion'),iTipo=idx('tipo'),iQuien=idx('quien cobra'),
-        iFecha=idx('fecha'),iCompartido=idx('compartido'),iRecurrente=idx('recurrente');
+        iFecha=idx('fecha'),iMes=idx('mes'),iCompartido=idx('compartido'),iRecurrente=idx('recurrente');
   if(iMonto<0||iDesc<0||iFecha<0){alert('El CSV debe tener al menos las columnas Monto, Descripcion y Fecha.');return;}
   const partnerNorm=normStr(partnerLabel());
-  let imported=0,skipped=0;
+  let imported=0,skipped=0,mismatched=0;
   for(let r=1;r<rows.length;r++){
     const row=rows[r];
     if(!row||!row.length||row.every(c=>!c.trim()))continue;
     const amt=parseFloat((row[iMonto]||'').replace(',','.'));
     const date=normalizeDateStr(row[iFecha]||'');
     if(!amt||amt<=0||!date){skipped++;continue;}
+    // Misma protección que en gastos: si "Mes" no coincide con el mes real de "Fecha", probablemente
+    // hay un problema de formato de fecha (típico de Excel) — se omite en vez de archivarlo mal.
+    const mesRaw=iMes>=0?(row[iMes]||'').trim():'';
+    if(mesRaw&&/^\d{4}-\d{2}$/.test(mesRaw)&&mesRaw!==date.slice(0,7)){mismatched++;continue;}
     const desc=(row[iDesc]||'').trim()||'Importado';
     const tipoRaw=iTipo>=0?(row[iTipo]||'').trim():'';
     const type=tipoRaw?matchIncomeType(tipoRaw):'variable';
@@ -3557,7 +3567,7 @@ function importIncomesCSV(text){
   if(imported>0)save();
   renderAll();
   const status=$('csvImportIncomeStatus');
-  const msg=`✓ Se importaron ${imported} ingreso${imported===1?'':'s'}.${skipped?` Se omitieron ${skipped} fila${skipped===1?'':'s'} con datos inválidos.`:''}`;
+  const msg=`✓ Se importaron ${imported} ingreso${imported===1?'':'s'}.${skipped?` Se omitieron ${skipped} fila${skipped===1?'':'s'} con datos inválidos.`:''}${mismatched?` Se omitieron ${mismatched} fila${mismatched===1?'':'s'} donde la Fecha no coincidía con el Mes indicado (revisá el formato de esas fechas).`:''}`;
   if(status)status.textContent=msg;
   alert(msg);
 }
