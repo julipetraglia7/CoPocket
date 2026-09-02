@@ -1122,6 +1122,10 @@ if(FIREBASE_LISTO){
     firebase.initializeApp(FIREBASE_CONFIG);
     fbAuth=firebase.auth();
     fbDb=firebase.database();
+    // Fuerza que la sesión persista en este navegador entre recargas (por defecto Firebase ya
+    // usa persistencia local, pero lo dejamos explícito para no depender de comportamientos
+    // default que puedan variar entre navegadores).
+    fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e=>console.error('No se pudo configurar persistencia de sesión:',e));
   }catch(e){console.error('Error Firebase:',e);}
 }
 
@@ -3960,7 +3964,12 @@ function actualizarUIUsuario(user){
 function signInWithGoogle(){
   if(!FIREBASE_LISTO){$('setupGuide').style.display='block';return;}
   const provider=new firebase.auth.GoogleAuthProvider();
-  fbAuth.signInWithPopup(provider).catch(err=>{
+  // signInWithRedirect en vez de signInWithPopup: los popups de login fallan de forma silenciosa
+  // o quedan bloqueados en navegadores con protecciones de privacidad más estrictas (Zen Browser,
+  // Firefox con Total Cookie Protection, bloqueadores de popups, etc.), lo que hacía que el login
+  // pareciera funcionar pero la sesión nunca quedara realmente iniciada en ese navegador — y por
+  // eso los datos "se borraban": en realidad nunca se había entrado a la cuenta ahí.
+  fbAuth.signInWithRedirect(provider).catch(err=>{
     console.error(err);
     alert('Error al iniciar sesión: '+err.message);
   });
@@ -3973,6 +3982,10 @@ function signOut(){
 }
 
 function usarModoLocal(){
+  // Advertencia explícita: este modo NO sincroniza con la cuenta de Google. Es la salida que
+  // alguien podía tocar sin querer después de un login fallido y terminar usando la app "vacía"
+  // en ese dispositivo, pensando que estaba en su cuenta de siempre.
+  if(FIREBASE_LISTO&&!confirm('Modo local: los datos que cargues acá NO se van a sincronizar con tu cuenta de Google ni con tus otros dispositivos, van a quedar solo en este navegador.\n\n¿Seguro que querés continuar sin iniciar sesión?'))return;
   modoLocal=true;
   loadLocal();
   actualizarUIUsuario(null);
@@ -4006,6 +4019,13 @@ if(FIREBASE_LISTO&&fbAuth){
       $('appLoading').classList.add('hidden');
       $('loginScreen').classList.remove('hidden');
     }
+  });
+  // Resultado del signInWithRedirect al volver de Google. onAuthStateChanged de arriba ya se
+  // encarga de cargar la app cuando el login sale bien — esto es solo para enterarnos si falló
+  // (en vez de quedar en silencio y que la persona termine igual en "Usar sin sincronización").
+  fbAuth.getRedirectResult().catch(err=>{
+    console.error('Error procesando el login con Google:',err);
+    alert('No se pudo iniciar sesión con Google: '+err.message+'\n\nProbá de nuevo. Si tu navegador tiene activado el bloqueo de cookies/rastreo estricto, puede que necesites permitir cookies para accounts.google.com.');
   });
 } else {
   // Firebase no configurado — ir directo a modo local
