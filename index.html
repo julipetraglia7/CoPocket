@@ -1172,7 +1172,8 @@ const INCOME_TYPES=[
   {id:'mensual',label:'Mensual',icon:'M',color:'#6FB1E8'},
   {id:'variable',label:'Variable',icon:'V',color:'#8B7FE8'},
   {id:'unica',label:'Única vez',icon:'U',color:'#F5A3B8'},
-  {id:'ahorro',label:'Ahorro',icon:'🐷',color:'#F0B84D'}
+  {id:'ahorro',label:'Ahorro',icon:'🐷',color:'#F0B84D'},
+  {id:'negocio',label:'Negocio',icon:'🏪',color:'#6FD19E'}
 ];
 const getIncomeType=id=>INCOME_TYPES.find(t=>t.id===id)||INCOME_TYPES[2];
 let selectedIncomeType='variable';
@@ -1364,6 +1365,18 @@ const monthExpsIndividual=owner=>monthExps().filter(e=>ownerOf(e)===owner&&!isSh
 const monthIncBy=owner=>monthIncEntries().filter(i=>(i.owner||'me')===owner&&!i.shared);
 const monthIncShared=()=>monthIncEntries().filter(i=>!!i.shared);
 const totalIncBy=owner=>monthIncBy(owner).reduce((s,i)=>s+Number(i.amt),0);
+const totalIncShared=()=>monthIncShared().reduce((s,i)=>s+Number(i.amt),0);
+// Gastos "del negocio": cualquier categoría llamada exactamente "Negocio" (o sus subcategorías).
+// Es una vista adicional/informativa, no excluye esos gastos de "Mis gastos"/"Compartidos".
+function businessCategoryIds(){
+  const biz=state.categories.filter(c=>normStr(c.label)==='negocio');
+  const ids=new Set(biz.map(c=>c.id));
+  state.categories.forEach(c=>{if(c.parentId&&ids.has(c.parentId))ids.add(c.id);});
+  return ids;
+}
+const monthExpsBusiness=()=>{const ids=businessCategoryIds();return ids.size?monthExps().filter(e=>ids.has(e.cat)):[];};
+// Ingresos "del negocio": ingresos cargados con el tipo "Negocio".
+const totalIncBusiness=()=>monthIncEntries().filter(i=>i.type==='negocio').reduce((s,i)=>s+Number(i.amt),0);
 function partnerLabel(){return state.partner&&state.partner.name?state.partner.name:'Pareja';}
 function myLabel(){return state.name||'Yo';}
 // Cálculo de ratios para split proporcional
@@ -1766,16 +1779,18 @@ function renderHome(){
     const misGastos=monthExpsIndividual('me').reduce((s,e)=>s+toArs(e),0);
     const gastosPareja=monthExpsIndividual('partner').reduce((s,e)=>s+toArs(e),0);
     const gastosCompartidos=monthExpsShared().reduce((s,e)=>s+toArs(e),0);
+    const ingresosCompartidos=totalIncShared();
     metricsHtml+=`
     <div class="metric-card"><div class="metric-lbl">Mis gastos</div><div class="metric-val" style="color:var(--accent-strong)">${fmt(misGastos)}</div><div class="metric-note">individuales</div></div>
     <div class="metric-card"><div class="metric-lbl">Gastos de ${partnerLabel()}</div><div class="metric-val" style="color:var(--secondary)">${fmt(gastosPareja)}</div><div class="metric-note">individuales</div></div>
-    <div class="metric-card"><div class="metric-lbl">Compartidos</div><div class="metric-val" style="color:var(--info)">${fmt(gastosCompartidos)}</div><div class="metric-note">entre los dos</div></div>`;
+    <div class="metric-card"><div class="metric-lbl">Gastos compartidos</div><div class="metric-val" style="color:var(--info)">${fmt(gastosCompartidos)}</div><div class="metric-note">entre los dos</div></div>
+    <div class="metric-card"><div class="metric-lbl">Ingresos compartidos</div><div class="metric-val" style="color:var(--info)">${fmt(ingresosCompartidos)}</div><div class="metric-note">entre los dos</div></div>`;
   }
-  const ahorroTotal=savingsBalanceAll();
-  const patrimonioTotal=margen+ahorroTotal;
+  const gastosNegocio=monthExpsBusiness().reduce((s,e)=>s+toArs(e),0);
+  const ingresosNegocio=totalIncBusiness();
   metricsHtml+=`
-    <div class="metric-card"><div class="metric-lbl">Ahorro</div><div class="metric-val" style="color:var(--warning)">${fmt(ahorroTotal)}</div><div class="metric-note">${state.partnerMode?'entre los dos':'tuyo'}</div></div>
-    <div class="metric-card"><div class="metric-lbl">Patrimonio total</div><div class="metric-val ${patrimonioTotal>=0?'green':'red'}">${patrimonioTotal<0?'-':''}${fmt(Math.abs(patrimonioTotal))}</div><div class="metric-note">disponible + ahorro</div></div>`;
+    <div class="metric-card"><div class="metric-lbl">Gastos del negocio</div><div class="metric-val amber">${fmt(gastosNegocio)}</div><div class="metric-note">categoría Negocio</div></div>
+    <div class="metric-card"><div class="metric-lbl">Ingresos del negocio</div><div class="metric-val emerald">${fmt(ingresosNegocio)}</div><div class="metric-note">tipo Negocio</div></div>`;
   $('metricGrid').innerHTML=metricsHtml;
   const ah=$('alertHome');
   let alertsHtml='';
