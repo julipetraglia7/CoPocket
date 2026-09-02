@@ -1769,28 +1769,17 @@ function updateHeader(){
 }
 
 function renderHome(){
-  const{total,ingresos,margen}=calcT();
+  const{total,ingresos}=calcT();
+  // Simplificado a propósito: solo lo general (Ingresos/Gastos) y lo del negocio.
+  // El desglose individual/compartido vive en la sección Compartido.
   let metricsHtml=`
     <div class="metric-card"><div class="metric-lbl">Ingresos</div><div class="metric-val emerald">${fmt(ingresos)}</div><div class="metric-note">del mes</div></div>
-    <div class="metric-card"><div class="metric-lbl">Gastos</div><div class="metric-val amber">${fmt(total)}</div><div class="metric-note">pagados con ingresos</div></div>
-    <div class="metric-card"><div class="metric-lbl">Pagado</div><div class="metric-val">${fmt(monthExps().filter(e=>e.paid).reduce((s,e)=>s+toArs(e),0))}</div><div class="metric-note">confirmado</div></div>
-    <div class="metric-card"><div class="metric-lbl">${margen>=0?'Superávit ingresos':'Déficit ingresos'}</div><div class="metric-val ${margen>=0?'green':'red'}">${margen<0?'-':''}${fmt(Math.abs(margen))}</div><div class="metric-note">${margen>=0?'disponible este mes':'en rojo este mes'}</div></div>`;
-  if(state.partnerMode){
-    const misGastos=monthExpsIndividual('me').reduce((s,e)=>s+toArs(e),0);
-    const gastosPareja=monthExpsIndividual('partner').reduce((s,e)=>s+toArs(e),0);
-    const gastosCompartidos=monthExpsShared().reduce((s,e)=>s+toArs(e),0);
-    const ingresosCompartidos=totalIncShared();
-    metricsHtml+=`
-    <div class="metric-card"><div class="metric-lbl">Mis gastos</div><div class="metric-val" style="color:var(--accent-strong)">${fmt(misGastos)}</div><div class="metric-note">individuales</div></div>
-    <div class="metric-card"><div class="metric-lbl">Gastos de ${partnerLabel()}</div><div class="metric-val" style="color:var(--secondary)">${fmt(gastosPareja)}</div><div class="metric-note">individuales</div></div>
-    <div class="metric-card"><div class="metric-lbl">Gastos compartidos</div><div class="metric-val" style="color:var(--info)">${fmt(gastosCompartidos)}</div><div class="metric-note">entre los dos</div></div>
-    <div class="metric-card"><div class="metric-lbl">Ingresos compartidos</div><div class="metric-val" style="color:var(--info)">${fmt(ingresosCompartidos)}</div><div class="metric-note">entre los dos</div></div>`;
-  }
+    <div class="metric-card"><div class="metric-lbl">Gastos</div><div class="metric-val amber">${fmt(total)}</div><div class="metric-note">del mes</div></div>`;
   const gastosNegocio=monthExpsBusiness().reduce((s,e)=>s+toArs(e),0);
   const ingresosNegocio=totalIncBusiness();
   metricsHtml+=`
-    <div class="metric-card"><div class="metric-lbl">Gastos del negocio</div><div class="metric-val amber">${fmt(gastosNegocio)}</div><div class="metric-note">categoría Negocio</div></div>
-    <div class="metric-card"><div class="metric-lbl">Ingresos del negocio</div><div class="metric-val emerald">${fmt(ingresosNegocio)}</div><div class="metric-note">tipo Negocio</div></div>`;
+    <div class="metric-card"><div class="metric-lbl">Ingresos del negocio</div><div class="metric-val emerald">${fmt(ingresosNegocio)}</div><div class="metric-note">tipo Negocio</div></div>
+    <div class="metric-card"><div class="metric-lbl">Gastos del negocio</div><div class="metric-val amber">${fmt(gastosNegocio)}</div><div class="metric-note">categoría Negocio</div></div>`;
   $('metricGrid').innerHTML=metricsHtml;
   const ah=$('alertHome');
   let alertsHtml='';
@@ -2556,9 +2545,11 @@ function renderCompartido(){
   const pfMe=personFinance('me'),pfPartner=personFinance('partner');
 
   // METRICAS
+  const ingresosCompartidos=totalIncShared();
   $('compMetrics').innerHTML=`
     <div class="metric-card"><div class="metric-lbl">Ingreso ${me}</div><div class="metric-val emerald">${fmt(incMe)}</div><div class="metric-note">${totalInc?Math.round(ratios.me*100):0}% del total</div></div>
     <div class="metric-card"><div class="metric-lbl">Ingreso ${partner}</div><div class="metric-val emerald">${fmt(incPartner)}</div><div class="metric-note">${totalInc?Math.round(ratios.partner*100):0}% del total</div></div>
+    <div class="metric-card"><div class="metric-lbl">Ingresos compartidos</div><div class="metric-val emerald">${fmt(ingresosCompartidos)}</div><div class="metric-note">entre los dos</div></div>
     <div class="metric-card"><div class="metric-lbl">Total compartido</div><div class="metric-val amber">${fmt(totalShared)}</div><div class="metric-note">${sharedExps.length} ${sharedExps.length===1?'gasto':'gastos'}</div></div>
     <div class="metric-card"><div class="metric-lbl">Disponible total</div><div class="metric-val ${(pfMe.remaining+pfPartner.remaining)>=0?'green':'red'}">${fmt(Math.abs(pfMe.remaining+pfPartner.remaining))}</div><div class="metric-note">entre los dos</div></div>`;
 
