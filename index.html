@@ -3964,14 +3964,20 @@ function actualizarUIUsuario(user){
 function signInWithGoogle(){
   if(!FIREBASE_LISTO){$('setupGuide').style.display='block';return;}
   const provider=new firebase.auth.GoogleAuthProvider();
-  // signInWithRedirect en vez de signInWithPopup: los popups de login fallan de forma silenciosa
-  // o quedan bloqueados en navegadores con protecciones de privacidad más estrictas (Zen Browser,
-  // Firefox con Total Cookie Protection, bloqueadores de popups, etc.), lo que hacía que el login
-  // pareciera funcionar pero la sesión nunca quedara realmente iniciada en ese navegador — y por
-  // eso los datos "se borraban": en realidad nunca se había entrado a la cuenta ahí.
-  fbAuth.signInWithRedirect(provider).catch(err=>{
-    console.error(err);
-    alert('Error al iniciar sesión: '+err.message);
+  // Popup como método principal (es el que veníamos usando y funciona bien en la mayoría de los
+  // casos). Si el popup específicamente queda bloqueado o no está soportado en este navegador,
+  // recién ahí probamos con redirect como respaldo — así no rompemos el flujo normal para
+  // resolver un caso puntual de navegadores con bloqueo de popups.
+  fbAuth.signInWithPopup(provider).catch(err=>{
+    console.error('Error con signInWithPopup:',err);
+    if(err.code==='auth/popup-blocked'||err.code==='auth/operation-not-supported-in-this-environment'){
+      fbAuth.signInWithRedirect(provider).catch(err2=>{
+        console.error(err2);
+        alert('Error al iniciar sesión: '+err2.message);
+      });
+    } else if(err.code!=='auth/popup-closed-by-user'&&err.code!=='auth/cancelled-popup-request'){
+      alert('Error al iniciar sesión: '+err.message);
+    }
   });
 }
 
