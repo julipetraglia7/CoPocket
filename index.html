@@ -759,7 +759,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div style="margin-top:16px">
       <div class="card">
         <div class="card-title">Exportar / Importar gastos</div>
-        <button class="btn-secondary" onclick="downloadCSVTemplate()">📄 Descargar planilla de ejemplo</button>
+        <button class="btn-secondary" onclick="downloadCSVTemplate()">📄 Descargar planilla de ejemplo (gastos)</button>
         <button class="btn-secondary" onclick="exportExpensesCSV()" style="margin-top:8px">⬇ Descargar CSV de gastos</button>
         <button class="btn-secondary" onclick="document.getElementById('csvImportInput').click()" style="margin-top:8px">⬆ Importar CSV de gastos</button>
         <input type="file" id="csvImportInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvImportChange(event)">
@@ -769,7 +769,7 @@ body:not(.dark) .card,body:not(.dark) .metric-card,body:not(.dark) .modal{backgr
     <div style="margin-top:16px">
       <div class="card">
         <div class="card-title">Exportar / Importar ingresos</div>
-        <button class="btn-secondary" onclick="downloadIncomeCSVTemplate()">📄 Descargar planilla de ejemplo</button>
+        <button class="btn-secondary" onclick="downloadIncomeCSVTemplate()">📄 Descargar planilla de ejemplo (ingresos)</button>
         <button class="btn-secondary" onclick="exportIncomesCSV()" style="margin-top:8px">⬇ Descargar CSV de ingresos</button>
         <button class="btn-secondary" onclick="document.getElementById('csvImportIncomeInput').click()" style="margin-top:8px">⬆ Importar CSV de ingresos</button>
         <input type="file" id="csvImportIncomeInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvImportIncomeChange(event)">
